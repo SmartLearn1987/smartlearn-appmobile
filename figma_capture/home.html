@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Smart Learn - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Quicksand', sans-serif; background: #F9F7F3; }
+    .screen { width: 1440px; background: #F9F7F3; display: flex; flex-direction: column; align-items: center; }
+
+    /* Header */
+    .header { width: 100%; height: 64px; background: #FFFFFF; border-bottom: 1px solid #E3DFD8; display: flex; align-items: center; justify-content: space-between; padding: 0 80px; }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .header-logo { width: 32px; height: 32px; background: rgba(192,132,71,0.09); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .header-logo svg { width: 18px; height: 18px; color: #C08447; }
+    .header-title { font-size: 18px; font-weight: 700; color: #2D9B63; }
+    .header-nav { display: flex; gap: 24px; }
+    .header-nav a { font-size: 14px; font-weight: 500; color: #9CA3AF; text-decoration: none; }
+    .header-nav a.active { color: #2D9B63; font-weight: 600; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #2D9B63; display: flex; align-items: center; justify-content: center; }
+    .avatar span { color: white; font-size: 14px; font-weight: 600; }
+
+    /* Hero */
+    .hero { width: 100%; padding: 48px 0 32px 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(45,155,99,0.05) 0%, transparent 50%, rgba(240,148,62,0.05) 100%); }
+    .hero h1 { font-size: 32px; font-weight: 700; color: #222D3F; text-align: center; }
+    .hero p { font-size: 16px; font-weight: 400; color: #9CA3AF; text-align: center; }
+
+    /* Tab Bar */
+    .tab-bar { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.8); border-radius: 20px; border: 1px solid rgba(45,155,99,0.1); box-shadow: 0 4px 16px rgba(45,155,99,0.05); }
+    .tab { height: 40px; border-radius: 16px; display: flex; align-items: center; gap: 8px; padding: 0 20px; cursor: pointer; }
+    .tab.active { background: #2D9B63; }
+    .tab.active svg { color: white; }
+    .tab.active span { color: white; font-weight: 600; }
+    .tab svg { width: 18px; height: 18px; color: #9CA3AF; }
+    .tab span { font-size: 14px; font-weight: 500; color: #9CA3AF; }
+
+    /* Content */
+    .content { width: 100%; padding: 32px 80px; display: flex; flex-direction: column; gap: 24px; }
+    .sec-head { display: flex; align-items: center; gap: 8px; }
+    .sec-head svg { width: 20px; height: 20px; color: #F0943E; }
+    .sec-head h2 { font-size: 22px; font-weight: 700; color: #222D3F; }
+
+    /* Card Grid */
+    .card-grid { display: flex; gap: 20px; }
+    .card { flex: 1; background: #FFFFFF; border-radius: 16px; border: 1px solid #E3DFD8; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .card-icon svg { width: 22px; height: 22px; }
+    .card h3 { font-size: 16px; font-weight: 600; color: #222D3F; }
+    .card .sub { font-size: 12px; font-weight: 500; color: #9CA3AF; }
+
+    /* Footer */
+    .footer { width: 100%; background: #FFFFFF; border-top: 1px solid #E5E7EB; padding: 40px 80px; display: flex; flex-direction: column; gap: 32px; }
+    .footer-cols { display: flex; gap: 40px; }
+    .footer-col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .footer-col h4 { font-size: 16px; font-weight: 700; color: #222D3F; }
+    .footer-col p { font-size: 13px; font-weight: 500; color: #9CA3AF; }
+    .footer-col .company { font-size: 14px; font-weight: 500; color: #374151; }
+    .footer-col .email { font-size: 13px; font-weight: 500; color: #2D9B63; display: flex; align-items: center; gap: 6px; }
+    .footer-col .email svg { width: 14px; height: 14px; color: #2D9B63; }
+    .footer-bottom { border-top: 1px solid #E5E7EB; padding-top: 16px; text-align: center; }
+    .footer-bottom p { font-size: 12px; font-weight: 400; color: #9CA3AF; }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7v10"/><path d="M11 7v10"/><path d="m15 7 2 10"/></svg>
+        </div>
+        <span class="header-title">Smart Learn</span>
+      </div>
+      <div class="header-nav">
+        <a href="#" class="active">Môn học</a>
+        <a href="#">Đồng hồ</a>
+      </div>
+      <div class="header-right">
+        <div class="avatar"><span>D</span></div>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1>Chào mừng bạn đến với Smart Learn</h1>
+      <p>Khám phá kho bài học, luyện thi và trò chơi học tập</p>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+        <span>Môn học</span>
+      </div>
+      <div class="tab">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>
+        <span>Đồng hồ</span>
+      </div>
+      <div class="tab">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+        <span>Trò chơi</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        <h2>Các môn học</h2>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(45,155,102,0.09)">
+            <svg style="color:#2D9B63" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+          </div>
+          <h3>Toán học</h3>
+          <span class="sub">12 khóa học</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(47,163,217,0.09)">
+            <svg style="color:#2FA3D9" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16.5h10"/></svg>
+          </div>
+          <h3>Vật lý</h3>
+          <span class="sub">8 khóa học</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(240,148,62,0.09)">
+            <svg style="color:#F0943E" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/></svg>
+          </div>
+          <h3>Ngữ văn</h3>
+          <span class="sub">10 khóa học</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(150,69,204,0.09)">
+            <svg style="color:#9645CC" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          </div>
+          <h3>Tiếng Anh</h3>
+          <span class="sub">15 khóa học</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Liên hệ</h4>
+          <p class="company">Công ty Smart Learn</p>
+          <div class="email">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <span>contact@smartlearn.vn</span>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Chính sách</h4>
+          <p>Điều khoản sử dụng</p>
+          <p>Chính sách bảo mật</p>
+        </div>
+        <div class="footer-col">
+          <h4>Về Smart Learn</h4>
+          <p>Giới thiệu</p>
+          <p>Blog</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Smart Learn. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

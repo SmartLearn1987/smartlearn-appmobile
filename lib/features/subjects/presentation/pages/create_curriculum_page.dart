@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/di/injection.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_toast.dart';
+import '../bloc/curriculum_form/curriculum_form_bloc.dart';
+import '../widgets/config_step_form.dart';
+import '../widgets/preview_step_content.dart';
+import '../widgets/step_indicator.dart';
+
+class CreateCurriculumPage extends StatelessWidget {
+  const CreateCurriculumPage({required this.subjectId, super.key});
+
+  final String subjectId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<CurriculumFormBloc>(
+      create: (_) => getIt<CurriculumFormBloc>(),
+      child: _CreateCurriculumView(subjectId: subjectId),
+    );
+  }
+}
+
+class _CreateCurriculumView extends StatelessWidget {
+  const _CreateCurriculumView({required this.subjectId});
+
+  final String subjectId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<CurriculumFormBloc, CurriculumFormState>(
+      listener: (context, state) {
+        if (state.isSuccess) {
+          AppToast.success(context, 'Đã tạo giáo trình mới thành công');
+          context.pop();
+        } else if (state.errorMessage != null && state.step == 1) {
+          AppToast.error(context, state.errorMessage!);
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.mdLg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: AppSpacing.md),
+                BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
+                  buildWhen: (prev, curr) => prev.step != curr.step,
+                  builder: (context, state) =>
+                      StepIndicator(currentStep: state.step),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Expanded(
+                  child: BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
+                    buildWhen: (prev, curr) => prev.step != curr.step,
+                    builder: (context, state) => state.step == 0
+                        ? ConfigStepForm(
+                            onCancel: () => context.pop(),
+                          )
+                        : PreviewStepContent(subjectId: subjectId),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('📚', style: TextStyle(fontSize: 32)),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Tạo giáo trình mới',
+          style: AppTypography.h3.copyWith(
+            color: AppColors.foreground,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "app_title": "Smart Learn",
+  "app_subtitle": "Nền tảng học tập thông minh",
+
+  "auth": {
+    "login_title": "Đăng nhập",
+    "register_title": "Đăng ký",
+    "username": "Tên đăng nhập",
+    "username_hint": "Nhập tên đăng nhập",
+    "email": "Email",
+    "email_hint": "you@example.com",
+    "password": "Mật khẩu",
+    "password_hint": "••••••••",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "name": "Họ tên",
+    "name_hint": "Nhập họ tên của bạn",
+    "confirm_password": "Xác nhận mật khẩu",
+    "register_button": "Đăng ký",
+    "register_success": "Đăng ký thành công!",
+    "field_required": "{} không được để trống",
+    "email_invalid": "Email không hợp lệ",
+    "password_mismatch": "Mật khẩu xác nhận không khớp",
+    "password_min_length": "Mật khẩu phải có ít nhất 6 ký tự",
+    "no_account": "Chưa có tài khoản?",
+    "has_account": "Đã có tài khoản?",
+    "forgot_password": "Quên mật khẩu?",
+    "forgot_password_title": "Khôi phục mật khẩu",
+    "forgot_password_email_label": "Địa chỉ Email",
+    "forgot_password_email_hint": "Nhập email của bạn",
+    "forgot_password_submit": "Gửi mật khẩu mới",
+    "forgot_password_success": "Mật khẩu mới đã được gửi vào Email. Truy cập vào Email đăng ký để lấy mật khẩu mới.",
+    "forgot_password_back_to_login": "Quay lại đăng nhập",
+    "forgot_password_register": "Đăng ký ngay"
+  },
+
+  "home": {
+    "welcome": "Chào mừng bạn đến với Smart Learn",
+    "explore": "Khám phá kho bài học, luyện thi và trò chơi học tập",
+    "subjects": "Các môn học",
+    "tab_subjects": "Môn học",
+    "tab_timer": "Đồng hồ",
+    "tab_games": "Trò chơi"
+  },
+
+  "subjects": {
+    "title": "Các môn học",
+    "subtitle": "Chọn môn học để bắt đầu học tập",
+    "math": "Toán học",
+    "physics": "Vật lý",
+    "literature": "Ngữ văn",
+    "english": "Tiếng Anh",
+    "courses_count": "{} khóa học"
+  },
+
+  "lesson": {
+    "content": "Nội dung",
+    "quiz": "Trắc nghiệm",
+    "flashcard": "Flashcard",
+    "summary": "Tóm tắt",
+    "complete": "Hoàn thành"
+  },
+
+  "common": {
+    "back": "Quay lại",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "search": "Tìm kiếm",
+    "loading": "Đang tải...",
+    "error": "Đã có lỗi xảy ra",
+    "retry": "Thử lại"
+  }
+}

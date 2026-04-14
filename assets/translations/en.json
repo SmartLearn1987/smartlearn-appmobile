@@ -1,0 +1,56 @@
+{
+  "app_title": "Smart Learn",
+  "app_subtitle": "Smart learning platform",
+
+  "auth": {
+    "email": "Email",
+    "email_hint": "you@example.com",
+    "password": "Password",
+    "password_hint": "••••••••",
+    "login": "Login",
+    "register": "Register",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?",
+    "forgot_password": "Forgot password?"
+  },
+
+  "home": {
+    "welcome": "Welcome to Smart Learn",
+    "explore": "Explore lessons, practice tests and learning games",
+    "subjects": "Subjects",
+    "tab_subjects": "Subjects",
+    "tab_timer": "Timer",
+    "tab_games": "Games"
+  },
+
+  "subjects": {
+    "title": "Subjects",
+    "subtitle": "Choose a subject to start learning",
+    "math": "Mathematics",
+    "physics": "Physics",
+    "literature": "Literature",
+    "english": "English",
+    "courses_count": "{} courses"
+  },
+
+  "lesson": {
+    "content": "Content",
+    "quiz": "Quiz",
+    "flashcard": "Flashcard",
+    "summary": "Summary",
+    "complete": "Complete"
+  },
+
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry"
+  }
+}
