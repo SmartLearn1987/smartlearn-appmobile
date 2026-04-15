@@ -36,9 +36,6 @@ dependencies:
   # Localization
   easy_localization: ^3.0.7
 
-  # Environment
-  flutter_dotenv: ^5.2.1
-
   # Secure Storage
   flutter_secure_storage: ^9.2.4
 
@@ -71,5 +68,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/translations/
-    - assets/env/
     - assets/images/

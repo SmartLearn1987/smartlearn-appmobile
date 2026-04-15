@@ -72,10 +72,6 @@ flutter test
 flutter analyze
 ```
 
-## Cấu hình môi trường
-
-Tạo file `.env` trong `assets/env/` với các biến cần thiết (base URL, API keys).
-
 ## License
 
 Private — không phân phối công khai.
