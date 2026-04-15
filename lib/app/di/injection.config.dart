@@ -57,6 +57,20 @@ import '../../features/home/domain/usecases/get_random_dictation.dart' as _i900;
 import '../../features/home/domain/usecases/get_subjects.dart' as _i185;
 import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/quizlet/data/datasources/quizlet_remote_datasource.dart'
+    as _i237;
+import '../../features/quizlet/data/repositories/quizlet_repository_impl.dart'
+    as _i364;
+import '../../features/quizlet/domain/repositories/quizlet_repository.dart'
+    as _i718;
+import '../../features/quizlet/domain/usecases/get_quizlet_detail_use_case.dart'
+    as _i595;
+import '../../features/quizlet/domain/usecases/get_quizlets_use_case.dart'
+    as _i1064;
+import '../../features/quizlet/presentation/bloc/quizlet/quizlet_bloc.dart'
+    as _i252;
+import '../../features/quizlet/presentation/bloc/quizlet_detail/quizlet_detail_bloc.dart'
+    as _i518;
 import '../../features/schedule/data/datasources/schedule_local_datasource.dart'
     as _i219;
 import '../../features/schedule/data/repositories/schedule_local_repository_impl.dart'
@@ -146,6 +160,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i278.HomeRemoteDatasource>(
       () => _i278.HomeRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i237.QuizletRemoteDatasource>(
+      () => _i237.QuizletRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i574.SubjectsRemoteDatasource>(
       () => _i574.SubjectsRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -188,6 +205,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i640.SubjectsRepository>(
       () => _i962.SubjectsRepositoryImpl(gh<_i574.SubjectsRemoteDatasource>()),
     );
+    gh.lazySingleton<_i718.QuizletRepository>(
+      () => _i364.QuizletRepositoryImpl(gh<_i237.QuizletRemoteDatasource>()),
+    );
+    gh.lazySingleton<_i595.GetQuizletDetailUseCase>(
+      () => _i595.GetQuizletDetailUseCase(gh<_i718.QuizletRepository>()),
+    );
+    gh.lazySingleton<_i1064.GetQuizletsUseCase>(
+      () => _i1064.GetQuizletsUseCase(gh<_i718.QuizletRepository>()),
+    );
     gh.lazySingleton<_i797.AuthBloc>(
       () => _i797.AuthBloc(
         gh<_i188.LoginUseCase>(),
@@ -197,6 +223,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i798.UpdateProfileUseCase>(),
         gh<_i992.AuthLocalDatasource>(),
       ),
+    );
+    gh.factory<_i252.QuizletBloc>(
+      () => _i252.QuizletBloc(gh<_i1064.GetQuizletsUseCase>()),
     );
     gh.factory<_i104.ForgotPasswordCubit>(
       () => _i104.ForgotPasswordCubit(gh<_i560.ForgotPasswordUseCase>()),
@@ -233,6 +262,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i185.GetSubjectsUseCase>(
       () => _i185.GetSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.factory<_i518.QuizletDetailBloc>(
+      () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
     );
     gh.factory<_i900.SubjectsListBloc>(
       () => _i900.SubjectsListBloc(

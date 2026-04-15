@@ -19,6 +19,8 @@ import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart'
 import 'package:smart_learn/features/home/presentation/pages/profile_page.dart';
 import 'package:smart_learn/features/home/presentation/pages/quiz_page.dart';
 import 'package:smart_learn/features/pictogram_play/presentation/pages/pictogram_play_screen.dart';
+import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
+import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -118,6 +120,15 @@ class AppRouter {
             return DictationPlayScreen(entity: entity);
           },
         ),
+        GoRoute(
+          path: '/quizlet/:id',
+          name: 'quizletDetail',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return QuizletDetailPage(quizletId: id);
+          },
+        ),
 
         // ─── Main shell with bottom nav ───
         StatefulShellRoute.indexedStack(
@@ -212,7 +223,7 @@ class AppRouter {
                 GoRoute(
                   path: '/quizlet',
                   name: 'quizlet',
-                  builder: (context, state) => const QuizPage(),
+                  builder: (context, state) => const QuizletListPage(),
                 ),
               ],
             ),
