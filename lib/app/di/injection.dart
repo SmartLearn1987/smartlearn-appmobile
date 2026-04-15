@@ -5,4 +5,4 @@ import 'package:smart_learn/app/di/injection.config.dart';
 final getIt = GetIt.instance;
 
 @InjectableInit(preferRelativeImports: true)
-Future<void> configureDependencies() async => getIt.init();
+Future<void> configureDependencies() async => await getIt.init();

@@ -13,10 +13,12 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import '../../core/network/auth_interceptor.dart' as _i388;
 import '../../core/network/dio_client.dart' as _i571;
 import '../../core/storage/secure_storage_module.dart' as _i1071;
+import '../../core/storage/shared_preferences_module.dart' as _i205;
 import '../../features/auth/data/datasources/auth_local_datasource.dart'
     as _i992;
 import '../../features/auth/data/datasources/auth_remote_datasource.dart'
@@ -49,6 +51,18 @@ import '../../features/home/domain/usecases/get_random_dictation.dart' as _i900;
 import '../../features/home/domain/usecases/get_subjects.dart' as _i185;
 import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/schedule/data/datasources/schedule_local_datasource.dart'
+    as _i219;
+import '../../features/schedule/data/repositories/schedule_local_repository_impl.dart'
+    as _i502;
+import '../../features/schedule/domain/repositories/schedule_local_repository.dart'
+    as _i500;
+import '../../features/schedule/presentation/cubit/notes/notes_cubit.dart'
+    as _i919;
+import '../../features/schedule/presentation/cubit/tasks/tasks_cubit.dart'
+    as _i543;
+import '../../features/schedule/presentation/cubit/timetable/timetable_cubit.dart'
+    as _i596;
 import '../../features/subjects/data/datasources/subjects_remote_datasource.dart'
     as _i574;
 import '../../features/subjects/data/repositories/subjects_repository_impl.dart'
@@ -78,20 +92,33 @@ import '../../features/subjects/presentation/bloc/subjects_list/subjects_list_bl
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
+  }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final secureStorageModule = _$SecureStorageModule();
+    final sharedPreferencesModule = _$SharedPreferencesModule();
     final dioModule = _$DioModule();
     final authRemoteModule = _$AuthRemoteModule();
     gh.factory<_i128.FocusCubit>(() => _i128.FocusCubit());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => secureStorageModule.secureStorage,
     );
+    await gh.lazySingletonAsync<_i460.SharedPreferences>(
+      () => sharedPreferencesModule.prefs,
+      preResolve: true,
+    );
     gh.lazySingleton<_i992.AuthLocalDatasource>(
       () => _i992.AuthLocalDatasource(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.lazySingleton<_i219.ScheduleLocalDatasource>(
+      () => _i219.ScheduleLocalDatasource(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i500.ScheduleLocalRepository>(
+      () => _i502.ScheduleLocalRepositoryImpl(
+        gh<_i219.ScheduleLocalDatasource>(),
+      ),
     );
     gh.factory<_i388.AuthInterceptor>(
       () => _i388.AuthInterceptor(gh<_i992.AuthLocalDatasource>()),
@@ -107,6 +134,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i574.SubjectsRemoteDatasource>(
       () => _i574.SubjectsRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i919.NotesCubit>(
+      () => _i919.NotesCubit(gh<_i500.ScheduleLocalRepository>()),
+    );
+    gh.factory<_i543.TasksCubit>(
+      () => _i543.TasksCubit(gh<_i500.ScheduleLocalRepository>()),
+    );
+    gh.factory<_i596.TimetableCubit>(
+      () => _i596.TimetableCubit(gh<_i500.ScheduleLocalRepository>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -219,6 +255,8 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$SecureStorageModule extends _i1071.SecureStorageModule {}
+
+class _$SharedPreferencesModule extends _i205.SharedPreferencesModule {}
 
 class _$DioModule extends _i571.DioModule {}
 

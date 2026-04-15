@@ -8,6 +8,7 @@ import 'package:smart_learn/features/auth/presentation/pages/login_page.dart';
 import 'package:smart_learn/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:smart_learn/features/auth/presentation/pages/register_page.dart';
 import 'package:smart_learn/features/home/presentation/pages/home_page.dart';
+import 'package:smart_learn/features/schedule/presentation/pages/schedule_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/create_curriculum_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/edit_curriculum_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/subject_detail_page.dart';
@@ -177,7 +178,7 @@ class AppRouter {
                 GoRoute(
                   path: '/schedule',
                   name: 'schedule',
-                  builder: (context, state) => const Placeholder(),
+                  builder: (context, state) => const SchedulePage(),
                 ),
               ],
             ),
