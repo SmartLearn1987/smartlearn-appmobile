@@ -11,12 +11,16 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
+import 'package:flutter_tts/flutter_tts.dart' as _i50;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import '../../core/network/auth_interceptor.dart' as _i388;
 import '../../core/network/dio_client.dart' as _i571;
+import '../../core/services/tts_module.dart' as _i1038;
+import '../../core/services/tts_service.dart' as _i643;
+import '../../core/services/tts_service_impl.dart' as _i479;
 import '../../core/storage/secure_storage_module.dart' as _i1071;
 import '../../core/storage/shared_preferences_module.dart' as _i205;
 import '../../features/auth/data/datasources/auth_local_datasource.dart'
@@ -39,6 +43,8 @@ import '../../features/auth/domain/usecases/update_profile_usecase.dart'
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart'
     as _i104;
+import '../../features/dictation_play/presentation/bloc/dictation_play_bloc.dart'
+    as _i130;
 import '../../features/home/data/datasources/home_remote_datasource.dart'
     as _i278;
 import '../../features/home/data/repositories/home_repository_impl.dart'
@@ -97,11 +103,13 @@ extension GetItInjectableX on _i174.GetIt {
     _i526.EnvironmentFilter? environmentFilter,
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final ttsModule = _$TtsModule();
     final secureStorageModule = _$SecureStorageModule();
     final sharedPreferencesModule = _$SharedPreferencesModule();
     final dioModule = _$DioModule();
     final authRemoteModule = _$AuthRemoteModule();
     gh.factory<_i128.FocusCubit>(() => _i128.FocusCubit());
+    gh.lazySingleton<_i50.FlutterTts>(() => ttsModule.flutterTts);
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => secureStorageModule.secureStorage,
     );
@@ -123,8 +131,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i388.AuthInterceptor>(
       () => _i388.AuthInterceptor(gh<_i992.AuthLocalDatasource>()),
     );
+    gh.lazySingleton<_i643.TtsService>(
+      () => _i479.TtsServiceImpl(gh<_i50.FlutterTts>()),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.dio(gh<_i388.AuthInterceptor>()),
+    );
+    gh.factory<_i130.DictationPlayBloc>(
+      () => _i130.DictationPlayBloc(gh<_i643.TtsService>()),
     );
     gh.lazySingleton<_i161.AuthRemoteDatasource>(
       () => authRemoteModule.authRemoteDatasource(gh<_i361.Dio>()),
@@ -253,6 +267,8 @@ extension GetItInjectableX on _i174.GetIt {
     return this;
   }
 }
+
+class _$TtsModule extends _i1038.TtsModule {}
 
 class _$SecureStorageModule extends _i1071.SecureStorageModule {}
 

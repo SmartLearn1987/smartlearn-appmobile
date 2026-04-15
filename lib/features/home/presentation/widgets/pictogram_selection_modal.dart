@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
@@ -212,8 +213,15 @@ class _PictogramSelectionModalState extends State<PictogramSelectionModal> {
         AppToast.error(context, failure.message);
       },
       (questions) {
+        if (questions.isEmpty) {
+          AppToast.error(context, 'Không có câu hỏi nào cho cấp độ này');
+          return;
+        }
         Navigator.of(context).pop();
-        // TODO: Navigate to pictogram game screen with questions and _selectedTime
+        context.go('/games/pictogram/play', extra: {
+          'questions': questions,
+          'timeInMinutes': _selectedTime,
+        });
       },
     );
   }

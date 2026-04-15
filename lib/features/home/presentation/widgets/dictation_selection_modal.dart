@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
@@ -194,7 +195,9 @@ class _DictationSelectionModalState extends State<DictationSelectionModal> {
       },
       (dictation) {
         Navigator.of(context).pop();
-        // TODO: Navigate to dictation game screen with dictation data
+        if (context.mounted) {
+          context.go('/games/dictation/play', extra: dictation);
+        }
       },
     );
   }

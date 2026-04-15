@@ -13,8 +13,12 @@ import 'package:smart_learn/features/subjects/presentation/pages/create_curricul
 import 'package:smart_learn/features/subjects/presentation/pages/edit_curriculum_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/subject_detail_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/subjects_list_page.dart';
+import 'package:smart_learn/features/dictation_play/presentation/pages/dictation_play_screen.dart';
+import 'package:smart_learn/features/home/domain/entities/dictation_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart';
 import 'package:smart_learn/features/home/presentation/pages/profile_page.dart';
 import 'package:smart_learn/features/home/presentation/pages/quiz_page.dart';
+import 'package:smart_learn/features/pictogram_play/presentation/pages/pictogram_play_screen.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -85,13 +89,34 @@ class AppRouter {
           ),
         ),
         GoRoute(
-          path: '/dictation-game',
-          name: 'dictationGame',
+          path: '/games/pictogram/play',
+          name: 'pictogramPlay',
           parentNavigatorKey: _rootNavigatorKey,
-          builder: (context, state) => Scaffold(
-            appBar: AppBar(title: const Text('Chép chính tả')),
-            body: const Center(child: Text('Dictation Game')),
-          ),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra == null) return const _RedirectToHome();
+            try {
+              final questions =
+                  extra['questions'] as List<PictogramEntity>;
+              final timeInMinutes = extra['timeInMinutes'] as int;
+              return PictogramPlayScreen(
+                questions: questions,
+                timeInMinutes: timeInMinutes,
+              );
+            } catch (_) {
+              return const _RedirectToHome();
+            }
+          },
+        ),
+        GoRoute(
+          path: '/games/dictation/play',
+          name: 'dictationPlay',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final entity = state.extra as DictationEntity?;
+            if (entity == null) return const _RedirectToHome();
+            return DictationPlayScreen(entity: entity);
+          },
         ),
 
         // ─── Main shell with bottom nav ───
@@ -213,5 +238,33 @@ class AppRouter {
         ),
       ],
     );
+  }
+}
+
+/// A helper widget that redirects to the home route on initialization.
+///
+/// Used by the pictogram play route when [GoRouterState.extra] is null
+/// or contains invalid data.
+class _RedirectToHome extends StatefulWidget {
+  const _RedirectToHome();
+
+  @override
+  State<_RedirectToHome> createState() => _RedirectToHomeState();
+}
+
+class _RedirectToHomeState extends State<_RedirectToHome> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.go('/');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
   }
 }
