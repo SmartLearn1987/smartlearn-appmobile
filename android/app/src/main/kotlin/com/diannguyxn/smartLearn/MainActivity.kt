@@ -1,4 +1,4 @@
-package com.example.smart_learn
+package com.diannguyxn.smartLearn
 
 import io.flutter.embedding.android.FlutterActivity
 
