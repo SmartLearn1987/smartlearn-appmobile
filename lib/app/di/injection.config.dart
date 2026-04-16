@@ -32,6 +32,8 @@ import '../../features/auth/data/datasources/auth_remote_datasource_module.dart'
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/change_password_usecase.dart'
+    as _i788;
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart'
     as _i560;
 import '../../features/auth/domain/usecases/get_profile_usecase.dart' as _i568;
@@ -40,11 +42,27 @@ import '../../features/auth/domain/usecases/logout_usecase.dart' as _i48;
 import '../../features/auth/domain/usecases/register_usecase.dart' as _i941;
 import '../../features/auth/domain/usecases/update_profile_usecase.dart'
     as _i798;
+import '../../features/auth/domain/usecases/upload_file_usecase.dart' as _i91;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart'
     as _i104;
 import '../../features/dictation_play/presentation/bloc/dictation_play_bloc.dart'
     as _i130;
+import '../../features/exam/data/datasources/exam_remote_datasource.dart'
+    as _i977;
+import '../../features/exam/data/repositories/exam_repository_impl.dart'
+    as _i362;
+import '../../features/exam/domain/repositories/exam_repository.dart' as _i413;
+import '../../features/exam/domain/usecases/get_exam_detail_use_case.dart'
+    as _i1072;
+import '../../features/exam/domain/usecases/get_exams_use_case.dart' as _i347;
+import '../../features/exam/domain/usecases/submit_exam_result_use_case.dart'
+    as _i891;
+import '../../features/exam/presentation/bloc/exam/exam_bloc.dart' as _i729;
+import '../../features/exam/presentation/bloc/exam_detail/exam_detail_bloc.dart'
+    as _i591;
+import '../../features/exam/presentation/bloc/exam_play/exam_play_bloc.dart'
+    as _i711;
 import '../../features/home/data/datasources/home_remote_datasource.dart'
     as _i278;
 import '../../features/home/data/repositories/home_repository_impl.dart'
@@ -57,6 +75,8 @@ import '../../features/home/domain/usecases/get_random_dictation.dart' as _i900;
 import '../../features/home/domain/usecases/get_subjects.dart' as _i185;
 import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/home/presentation/bloc/profile/profile_bloc.dart'
+    as _i124;
 import '../../features/quizlet/data/datasources/quizlet_remote_datasource.dart'
     as _i237;
 import '../../features/quizlet/data/repositories/quizlet_repository_impl.dart'
@@ -157,6 +177,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i161.AuthRemoteDatasource>(
       () => authRemoteModule.authRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i977.ExamRemoteDatasource>(
+      () => _i977.ExamRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i278.HomeRemoteDatasource>(
       () => _i278.HomeRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -181,6 +204,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.AuthLocalDatasource>(),
       ),
     );
+    gh.lazySingleton<_i413.ExamRepository>(
+      () => _i362.ExamRepositoryImpl(gh<_i977.ExamRemoteDatasource>()),
+    );
+    gh.factory<_i788.ChangePasswordUseCase>(
+      () => _i788.ChangePasswordUseCase(gh<_i787.AuthRepository>()),
+    );
     gh.factory<_i560.ForgotPasswordUseCase>(
       () => _i560.ForgotPasswordUseCase(gh<_i787.AuthRepository>()),
     );
@@ -199,6 +228,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i798.UpdateProfileUseCase>(
       () => _i798.UpdateProfileUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.factory<_i91.UploadFileUseCase>(
+      () => _i91.UploadFileUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i1072.GetExamDetailUseCase>(
+      () => _i1072.GetExamDetailUseCase(gh<_i413.ExamRepository>()),
+    );
+    gh.lazySingleton<_i347.GetExamsUseCase>(
+      () => _i347.GetExamsUseCase(gh<_i413.ExamRepository>()),
+    );
+    gh.lazySingleton<_i891.SubmitExamResultUseCase>(
+      () => _i891.SubmitExamResultUseCase(gh<_i413.ExamRepository>()),
+    );
     gh.lazySingleton<_i0.HomeRepository>(
       () => _i76.HomeRepositoryImpl(gh<_i278.HomeRemoteDatasource>()),
     );
@@ -208,11 +249,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i718.QuizletRepository>(
       () => _i364.QuizletRepositoryImpl(gh<_i237.QuizletRemoteDatasource>()),
     );
+    gh.factory<_i711.ExamPlayBloc>(
+      () => _i711.ExamPlayBloc(gh<_i891.SubmitExamResultUseCase>()),
+    );
     gh.lazySingleton<_i595.GetQuizletDetailUseCase>(
       () => _i595.GetQuizletDetailUseCase(gh<_i718.QuizletRepository>()),
     );
     gh.lazySingleton<_i1064.GetQuizletsUseCase>(
       () => _i1064.GetQuizletsUseCase(gh<_i718.QuizletRepository>()),
+    );
+    gh.factory<_i591.ExamDetailBloc>(
+      () => _i591.ExamDetailBloc(gh<_i1072.GetExamDetailUseCase>()),
     );
     gh.lazySingleton<_i797.AuthBloc>(
       () => _i797.AuthBloc(
@@ -229,6 +276,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i104.ForgotPasswordCubit>(
       () => _i104.ForgotPasswordCubit(gh<_i560.ForgotPasswordUseCase>()),
+    );
+    gh.factory<_i729.ExamBloc>(
+      () => _i729.ExamBloc(gh<_i347.GetExamsUseCase>()),
     );
     gh.lazySingleton<_i901.CreateCurriculumUseCase>(
       () => _i901.CreateCurriculumUseCase(gh<_i640.SubjectsRepository>()),
@@ -250,6 +300,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i765.UploadImageUseCase>(
       () => _i765.UploadImageUseCase(gh<_i640.SubjectsRepository>()),
+    );
+    gh.factory<_i124.ProfileBloc>(
+      () => _i124.ProfileBloc(
+        gh<_i568.GetProfileUseCase>(),
+        gh<_i798.UpdateProfileUseCase>(),
+        gh<_i788.ChangePasswordUseCase>(),
+        gh<_i797.AuthBloc>(),
+      ),
     );
     gh.lazySingleton<_i93.GetCurriculaUseCase>(
       () => _i93.GetCurriculaUseCase(gh<_i0.HomeRepository>()),

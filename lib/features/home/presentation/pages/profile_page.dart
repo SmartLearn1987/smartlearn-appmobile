@@ -1,68 +1,152 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_shadows.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
+import 'package:smart_learn/features/home/presentation/widgets/change_password_bottom_sheet.dart';
+import 'package:smart_learn/features/home/presentation/widgets/edit_profile_bottom_sheet.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocProvider(
+      create: (_) => getIt<ProfileBloc>()..add(const LoadProfile()),
+      child: const _ProfileView(),
+    );
+  }
+}
+
+class _ProfileView extends StatelessWidget {
+  const _ProfileView();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileUpdateSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cập nhật thành công')),
+          );
+        } else if (state is ProfilePasswordChanged) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đổi mật khẩu thành công')),
+          );
+        } else if (state is ProfileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
       builder: (context, state) {
-        final user = state is AuthAuthenticated ? state.user : null;
+        // Loading state
+        if (state is ProfileLoading || state is ProfileInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Error state
+        if (state is ProfileError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.mdLg),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    state.message,
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: AppColors.destructive,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  OutlinedButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(const LoadProfile());
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: AppBorders.shapeSm,
+                    ),
+                    child: Text(
+                      'Thử lại',
+                      style: AppTypography.buttonMedium.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Extract user from states that carry user data
+        UserEntity? user;
+        if (state is ProfileLoaded) user = state.user;
+        if (state is ProfileUpdating) user = state.user;
+        if (state is ProfileUpdateSuccess) user = state.user;
+        if (state is ProfilePasswordChanged) user = state.user;
+
+        if (user == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.mdLg),
           child: Column(
             children: [
               const SizedBox(height: AppSpacing.lg),
               // ─── Avatar ───
-              Container(
-                width: 72,
-                height: 72,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  user?.displayName.isNotEmpty == true
-                      ? user!.displayName[0].toUpperCase()
-                      : 'U',
-                  style: AppTypography.h2.copyWith(
-                    color: AppColors.primaryForeground,
-                  ),
-                ),
-              ),
+              _buildAvatar(user),
               const SizedBox(height: AppSpacing.smMd),
               Text(
-                user?.displayName ?? 'Người dùng',
+                user.displayName,
                 style: AppTypography.h4.copyWith(color: AppColors.foreground),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                user?.email ?? '',
+                user.email,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.mutedForeground,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg),
+              // ─── Membership & Education Card ───
+              _buildMembershipCard(user),
+              const SizedBox(height: AppSpacing.lg),
               // ─── Menu items ───
               _ProfileMenuItem(
                 icon: LucideIcons.user,
                 label: 'Thông tin cá nhân',
-                onTap: () {},
+                onTap: () {
+                  EditProfileBottomSheet.show(
+                    context,
+                    user!,
+                    context.read<ProfileBloc>(),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.sm),
               _ProfileMenuItem(
-                icon: LucideIcons.settings,
-                label: 'Cài đặt',
-                onTap: () {},
+                icon: LucideIcons.lock,
+                label: 'Đổi mật khẩu',
+                onTap: () {
+                  ChangePasswordBottomSheet.show(
+                    context,
+                    user!,
+                    context.read<ProfileBloc>(),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.sm),
               _ProfileMenuItem(
@@ -76,9 +160,7 @@ class ProfilePage extends StatelessWidget {
                 width: double.infinity,
                 height: 44,
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    context.read<AuthBloc>().add(const AuthLogoutRequested());
-                  },
+                  onPressed: () => _showLogoutDialog(context),
                   icon: const Icon(LucideIcons.logOut, size: 18),
                   label: Text(
                     'Đăng xuất',
@@ -97,6 +179,154 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAvatar(UserEntity user) {
+    if (user.avatarUrl != null && user.avatarUrl!.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          user.avatarUrl!,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildInitialAvatar(user),
+        ),
+      );
+    }
+    return _buildInitialAvatar(user);
+  }
+
+  Widget _buildInitialAvatar(UserEntity user) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        user.displayName.isNotEmpty
+            ? user.displayName[0].toUpperCase()
+            : 'U',
+        style: AppTypography.h2.copyWith(
+          color: AppColors.primaryForeground,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMembershipCard(UserEntity user) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: AppBorders.borderRadiusSm,
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Thông tin gói thành viên',
+            style: AppTypography.labelLarge.copyWith(
+              color: AppColors.foreground,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          _buildInfoRow(
+            'Gói thành viên',
+            user.plan ?? 'Chưa cập nhật',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _buildInfoRow(
+            'Ngày hết hạn',
+            user.planEndDate != null
+                ? _formatDate(user.planEndDate!)
+                : 'Không giới hạn',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _buildInfoRow(
+            'Cấp học',
+            user.educationLevel ?? 'Chưa cập nhật',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.mutedForeground,
+          ),
+        ),
+        Text(
+          value,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.foreground,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Đăng xuất',
+          style: AppTypography.h4.copyWith(color: AppColors.foreground),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn đăng xuất?',
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.foreground,
+          ),
+        ),
+        shape: AppBorders.shapeSm,
+        backgroundColor: AppColors.card,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Hủy',
+              style: AppTypography.buttonMedium.copyWith(
+                color: AppColors.mutedForeground,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.read<AuthBloc>().add(const AuthLogoutRequested());
+            },
+            child: Text(
+              'Đăng xuất',
+              style: AppTypography.buttonMedium.copyWith(
+                color: AppColors.destructive,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -124,7 +354,10 @@ class _ProfileMenuItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: AppBorders.borderRadiusSm,
-          border: Border.all(color: AppColors.border, width: AppBorders.widthThin),
+          border: Border.all(
+            color: AppColors.border,
+            width: AppBorders.widthThin,
+          ),
           boxShadow: AppShadows.card,
         ),
         child: Row(

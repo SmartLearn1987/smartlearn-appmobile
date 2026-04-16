@@ -17,6 +17,7 @@ class UserModel extends UserEntity {
     super.plan,
     super.planStartDate,
     super.planEndDate,
+    super.avatarUrl,
     required super.createdAt,
   });
 

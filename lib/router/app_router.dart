@@ -17,7 +17,11 @@ import 'package:smart_learn/features/dictation_play/presentation/pages/dictation
 import 'package:smart_learn/features/home/domain/entities/dictation_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart';
 import 'package:smart_learn/features/home/presentation/pages/profile_page.dart';
-import 'package:smart_learn/features/home/presentation/pages/quiz_page.dart';
+import 'package:smart_learn/features/exam/domain/entities/exam_detail_entity.dart';
+import 'package:smart_learn/features/exam/presentation/pages/exam_detail_page.dart';
+import 'package:smart_learn/features/exam/presentation/pages/exam_list_page.dart';
+import 'package:smart_learn/features/exam/presentation/pages/exam_play_page.dart';
+import 'package:smart_learn/features/exam/presentation/pages/exam_result_page.dart';
 import 'package:smart_learn/features/pictogram_play/presentation/pages/pictogram_play_screen.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
@@ -129,6 +133,35 @@ class AppRouter {
             return QuizletDetailPage(quizletId: id);
           },
         ),
+        GoRoute(
+          path: '/exams/:id',
+          name: 'examDetail',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return ExamDetailPage(examId: id);
+          },
+        ),
+        GoRoute(
+          path: '/exams/:id/play',
+          name: 'examPlay',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final detail = state.extra as ExamDetailEntity?;
+            if (detail == null) return const _RedirectToHome();
+            return ExamPlayPage(detail: detail);
+          },
+        ),
+        GoRoute(
+          path: '/exams/:id/result',
+          name: 'examResult',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final resultData = state.extra as Map<String, dynamic>?;
+            if (resultData == null) return const _RedirectToHome();
+            return ExamResultPage(resultData: resultData);
+          },
+        ),
 
         // ─── Main shell with bottom nav ───
         StatefulShellRoute.indexedStack(
@@ -232,7 +265,7 @@ class AppRouter {
                 GoRoute(
                   path: '/quizzes',
                   name: 'quizzes',
-                  builder: (context, state) => const QuizPage(),
+                  builder: (context, state) => const ExamListPage(),
                 ),
               ],
             ),

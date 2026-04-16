@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:smart_learn/core/error/failures.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
@@ -26,4 +28,11 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, void>> forgotPassword(String email);
+
+  Future<Either<Failure, void>> changePassword(
+    String userId,
+    String newPassword,
+  );
+
+  Future<Either<Failure, String>> uploadFile(File file);
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -110,6 +112,35 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remoteDatasource.forgotPassword({'email': email});
       return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword(
+    String userId,
+    String newPassword,
+  ) async {
+    try {
+      await _remoteDatasource.changePassword(userId, {
+        'new_password': newPassword,
+      });
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadFile(File file) async {
+    try {
+      final url = await _remoteDatasource.uploadFile(file);
+      return Right(url);
     } on DioException catch (e) {
       return Left(ServerFailure(message: _extractDioErrorMessage(e)));
     } catch (e) {

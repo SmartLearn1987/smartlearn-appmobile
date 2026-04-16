@@ -11,6 +11,7 @@ class UserEntity extends Equatable {
   final String? plan;
   final DateTime? planStartDate;
   final DateTime? planEndDate;
+  final String? avatarUrl;
   final DateTime createdAt;
 
   const UserEntity({
@@ -24,6 +25,7 @@ class UserEntity extends Equatable {
     this.plan,
     this.planStartDate,
     this.planEndDate,
+    this.avatarUrl,
     required this.createdAt,
   });
 
@@ -39,6 +41,7 @@ class UserEntity extends Equatable {
         plan,
         planStartDate,
         planEndDate,
+        avatarUrl,
         createdAt,
       ];
 }

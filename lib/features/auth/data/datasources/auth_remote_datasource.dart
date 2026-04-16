@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -25,4 +27,16 @@ abstract class AuthRemoteDatasource {
 
   @POST('/forgot-password')
   Future<void> forgotPassword(@Body() Map<String, dynamic> body);
+
+  @PUT('/users/{id}/password')
+  Future<void> changePassword(
+    @Path('id') String userId,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @POST('/upload')
+  @MultiPart()
+  Future<String> uploadFile(
+    @Part(name: 'file') File file,
+  );
 }
