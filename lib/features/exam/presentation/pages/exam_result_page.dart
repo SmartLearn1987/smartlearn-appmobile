@@ -27,15 +27,11 @@ class ExamResultPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
           'Kết quả',
           style: AppTypography.h4.copyWith(color: AppColors.foreground),
         ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.mdLg),

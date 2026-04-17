@@ -92,10 +92,6 @@ class _PictogramPlayViewState extends State<_PictogramPlayView> {
               return const SizedBox.shrink();
             },
           ),
-          centerTitle: true,
-          backgroundColor: AppColors.background,
-          foregroundColor: AppColors.foreground,
-          elevation: 0,
         ),
         backgroundColor: AppColors.background,
         body: BlocBuilder<PictogramPlayBloc, PictogramPlayState>(

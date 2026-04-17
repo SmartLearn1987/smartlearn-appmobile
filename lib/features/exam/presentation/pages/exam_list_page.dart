@@ -36,9 +36,6 @@ class _ExamListView extends StatelessWidget {
           'Trắc Nghiệm',
           style: AppTypography.h3.copyWith(color: AppColors.foreground),
         ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
       ),
       body: BlocBuilder<ExamBloc, ExamState>(
         builder: (context, state) => switch (state) {

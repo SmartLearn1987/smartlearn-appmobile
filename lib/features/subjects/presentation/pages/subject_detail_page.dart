@@ -68,35 +68,35 @@ class _SubjectDetailView extends StatelessWidget {
     final subject = state.subject;
     final grouped = state.groupedCurricula;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.mdLg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildBackButton(context),
-          const SizedBox(height: AppSpacing.md),
-          _buildSubjectHeader(subject.icon, subject.name, subject.description),
-          const SizedBox(height: AppSpacing.md),
-          _buildCreateButton(context),
-          const SizedBox(height: AppSpacing.md),
-          if (grouped.isEmpty)
-            _buildEmptyState()
-          else
-            _buildGroupedList(context, grouped),
-        ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: BackButton(onPressed: () => context.go(RoutePaths.subjects)),
+        title: Text(
+          subject.name,
+          style: AppTypography.h4.copyWith(color: AppColors.foreground),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-    );
-  }
-
-  Widget _buildBackButton(BuildContext context) {
-    return TextButton.icon(
-      onPressed: () => context.go(RoutePaths.subjects),
-      icon: const Text('←'),
-      label: const Text('Quay lại'),
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.mutedForeground,
-        textStyle: AppTypography.buttonMedium,
-        padding: EdgeInsets.zero,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.mdLg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSubjectHeader(
+              subject.icon,
+              subject.name,
+              subject.description,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildCreateButton(context),
+            const SizedBox(height: AppSpacing.md),
+            if (grouped.isEmpty)
+              _buildEmptyState()
+            else
+              _buildGroupedList(context, grouped),
+          ],
+        ),
       ),
     );
   }

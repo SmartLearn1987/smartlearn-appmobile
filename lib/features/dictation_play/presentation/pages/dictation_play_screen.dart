@@ -67,10 +67,6 @@ class _DictationPlayView extends StatelessWidget {
             ),
           ],
         ),
-        centerTitle: true,
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.foreground,
-        elevation: 0,
       ),
       backgroundColor: AppColors.background,
       body: BlocBuilder<DictationPlayBloc, DictationPlayState>(

@@ -212,7 +212,6 @@ class AppRouter {
                         GoRoute(
                           path: RoutePaths.createCurriculumSegment,
                           name: RouteNames.createCurriculum,
-                          parentNavigatorKey: _rootNavigatorKey,
                           builder: (context, state) => CreateCurriculumPage(
                             subjectId: state.pathParameters['subjectId']!,
                           ),
@@ -220,7 +219,6 @@ class AppRouter {
                         GoRoute(
                           path: RoutePaths.editCurriculumSegment,
                           name: RouteNames.editCurriculum,
-                          parentNavigatorKey: _rootNavigatorKey,
                           builder: (context, state) => EditCurriculumPage(
                             subjectId: state.pathParameters['subjectId']!,
                             curriculumId: state.pathParameters['curriculumId']!,

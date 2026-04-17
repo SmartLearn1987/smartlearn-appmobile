@@ -91,16 +91,26 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
     );
   }
 
+  static const _title = 'Chỉnh sửa giáo trình';
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(
+          leading: BackButton(onPressed: () => context.pop()),
+          title: const Text(_title),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_loadError != null) {
       return Scaffold(
+        appBar: AppBar(
+          leading: BackButton(onPressed: () => context.pop()),
+          title: const Text(_title),
+        ),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -132,14 +142,16 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
         }
       },
       child: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(onPressed: () => context.pop()),
+          title: const Text(_title),
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.mdLg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
-                const SizedBox(height: AppSpacing.md),
                 BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
                   buildWhen: (prev, curr) => prev.step != curr.step,
                   builder: (context, state) =>
@@ -164,20 +176,4 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('📚', style: TextStyle(fontSize: 32)),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          'Chỉnh sửa giáo trình',
-          style: AppTypography.h3.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
 }

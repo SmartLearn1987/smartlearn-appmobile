@@ -33,9 +33,6 @@ class _ExamDetailView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
         leading: BackButton(onPressed: () => context.pop()),
         title: BlocBuilder<ExamDetailBloc, ExamDetailState>(
           buildWhen: (prev, curr) =>

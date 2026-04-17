@@ -36,9 +36,6 @@ class _QuizletListView extends StatelessWidget {
           'Flashcards',
           style: AppTypography.h3.copyWith(color: AppColors.foreground),
         ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
       ),
       body: BlocBuilder<QuizletBloc, QuizletState>(
         builder: (context, state) => switch (state) {

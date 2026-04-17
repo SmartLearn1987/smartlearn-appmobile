@@ -39,22 +39,20 @@ class _SchedulePageState extends State<SchedulePage> {
       ],
       child: Scaffold(
         backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(
+          'Thời gian biểu',
+          style: AppTypography.h3.copyWith(color: AppColors.foreground),
+        ),
+      ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
-              vertical: AppSpacing.md,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Thời gian biểu',
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.foreground,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Quản lý lịch học, nhiệm vụ và ghi chú của bạn',
                   style: AppTypography.bodySmall.copyWith(

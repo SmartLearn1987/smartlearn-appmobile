@@ -40,10 +40,12 @@ class AppTheme {
           backgroundColor: AppColors.card,
           foregroundColor: AppColors.foreground,
           elevation: 0,
-          centerTitle: false,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
           titleTextStyle: AppTypography.h4.copyWith(
             color: AppColors.foreground,
           ),
+          surfaceTintColor: Colors.transparent,
         ),
 
         // ─── Text Theme ───

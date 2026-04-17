@@ -43,14 +43,20 @@ class _CreateCurriculumView extends StatelessWidget {
         }
       },
       child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          leading: BackButton(onPressed: () => context.pop()),
+          title: Text(
+            'Tạo giáo trình mới',
+            style: AppTypography.h4.copyWith(color: AppColors.foreground),
+          ),
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.mdLg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
-                const SizedBox(height: AppSpacing.md),
                 BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
                   buildWhen: (prev, curr) => prev.step != curr.step,
                   builder: (context, state) =>
@@ -75,20 +81,4 @@ class _CreateCurriculumView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('📚', style: TextStyle(fontSize: 32)),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          'Tạo giáo trình mới',
-          style: AppTypography.h3.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
 }

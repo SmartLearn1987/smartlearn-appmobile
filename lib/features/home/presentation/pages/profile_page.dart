@@ -49,42 +49,48 @@ class _ProfileView extends StatelessWidget {
       builder: (context, state) {
         // Loading state
         if (state is ProfileLoading || state is ProfileInitial) {
-          return const Center(child: CircularProgressIndicator());
+          return Scaffold(
+            appBar: AppBar(title: const Text('Hồ sơ')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
         }
 
         // Error state
         if (state is ProfileError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.mdLg),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    state.message,
-                    style: AppTypography.bodyLarge.copyWith(
-                      color: AppColors.destructive,
+          return Scaffold(
+            appBar: AppBar(title: const Text('Hồ sơ')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.mdLg),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      state.message,
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: AppColors.destructive,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  OutlinedButton(
-                    onPressed: () {
-                      context.read<ProfileBloc>().add(const LoadProfile());
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: Text(
-                      'Thử lại',
-                      style: AppTypography.buttonMedium.copyWith(
-                        color: AppColors.primary,
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton(
+                      onPressed: () {
+                        context.read<ProfileBloc>().add(const LoadProfile());
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: Text(
+                        'Thử lại',
+                        style: AppTypography.buttonMedium.copyWith(
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -101,7 +107,9 @@ class _ProfileView extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
+        return Scaffold(
+          appBar: AppBar(title: const Text('Hồ sơ')),
+          body: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.mdLg),
           child: Column(
             children: [
@@ -177,6 +185,7 @@ class _ProfileView extends StatelessWidget {
               ),
             ],
           ),
+        ),
         );
       },
     );
