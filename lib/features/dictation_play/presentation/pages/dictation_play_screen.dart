@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../../home/domain/entities/dictation_entity.dart';
 import '../bloc/dictation_play_bloc.dart';
 import '../widgets/dictation_audio_button.dart';
@@ -48,7 +49,7 @@ class _DictationPlayView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () => context.go('/'),
+          onPressed: () => context.go(RoutePaths.home),
         ),
         title: Column(
           children: [
@@ -79,8 +80,8 @@ class _DictationPlayView extends StatelessWidget {
               result: state.result,
               wordComparisons: state.wordComparisons,
               userInput: state.userInput,
-              onPlayAgain: () => context.go('/'),
-              onGoHome: () => context.go('/'),
+              onPlayAgain: () => context.go(RoutePaths.home),
+              onGoHome: () => context.go(RoutePaths.home),
             ),
           _ => const Center(
               child: CircularProgressIndicator(

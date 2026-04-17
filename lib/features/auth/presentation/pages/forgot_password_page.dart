@@ -10,6 +10,7 @@ import 'package:smart_learn/features/auth/presentation/cubit/forgot_password_cub
 import 'package:smart_learn/features/auth/presentation/cubit/forgot_password_state.dart';
 import 'package:smart_learn/features/auth/presentation/widgets/forgot_password_form_card.dart';
 import 'package:smart_learn/features/auth/presentation/widgets/login_logo_header.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
@@ -23,7 +24,7 @@ class ForgotPasswordPage extends StatelessWidget {
           switch (state) {
             case ForgotPasswordSuccess():
               AppToast.success(context, 'auth.forgot_password_success'.tr());
-              context.go('/login');
+              context.go(RoutePaths.login);
             case ForgotPasswordError(:final message):
               AppToast.error(context, message);
             case _:

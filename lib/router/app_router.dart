@@ -26,6 +26,7 @@ import 'package:smart_learn/features/pictogram_play/presentation/pages/pictogram
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -43,7 +44,7 @@ class AppRouter {
 
     return GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: '/',
+      initialLocation: RoutePaths.home,
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (context, state) {
         final authState = authBloc.state;
@@ -55,39 +56,39 @@ class AppRouter {
 
         final isAuthenticated = authState is AuthAuthenticated;
         final isAuthRoute =
-            state.matchedLocation == '/login' ||
-            state.matchedLocation == '/register' ||
-            state.matchedLocation == '/forgot-password';
+            state.matchedLocation == RoutePaths.login ||
+            state.matchedLocation == RoutePaths.register ||
+            state.matchedLocation == RoutePaths.forgotPassword;
 
-        if (!isAuthenticated && !isAuthRoute) return '/login';
-        if (isAuthenticated && isAuthRoute) return '/';
+        if (!isAuthenticated && !isAuthRoute) return RoutePaths.login;
+        if (isAuthenticated && isAuthRoute) return RoutePaths.home;
         return null;
       },
       routes: [
         // ─── Auth routes (no shell) ───
         GoRoute(
-          path: '/login',
-          name: 'login',
+          path: RoutePaths.login,
+          name: RouteNames.login,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
-          path: '/register',
-          name: 'register',
+          path: RoutePaths.register,
+          name: RouteNames.register,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const RegisterPage(),
         ),
         GoRoute(
-          path: '/forgot-password',
-          name: 'forgotPassword',
+          path: RoutePaths.forgotPassword,
+          name: RouteNames.forgotPassword,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const ForgotPasswordPage(),
         ),
 
         // ─── Game routes (fullscreen, no shell) ───
         GoRoute(
-          path: '/pictogram-game',
-          name: 'pictogramGame',
+          path: RoutePaths.pictogramGame,
+          name: RouteNames.pictogramGame,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => Scaffold(
             appBar: AppBar(title: const Text('Đuổi hình bắt chữ')),
@@ -95,15 +96,14 @@ class AppRouter {
           ),
         ),
         GoRoute(
-          path: '/games/pictogram/play',
-          name: 'pictogramPlay',
+          path: RoutePaths.pictogramPlay,
+          name: RouteNames.pictogramPlay,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
             if (extra == null) return const _RedirectToHome();
             try {
-              final questions =
-                  extra['questions'] as List<PictogramEntity>;
+              final questions = extra['questions'] as List<PictogramEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
               return PictogramPlayScreen(
                 questions: questions,
@@ -115,8 +115,8 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: '/games/dictation/play',
-          name: 'dictationPlay',
+          path: RoutePaths.dictationPlay,
+          name: RouteNames.dictationPlay,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final entity = state.extra as DictationEntity?;
@@ -125,8 +125,8 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: '/quizlet/:id',
-          name: 'quizletDetail',
+          path: RoutePaths.quizletDetailTemplate,
+          name: RouteNames.quizletDetail,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final id = state.pathParameters['id']!;
@@ -134,8 +134,8 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: '/exams/:id',
-          name: 'examDetail',
+          path: RoutePaths.examDetailTemplate,
+          name: RouteNames.examDetail,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final id = state.pathParameters['id']!;
@@ -143,8 +143,8 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: '/exams/:id/play',
-          name: 'examPlay',
+          path: RoutePaths.examPlayTemplate,
+          name: RouteNames.examPlay,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final detail = state.extra as ExamDetailEntity?;
@@ -153,8 +153,8 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: '/exams/:id/result',
-          name: 'examResult',
+          path: RoutePaths.examResultTemplate,
+          name: RouteNames.examResult,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) {
             final resultData = state.extra as Map<String, dynamic>?;
@@ -185,51 +185,41 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/',
-                  name: 'home',
+                  path: RoutePaths.home,
+                  name: RouteNames.home,
                   builder: (context, state) => const HomePage(),
-                  routes: [
-                    GoRoute(
-                      path: 'subjects/:id',
-                      name: 'subjectDetail',
-                      builder: (context, state) => Scaffold(
-                        appBar: AppBar(title: const Text('Môn học')),
-                        body: Center(
-                          child: Text(
-                            'Subject detail: ${state.pathParameters['id']}',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
             StatefulShellBranch(
-              routes: [
+              routes: [ 
                 GoRoute(
-                  path: '/subjects',
-                  name: 'subjects',
+                  path: RoutePaths.subjects,
+                  name: RouteNames.subjects,
                   builder: (context, state) => const SubjectsListPage(),
                   routes: [
                     GoRoute(
-                      path: ':subjectId',
-                      name: 'subjectDetailFromSubjects',
-                      builder: (context, state) => SubjectDetailPage(
-                        subjectId: state.pathParameters['subjectId']!,
-                      ),
+                      path: RoutePaths.subjectIdSegment,
+                      name: RouteNames.subjectDetailFromSubjects,
+                      builder: (context, state) {
+                        final subjectId = state.pathParameters['subjectId']!;
+                        return SubjectDetailPage(
+                          key: ValueKey(subjectId),
+                          subjectId: subjectId,
+                        );
+                      },
                       routes: [
                         GoRoute(
-                          path: 'create-curriculum',
-                          name: 'createCurriculum',
+                          path: RoutePaths.createCurriculumSegment,
+                          name: RouteNames.createCurriculum,
                           parentNavigatorKey: _rootNavigatorKey,
                           builder: (context, state) => CreateCurriculumPage(
                             subjectId: state.pathParameters['subjectId']!,
                           ),
                         ),
                         GoRoute(
-                          path: 'edit-curriculum/:curriculumId',
-                          name: 'editCurriculum',
+                          path: RoutePaths.editCurriculumSegment,
+                          name: RouteNames.editCurriculum,
                           parentNavigatorKey: _rootNavigatorKey,
                           builder: (context, state) => EditCurriculumPage(
                             subjectId: state.pathParameters['subjectId']!,
@@ -245,8 +235,8 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/schedule',
-                  name: 'schedule',
+                  path: RoutePaths.schedule,
+                  name: RouteNames.schedule,
                   builder: (context, state) => const SchedulePage(),
                 ),
               ],
@@ -254,8 +244,8 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/quizlet',
-                  name: 'quizlet',
+                  path: RoutePaths.quizlet,
+                  name: RouteNames.quizlet,
                   builder: (context, state) => const QuizletListPage(),
                 ),
               ],
@@ -263,8 +253,8 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/quizzes',
-                  name: 'quizzes',
+                  path: RoutePaths.quizzes,
+                  name: RouteNames.quizzes,
                   builder: (context, state) => const ExamListPage(),
                 ),
               ],
@@ -272,8 +262,8 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/profile',
-                  name: 'profile',
+                  path: RoutePaths.profile,
+                  name: RouteNames.profile,
                   builder: (context, state) => const ProfilePage(),
                 ),
               ],
@@ -302,7 +292,7 @@ class _RedirectToHomeState extends State<_RedirectToHome> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.go('/');
+        context.go(RoutePaths.home);
       }
     });
   }

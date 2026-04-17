@@ -7,6 +7,7 @@ import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_pictogram_questions.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class PictogramSelectionModal extends StatefulWidget {
   const PictogramSelectionModal({super.key});
@@ -218,7 +219,7 @@ class _PictogramSelectionModalState extends State<PictogramSelectionModal> {
           return;
         }
         Navigator.of(context).pop();
-        context.go('/games/pictogram/play', extra: {
+        context.go(RoutePaths.pictogramPlay, extra: {
           'questions': questions,
           'timeInMinutes': _selectedTime,
         });

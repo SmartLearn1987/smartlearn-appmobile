@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/login_response_model.dart';
+import '../models/refresh_token_response_model.dart';
 import '../models/user_model.dart';
 
 part 'auth_remote_datasource.g.dart';
@@ -18,6 +19,11 @@ abstract class AuthRemoteDatasource {
 
   @POST('/register')
   Future<void> register(@Body() Map<String, dynamic> body);
+
+  @POST('/refresh-token')
+  Future<RefreshTokenResponseModel> refreshToken(
+    @Body() Map<String, dynamic> body,
+  );
 
   @GET('/me')
   Future<UserModel> getProfile();

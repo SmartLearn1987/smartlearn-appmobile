@@ -11,6 +11,7 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class RegisterFormCard extends StatefulWidget {
   const RegisterFormCard({super.key});
@@ -271,7 +272,7 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
         ),
         const SizedBox(width: AppSpacing.xs),
         GestureDetector(
-          onTap: () => context.go('/login'),
+          onTap: () => context.go(RoutePaths.login),
           child: Text(
             'auth.login'.tr(),
             style: AppTypography.labelMedium.copyWith(color: AppColors.primary),

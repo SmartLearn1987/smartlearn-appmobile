@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:smart_learn/features/subjects/presentation/models/subject_with_count.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/usecases/get_curricula.dart';
 import '../../domain/usecases/get_subjects.dart';
 import '../helpers/subject_count_helper.dart';
-import '../models/subject_with_count.dart';
 import '../../../../core/usecase/usecase.dart';
 
 part 'home_event.dart';

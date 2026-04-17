@@ -7,6 +7,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_detail_entity.dart';
 import '../bloc/exam_play/exam_play_bloc.dart';
 import '../utils/time_formatter.dart';
@@ -45,7 +46,7 @@ class _ExamPlayView extends StatelessWidget {
                 .findAncestorWidgetOfExactType<ExamPlayPage>()!
                 .detail;
             context.go(
-              '/exams/${detail.id}/result',
+              RoutePaths.examResult(detail.id),
               extra: {
                 'correctCount': state.correctCount,
                 'totalCount': state.totalCount,
@@ -267,7 +268,7 @@ void _showExitDialog(BuildContext context) {
         TextButton(
           onPressed: () {
             Navigator.of(ctx).pop();
-            context.go('/quizzes');
+            context.go(RoutePaths.quizzes);
           },
           child: const Text('Thoát'),
         ),

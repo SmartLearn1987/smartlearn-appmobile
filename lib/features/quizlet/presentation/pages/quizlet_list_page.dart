@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../../quizlet/domain/entities/quizlet_entity.dart';
 import '../bloc/quizlet/quizlet_bloc.dart';
 
@@ -117,7 +118,7 @@ class _QuizletCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/quizlet/${quizlet.id}'),
+      onTap: () => context.go(RoutePaths.quizletDetail(quizlet.id)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,

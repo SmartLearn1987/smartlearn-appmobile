@@ -7,6 +7,7 @@ import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_random_dictation.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class DictationSelectionModal extends StatefulWidget {
   const DictationSelectionModal({super.key});
@@ -196,7 +197,7 @@ class _DictationSelectionModalState extends State<DictationSelectionModal> {
       (dictation) {
         Navigator.of(context).pop();
         if (context.mounted) {
-          context.go('/games/dictation/play', extra: dictation);
+          context.go(RoutePaths.dictationPlay, extra: dictation);
         }
       },
     );

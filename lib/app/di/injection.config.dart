@@ -151,6 +151,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => sharedPreferencesModule.prefs,
       preResolve: true,
     );
+    gh.lazySingleton<_i361.Dio>(
+      () => dioModule.refreshDio(),
+      instanceName: 'refreshDio',
+    );
     gh.lazySingleton<_i992.AuthLocalDatasource>(
       () => _i992.AuthLocalDatasource(gh<_i558.FlutterSecureStorage>()),
     );
@@ -162,11 +166,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i219.ScheduleLocalDatasource>(),
       ),
     );
-    gh.factory<_i388.AuthInterceptor>(
-      () => _i388.AuthInterceptor(gh<_i992.AuthLocalDatasource>()),
-    );
     gh.lazySingleton<_i643.TtsService>(
       () => _i479.TtsServiceImpl(gh<_i50.FlutterTts>()),
+    );
+    gh.factory<_i388.AuthInterceptor>(
+      () => _i388.AuthInterceptor(
+        gh<_i992.AuthLocalDatasource>(),
+        gh<_i361.Dio>(instanceName: 'refreshDio'),
+      ),
     );
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.dio(gh<_i388.AuthInterceptor>()),

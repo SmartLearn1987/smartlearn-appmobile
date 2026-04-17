@@ -1,89 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:smart_learn/core/theme/app_borders.dart';
+import 'package:smart_learn/core/theme/app_colors.dart';
+import 'package:smart_learn/core/theme/app_shadows.dart';
+import 'package:smart_learn/core/theme/app_spacing.dart';
+import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/router/route_names.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../models/subject_with_count.dart';
 
-class SubjectCardWidget extends StatefulWidget {
-  const SubjectCardWidget({
-    required this.subjectWithCount,
-    this.onTap,
-    super.key,
-  });
+class SubjectCardWidget extends StatelessWidget {
+  const SubjectCardWidget({required this.subjectWithCount, super.key});
 
   final SubjectWithCount subjectWithCount;
-  final VoidCallback? onTap;
-
-  @override
-  State<SubjectCardWidget> createState() => _SubjectCardWidgetState();
-}
-
-class _SubjectCardWidgetState extends State<SubjectCardWidget> {
-  bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        constraints: const BoxConstraints(minHeight: 210),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.smMd,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: AppBorders.borderRadiusLg,
-          boxShadow: _isPressed ? AppShadows.elevated : AppShadows.card,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.subjectWithCount.icon,
-              style: AppTypography.text3Xl,
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            Text(
-              widget.subjectWithCount.subject.name,
-              style: AppTypography.h4,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              widget.subjectWithCount.description,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.mutedForeground,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
-              child: Text(
-                '${widget.subjectWithCount.userCurriculumCount} giáo trình',
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.primary,
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 400),
+      builder: (context, opacity, child) =>
+          Opacity(opacity: opacity, child: child),
+      child: GestureDetector(
+        onTap: () =>
+            context.go(RoutePaths.subjectDetail(subjectWithCount.subject.id)),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.smMd),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.smMd,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: AppBorders.borderRadiusLg,
+            boxShadow: AppShadows.card,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(subjectWithCount.icon, style: AppTypography.text3Xl),
+              const SizedBox(height: AppSpacing.smMd),
+              Text(subjectWithCount.subject.name, style: AppTypography.h3),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                subjectWithCount.description,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedForeground,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.sm),
+              Chip(
+                padding: EdgeInsets.zero,
+                label: Text(
+                  '${subjectWithCount.userCurriculumCount} giáo trình',
+                  style: AppTypography.buttonSmall.copyWith(
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

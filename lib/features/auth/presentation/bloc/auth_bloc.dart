@@ -37,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckStatusRequested>(_onCheckStatusRequested);
     on<AuthProfileRequested>(_onProfileRequested);
     on<AuthProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<AuthForceLogout>(_onForceLogout);
   }
 
   Future<void> _onLoginRequested(
@@ -132,5 +133,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthError(failure.message)),
       (user) => emit(AuthAuthenticated(user)),
     );
+  }
+
+  void _onForceLogout(
+    AuthForceLogout event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(const AuthUnauthenticated(message: 'Phiên đăng nhập đã hết hạn'));
   }
 }

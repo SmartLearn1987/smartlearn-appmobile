@@ -11,7 +11,7 @@ import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_curricula.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_subjects.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
-import 'package:smart_learn/features/home/presentation/models/subject_with_count.dart';
+import 'package:smart_learn/features/subjects/presentation/models/subject_with_count.dart';
 
 class MockGetSubjectsUseCase extends Mock implements GetSubjectsUseCase {}
 
@@ -90,83 +90,88 @@ void main() {
     blocTest<HomeBloc, HomeState>(
       'emits [HomeLoading, HomeLoaded] when both use cases succeed',
       build: () {
-        when(() => mockGetSubjects(any()))
-            .thenAnswer((_) async => Right(testSubjects));
-        when(() => mockGetCurricula(any()))
-            .thenAnswer((_) async => Right(testCurricula));
-        when(() => mockAuthBloc.state)
-            .thenReturn(AuthAuthenticated(testUser));
+        when(
+          () => mockGetSubjects(any()),
+        ).thenAnswer((_) async => Right(testSubjects));
+        when(
+          () => mockGetCurricula(any()),
+        ).thenAnswer((_) async => Right(testCurricula));
+        when(() => mockAuthBloc.state).thenReturn(AuthAuthenticated(testUser));
         return HomeBloc(mockGetSubjects, mockGetCurricula, mockAuthBloc);
       },
       act: (bloc) => bloc.add(const HomeLoadSubjects()),
       expect: () => [
         const HomeLoading(),
-        HomeLoaded(subjects: [
-          const SubjectWithCount(
-            subject: SubjectEntity(
-              id: 'sub_1',
-              name: 'Math',
-              sortOrder: 1,
-              curriculumCount: 5,
+        HomeLoaded(
+          subjects: [
+            const SubjectWithCount(
+              subject: SubjectEntity(
+                id: 'sub_1',
+                name: 'Math',
+                sortOrder: 1,
+                curriculumCount: 5,
+              ),
+              description: 'Môn học',
+              icon: '',
+              userCurriculumCount: 2,
             ),
-            description: 'Môn học',
-            icon: '',
-            userCurriculumCount: 2,
-          ),
-          const SubjectWithCount(
-            subject: SubjectEntity(
-              id: 'sub_2',
-              name: 'Science',
-              sortOrder: 2,
-              curriculumCount: 3,
+            const SubjectWithCount(
+              subject: SubjectEntity(
+                id: 'sub_2',
+                name: 'Science',
+                sortOrder: 2,
+                curriculumCount: 3,
+              ),
+              description: 'Môn học',
+              icon: '',
+              userCurriculumCount: 0,
             ),
-            description: 'Môn học',
-            icon: '',
-            userCurriculumCount: 0,
-          ),
-        ]),
+          ],
+        ),
       ],
     );
 
     blocTest<HomeBloc, HomeState>(
       'emits [HomeLoading, HomeLoaded] with count=0 when curricula fails',
       build: () {
-        when(() => mockGetSubjects(any()))
-            .thenAnswer((_) async => Right(testSubjects));
+        when(
+          () => mockGetSubjects(any()),
+        ).thenAnswer((_) async => Right(testSubjects));
         when(() => mockGetCurricula(any())).thenAnswer(
           (_) async => const Left(ServerFailure(message: 'Network error')),
         );
-        when(() => mockAuthBloc.state)
-            .thenReturn(AuthAuthenticated(testUser));
+        when(() => mockAuthBloc.state).thenReturn(AuthAuthenticated(testUser));
         return HomeBloc(mockGetSubjects, mockGetCurricula, mockAuthBloc);
       },
       act: (bloc) => bloc.add(const HomeLoadSubjects()),
       expect: () => [
         const HomeLoading(),
-        HomeLoaded(subjects: [
-          const SubjectWithCount(
-            subject: SubjectEntity(
-              id: 'sub_1',
-              name: 'Math',
-              sortOrder: 1,
-              curriculumCount: 5,
+        HomeLoaded(
+          subjects: [
+            const SubjectWithCount(
+              subject: SubjectEntity(
+                id: 'sub_1',
+                name: 'Math',
+                sortOrder: 1,
+                curriculumCount: 5,
+              ),
+              description: 'Môn học',
+              icon: '',
+              userCurriculumCount: 0,
             ),
-            description: 'Môn học',
-            icon: '',
-            userCurriculumCount: 0,
-          ),
-          const SubjectWithCount(
-            subject: SubjectEntity(
-              id: 'sub_2',
-              name: 'Science',
-              sortOrder: 2,
-              curriculumCount: 3,
+            const SubjectWithCount(
+              subject: SubjectEntity(
+                id: 'sub_2',
+                name: 'Science',
+                sortOrder: 2,
+                curriculumCount: 3,
+              ),
+              description: 'Môn học',
+              icon: '',
+              userCurriculumCount: 0,
             ),
-            description: 'Môn học',
-            icon: '',
-            userCurriculumCount: 0,
-          ),
-        ]),
+          ],
+        ),
       ],
     );
 
@@ -176,10 +181,10 @@ void main() {
         when(() => mockGetSubjects(any())).thenAnswer(
           (_) async => const Left(ServerFailure(message: 'Server error')),
         );
-        when(() => mockGetCurricula(any()))
-            .thenAnswer((_) async => Right(testCurricula));
-        when(() => mockAuthBloc.state)
-            .thenReturn(AuthAuthenticated(testUser));
+        when(
+          () => mockGetCurricula(any()),
+        ).thenAnswer((_) async => Right(testCurricula));
+        when(() => mockAuthBloc.state).thenReturn(AuthAuthenticated(testUser));
         return HomeBloc(mockGetSubjects, mockGetCurricula, mockAuthBloc);
       },
       act: (bloc) => bloc.add(const HomeLoadSubjects()),

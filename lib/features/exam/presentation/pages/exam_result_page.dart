@@ -5,6 +5,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_question_result.dart';
 import '../utils/time_formatter.dart';
 
@@ -69,7 +70,7 @@ class ExamResultPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => context.go('/quizzes'),
+                onPressed: () => context.go(RoutePaths.quizzes),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.primaryForeground,

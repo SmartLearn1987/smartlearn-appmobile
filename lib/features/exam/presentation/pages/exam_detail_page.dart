@@ -6,6 +6,7 @@ import '../../../../app/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_detail_entity.dart';
 import '../bloc/exam_detail/exam_detail_bloc.dart';
 
@@ -125,7 +126,7 @@ class _LoadedContent extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () =>
-                    context.go('/exams/${detail.id}/play', extra: detail),
+                    context.go(RoutePaths.examPlay(detail.id), extra: detail),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.primaryForeground,

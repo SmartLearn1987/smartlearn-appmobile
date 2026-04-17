@@ -34,6 +34,7 @@ class HomeCategoryTabs extends StatelessWidget {
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
           boxShadow: AppShadows.tab,
         ),
+        padding: const EdgeInsets.all(AppSpacing.xs),
         child: Row(
           children: List.generate(_tabs.length, (index) {
             final tab = _tabs[index];

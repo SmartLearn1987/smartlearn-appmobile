@@ -1,6 +1,6 @@
 import '../../domain/entities/curriculum_entity.dart';
 import '../../domain/entities/subject_entity.dart';
-import '../models/subject_with_count.dart';
+import '../../../../features/subjects/presentation/models/subject_with_count.dart';
 
 List<SubjectWithCount> computeSubjectCounts(
   List<SubjectEntity> subjects,

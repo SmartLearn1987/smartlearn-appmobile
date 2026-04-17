@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../router/route_names.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/curriculum_entity.dart';
 import '../bloc/subject_detail/subject_detail_bloc.dart';
@@ -89,7 +90,7 @@ class _SubjectDetailView extends StatelessWidget {
 
   Widget _buildBackButton(BuildContext context) {
     return TextButton.icon(
-      onPressed: () => context.go('/subjects'),
+      onPressed: () => context.go(RoutePaths.subjects),
       icon: const Text('←'),
       label: const Text('Quay lại'),
       style: TextButton.styleFrom(
@@ -140,7 +141,7 @@ class _SubjectDetailView extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () =>
-            context.go('/subjects/$subjectId/create-curriculum'),
+            context.go(RoutePaths.createCurriculum(subjectId)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.primaryForeground,
@@ -207,7 +208,7 @@ class _SubjectDetailView extends StatelessWidget {
                 );
               },
               onEdit: () => context.go(
-                '/subjects/$subjectId/edit-curriculum/${curriculum.id}',
+                RoutePaths.editCurriculum(subjectId, curriculum.id),
               ),
               onDelete: () => _showDeleteConfirmation(context, curriculum),
             ),

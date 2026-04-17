@@ -56,3 +56,7 @@ final class AuthProfileUpdateRequested extends AuthEvent {
   @override
   List<Object?> get props => [name, username, avatarUrl];
 }
+
+final class AuthForceLogout extends AuthEvent {
+  const AuthForceLogout();
+}

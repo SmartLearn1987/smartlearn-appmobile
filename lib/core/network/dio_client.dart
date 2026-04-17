@@ -23,12 +23,21 @@ abstract class DioModule {
 
     dio.interceptors.add(authInterceptor);
 
-    dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (obj) => Logger().d(obj),
-    ));
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 
     return dio;
+  }
+
+  /// Dio instance riêng cho refresh token.
+  /// KHÔNG có AuthInterceptor để tránh vòng lặp vô hạn khi gọi /refresh-token.
+  @Named('refreshDio')
+  @lazySingleton
+  Dio refreshDio() {
+    return Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
   }
 }

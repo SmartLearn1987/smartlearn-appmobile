@@ -30,6 +30,10 @@ class AuthRepositoryImpl implements AuthRepository {
       });
 
       await _localDatasource.saveSessionToken(response.sessionToken);
+      await _localDatasource.saveRefreshToken(response.refreshToken);
+      await _localDatasource.saveAccessTokenExpiresAt(
+        response.accessTokenExpiresAt,
+      );
       await _localDatasource.saveUserId(response.user.id);
 
       return Right((response.user, response.sessionToken));

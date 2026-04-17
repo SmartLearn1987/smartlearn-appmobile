@@ -11,6 +11,7 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class LoginFormCard extends StatefulWidget {
   const LoginFormCard({super.key});
@@ -138,7 +139,7 @@ class _LoginFormCardState extends State<LoginFormCard> {
             // ─── Forgot password link ───
             Center(
               child: GestureDetector(
-                onTap: () => context.go('/forgot-password'),
+                onTap: () => context.go(RoutePaths.forgotPassword),
                 child: Text(
                   'auth.forgot_password'.tr(),
                   style: AppTypography.bodyMedium.copyWith(
@@ -162,7 +163,7 @@ class _LoginFormCardState extends State<LoginFormCard> {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 GestureDetector(
-                  onTap: () => context.go('/register'),
+                  onTap: () => context.go(RoutePaths.register),
                   child: Text(
                     'auth.register'.tr(),
                     style: AppTypography.labelMedium.copyWith(

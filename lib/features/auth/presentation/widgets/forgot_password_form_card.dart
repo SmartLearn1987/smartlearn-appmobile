@@ -12,6 +12,7 @@ import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/auth/presentation/cubit/forgot_password_cubit.dart';
 import 'package:smart_learn/features/auth/presentation/cubit/forgot_password_state.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class ForgotPasswordFormCard extends StatefulWidget {
   const ForgotPasswordFormCard({super.key});
@@ -114,7 +115,7 @@ class _ForgotPasswordFormCardState extends State<ForgotPasswordFormCard> {
             // ─── Back to login link ───
             Center(
               child: GestureDetector(
-                onTap: () => context.go('/login'),
+                onTap: () => context.go(RoutePaths.login),
                 child: Text(
                   'auth.forgot_password_back_to_login'.tr(),
                   style: AppTypography.bodyMedium.copyWith(
@@ -138,7 +139,7 @@ class _ForgotPasswordFormCardState extends State<ForgotPasswordFormCard> {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 GestureDetector(
-                  onTap: () => context.go('/register'),
+                  onTap: () => context.go(RoutePaths.register),
                   child: Text(
                     'auth.forgot_password_register'.tr(),
                     style: AppTypography.labelMedium.copyWith(

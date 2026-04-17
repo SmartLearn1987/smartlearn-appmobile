@@ -8,6 +8,7 @@ import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/auth/presentation/widgets/login_logo_header.dart';
 import 'package:smart_learn/features/auth/presentation/widgets/register_form_card.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -19,7 +20,7 @@ class RegisterPage extends StatelessWidget {
         switch (state) {
           case AuthRegistrationSuccess():
             AppToast.success(context, 'auth.register_success'.tr());
-            context.go('/login');
+            context.go(RoutePaths.login);
           case AuthError(:final message):
             AppToast.error(context, message);
           case _:

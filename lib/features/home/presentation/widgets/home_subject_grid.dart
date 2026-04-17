@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/features/home/presentation/models/subject_with_count.dart';
-import 'package:smart_learn/features/home/presentation/widgets/subject_card_widget.dart';
+import 'package:smart_learn/features/subjects/presentation/widgets/subject_card_widget.dart';
+import 'package:smart_learn/features/subjects/presentation/models/subject_with_count.dart';
 
 class HomeSubjectGrid extends StatelessWidget {
   const HomeSubjectGrid({required this.subjects, super.key});

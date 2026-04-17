@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_entity.dart';
 import '../bloc/exam/exam_bloc.dart';
 
@@ -117,7 +118,7 @@ class _ExamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/exams/${exam.id}'),
+      onTap: () => context.go(RoutePaths.examDetail(exam.id)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,
