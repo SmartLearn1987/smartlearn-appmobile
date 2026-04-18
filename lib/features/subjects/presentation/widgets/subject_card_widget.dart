@@ -24,38 +24,62 @@ class SubjectCardWidget extends StatelessWidget {
       child: GestureDetector(
         onTap: () =>
             context.go(RoutePaths.subjectDetail(subjectWithCount.subject.id)),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.smMd),
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.smMd,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: AppBorders.borderRadiusLg,
-            boxShadow: AppShadows.card,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: ClipRRect(
+          borderRadius: AppBorders.borderRadiusLg,
+          child: Stack(
             children: [
-              Text(subjectWithCount.icon, style: AppTypography.text3Xl),
-              const SizedBox(height: AppSpacing.smMd),
-              Text(subjectWithCount.subject.name, style: AppTypography.h3),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                subjectWithCount.description,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedForeground,
+              // ─── Content ───
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.smMd),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.smMd,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: AppBorders.borderRadiusLg,
+                  boxShadow: AppShadows.card,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(subjectWithCount.icon, style: AppTypography.text3Xl),
+                    const SizedBox(height: AppSpacing.smMd),
+                    Text(
+                      subjectWithCount.subject.name,
+                      style: AppTypography.h3,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subjectWithCount.description,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.mutedForeground,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Chip(
+                      padding: EdgeInsets.zero,
+                      label: Text(
+                        '${subjectWithCount.userCurriculumCount} giáo trình',
+                        style: AppTypography.buttonSmall.copyWith(
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Chip(
-                padding: EdgeInsets.zero,
-                label: Text(
-                  '${subjectWithCount.userCurriculumCount} giáo trình',
-                  style: AppTypography.buttonSmall.copyWith(
-                    color: AppColors.mutedForeground,
+              // ─── Decorative circle ───
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary.withValues(alpha: 0.08),
                   ),
                 ),
               ),

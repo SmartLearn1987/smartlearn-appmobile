@@ -54,16 +54,12 @@ class _SubjectsListView extends StatelessWidget {
                     child: CircularProgressIndicator(),
                   ),
                 ),
-                SubjectsListLoaded(:final subjects) => GridView.builder(
+                SubjectsListLoaded(:final subjects) => ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: AppSpacing.smMd,
-                    mainAxisSpacing: AppSpacing.smMd,
-                    childAspectRatio: 1,
-                  ),
                   itemCount: subjects.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.smMd),
                   itemBuilder: (context, index) {
                     final item = subjects[index];
                     return SubjectCardWidget(subjectWithCount: item);
