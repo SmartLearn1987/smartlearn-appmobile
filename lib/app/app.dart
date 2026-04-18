@@ -22,7 +22,7 @@ class App extends StatelessWidget {
         ),
         child: MaterialApp.router(
           title: 'Smart Learn',
-          debugShowCheckedModeBanner: true,
+          debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           routerConfig: AppRouter.router,
           localizationsDelegates: context.localizationDelegates,

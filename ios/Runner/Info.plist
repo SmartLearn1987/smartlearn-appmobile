@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Smart Learn cần truy cập thư viện ảnh để chọn ảnh cho giáo trình và hồ sơ cá nhân.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Smart Learn cần truy cập camera để chụp ảnh cho giáo trình và hồ sơ cá nhân.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Smart Learn sử dụng tính năng đọc văn bản để hỗ trợ học tập.</string>
 </dict>
 </plist>
