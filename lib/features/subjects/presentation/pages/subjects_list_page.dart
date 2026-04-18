@@ -49,52 +49,50 @@ class _SubjectsListView extends StatelessWidget {
             BlocBuilder<SubjectsListBloc, SubjectsListState>(
               builder: (context, state) => switch (state) {
                 SubjectsListLoading() => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: AppSpacing.xxl),
-                      child: CircularProgressIndicator(),
-                    ),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.xxl),
+                    child: CircularProgressIndicator(),
                   ),
+                ),
                 SubjectsListLoaded(:final subjects) => GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: AppSpacing.smMd,
-                      mainAxisSpacing: AppSpacing.smMd,
-                      childAspectRatio: 1,
-                    ),
-                    itemCount: subjects.length,
-                    itemBuilder: (context, index) {
-                      final item = subjects[index];
-                      return SubjectCardWidget(subjectWithCount: item);
-                    },
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: AppSpacing.smMd,
+                    mainAxisSpacing: AppSpacing.smMd,
+                    childAspectRatio: 1,
                   ),
+                  itemCount: subjects.length,
+                  itemBuilder: (context, index) {
+                    final item = subjects[index];
+                    return SubjectCardWidget(subjectWithCount: item);
+                  },
+                ),
                 SubjectsListError(:final message) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.xxl),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            message,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.mutedForeground,
-                            ),
-                            textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xxl),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          message,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.mutedForeground,
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          ElevatedButton(
-                            onPressed: () =>
-                                context.read<SubjectsListBloc>().add(
-                                      const SubjectsListLoadRequested(),
-                                    ),
-                            child: const Text('Thử lại'),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        ElevatedButton(
+                          onPressed: () => context.read<SubjectsListBloc>().add(
+                            const SubjectsListLoadRequested(),
                           ),
-                        ],
-                      ),
+                          child: const Text('Thử lại'),
+                        ),
+                      ],
                     ),
                   ),
+                ),
                 _ => const SizedBox.shrink(),
               },
             ),

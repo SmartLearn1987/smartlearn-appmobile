@@ -37,7 +37,7 @@ class AppTheme {
 
         // ─── AppBar ───
         appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.card,
+          backgroundColor: AppColors.background,
           foregroundColor: AppColors.foreground,
           elevation: 0,
           scrolledUnderElevation: 0,
