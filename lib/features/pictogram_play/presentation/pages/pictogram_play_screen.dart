@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,14 +7,8 @@ import '../../../home/domain/entities/pictogram_entity.dart';
 import '../../../../router/route_names.dart';
 import '../bloc/pictogram_play_bloc.dart';
 import '../widgets/game_result_view.dart';
-import '../widgets/game_timer_display.dart';
 import '../widgets/question_view.dart';
 
-/// Main screen for the Pictogram game play.
-///
-/// Receives [questions] and [timeInMinutes] from the route extra data,
-/// provides [PictogramPlayBloc] to the widget tree, and orchestrates
-/// the game flow between [QuestionView] and [GameResultView].
 class PictogramPlayScreen extends StatelessWidget {
   const PictogramPlayScreen({
     required this.questions,
@@ -31,100 +23,55 @@ class PictogramPlayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => PictogramPlayBloc()
-        ..add(StartGame(
-          questions: questions,
-          timeInMinutes: timeInMinutes,
-        )),
+        ..add(StartGame(questions: questions, timeInMinutes: timeInMinutes)),
       child: const _PictogramPlayView(),
     );
   }
 }
 
-class _PictogramPlayView extends StatefulWidget {
+class _PictogramPlayView extends StatelessWidget {
   const _PictogramPlayView();
 
   @override
-  State<_PictogramPlayView> createState() => _PictogramPlayViewState();
-}
-
-class _PictogramPlayViewState extends State<_PictogramPlayView> {
-  Timer? _autoAdvanceTimer;
-
-  @override
-  void dispose() {
-    _autoAdvanceTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocListener<PictogramPlayBloc, PictogramPlayState>(
-      listenWhen: (previous, current) {
-        if (current is! PictogramPlayInProgress) return false;
-        if (previous is! PictogramPlayInProgress) return false;
-        return previous.lastAnswerResult != current.lastAnswerResult;
-      },
-      listener: (context, state) {
-        if (state is PictogramPlayInProgress &&
-            state.lastAnswerResult == AnswerResult.correct) {
-          _autoAdvanceTimer?.cancel();
-          _autoAdvanceTimer = Timer(const Duration(seconds: 1), () {
-            if (context.mounted) {
-              context.read<PictogramPlayBloc>().add(const NextQuestion());
-            }
-          });
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: BackButton(
-            onPressed: () => context.go(RoutePaths.home),
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
+      ),
+      backgroundColor: AppColors.background,
+      body: BlocBuilder<PictogramPlayBloc, PictogramPlayState>(
+        builder: (context, state) => switch (state) {
+          PictogramPlayInProgress() => QuestionView(
+            question: state.questions[state.currentIndex],
+            currentIndex: state.currentIndex,
+            totalQuestions: state.questions.length,
+            remainingSeconds: state.remainingSeconds,
+            answeredQuestions: state.answeredQuestions,
+            lastAnswerResult: state.lastAnswerResult,
+            onSubmit: (text) => context.read<PictogramPlayBloc>().add(
+              SubmitAnswer(answer: text),
+            ),
+            onGoTo: (index) => context.read<PictogramPlayBloc>().add(
+              GoToQuestion(index: index),
+            ),
+            onPrevious: () =>
+                context.read<PictogramPlayBloc>().add(const PreviousQuestion()),
+            onNext: () =>
+                context.read<PictogramPlayBloc>().add(const NextQuestion()),
+            onEndGame: () =>
+                context.read<PictogramPlayBloc>().add(const EndGame()),
           ),
-          title: BlocBuilder<PictogramPlayBloc, PictogramPlayState>(
-            buildWhen: (previous, current) =>
-                current is PictogramPlayInProgress,
-            builder: (context, state) {
-              if (state is PictogramPlayInProgress) {
-                return GameTimerDisplay(
-                  remainingSeconds: state.remainingSeconds,
-                );
-              }
-              return const SizedBox.shrink();
-            },
+          PictogramPlayFinished() => GameResultView(
+            correctCount: state.correctCount,
+            totalQuestions: state.totalQuestions,
+            elapsedSeconds: state.elapsedSeconds,
+            onPlayAgain: () => context.go(RoutePaths.home),
+            onGoHome: () => context.go(RoutePaths.home),
           ),
-        ),
-        backgroundColor: AppColors.background,
-        body: BlocBuilder<PictogramPlayBloc, PictogramPlayState>(
-          builder: (context, state) => switch (state) {
-            PictogramPlayInProgress() => QuestionView(
-                question: state.questions[state.currentIndex],
-                currentIndex: state.currentIndex,
-                totalQuestions: state.questions.length,
-                lastAnswerResult: state.lastAnswerResult,
-                onSubmit: (text) => context
-                    .read<PictogramPlayBloc>()
-                    .add(SubmitAnswer(answer: text)),
-                onSkip: () => context
-                    .read<PictogramPlayBloc>()
-                    .add(const SkipQuestion()),
-                onNext: () => context
-                    .read<PictogramPlayBloc>()
-                    .add(const NextQuestion()),
-              ),
-            PictogramPlayFinished() => GameResultView(
-                correctCount: state.correctCount,
-                totalQuestions: state.totalQuestions,
-                elapsedSeconds: state.elapsedSeconds,
-                onPlayAgain: () => context.go(RoutePaths.home),
-                onGoHome: () => context.go(RoutePaths.home),
-              ),
-            _ => const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
-              ),
-          },
-        ),
+          _ => const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        },
       ),
     );
   }

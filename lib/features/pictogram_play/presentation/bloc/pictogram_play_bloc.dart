@@ -19,6 +19,8 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
     on<TimerTick>(_onTimerTick);
     on<NextQuestion>(_onNextQuestion);
     on<EndGame>(_onEndGame);
+    on<GoToQuestion>(_onGoToQuestion);
+    on<PreviousQuestion>(_onPreviousQuestion);
   }
 
   void _onStartGame(StartGame event, Emitter<PictogramPlayState> emit) {
@@ -46,6 +48,11 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
 
     final currentQuestion = currentState.questions[currentState.currentIndex];
     final isCorrect = checkAnswer(event.answer, currentQuestion.answer);
+    final result = isCorrect ? AnswerResult.correct : AnswerResult.incorrect;
+
+    final updatedAnswers = Map<int, AnswerResult>.from(
+      currentState.answeredQuestions,
+    )..[currentState.currentIndex] = result;
 
     emit(PictogramPlayInProgress(
       questions: currentState.questions,
@@ -53,8 +60,8 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
       correctCount:
           isCorrect ? currentState.correctCount + 1 : currentState.correctCount,
       remainingSeconds: currentState.remainingSeconds,
-      lastAnswerResult:
-          isCorrect ? AnswerResult.correct : AnswerResult.incorrect,
+      lastAnswerResult: result,
+      answeredQuestions: updatedAnswers,
     ));
   }
 
@@ -77,6 +84,7 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
       currentIndex: nextIndex,
       correctCount: currentState.correctCount,
       remainingSeconds: currentState.remainingSeconds,
+      answeredQuestions: currentState.answeredQuestions,
     ));
   }
 
@@ -118,6 +126,41 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
       currentIndex: nextIndex,
       correctCount: currentState.correctCount,
       remainingSeconds: currentState.remainingSeconds,
+      answeredQuestions: currentState.answeredQuestions,
+    ));
+  }
+
+  void _onGoToQuestion(
+    GoToQuestion event,
+    Emitter<PictogramPlayState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! PictogramPlayInProgress) return;
+    if (event.index < 0 || event.index >= currentState.questions.length) return;
+
+    emit(PictogramPlayInProgress(
+      questions: currentState.questions,
+      currentIndex: event.index,
+      correctCount: currentState.correctCount,
+      remainingSeconds: currentState.remainingSeconds,
+      answeredQuestions: currentState.answeredQuestions,
+    ));
+  }
+
+  void _onPreviousQuestion(
+    PreviousQuestion event,
+    Emitter<PictogramPlayState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! PictogramPlayInProgress) return;
+    if (currentState.currentIndex <= 0) return;
+
+    emit(PictogramPlayInProgress(
+      questions: currentState.questions,
+      currentIndex: currentState.currentIndex - 1,
+      correctCount: currentState.correctCount,
+      remainingSeconds: currentState.remainingSeconds,
+      answeredQuestions: currentState.answeredQuestions,
     ));
   }
 

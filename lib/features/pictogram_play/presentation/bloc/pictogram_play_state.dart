@@ -19,6 +19,8 @@ final class PictogramPlayInProgress extends PictogramPlayState {
   final int correctCount;
   final int remainingSeconds;
   final AnswerResult? lastAnswerResult;
+  /// Per-question answer results. Key = question index, Value = result.
+  final Map<int, AnswerResult> answeredQuestions;
 
   const PictogramPlayInProgress({
     required this.questions,
@@ -26,6 +28,7 @@ final class PictogramPlayInProgress extends PictogramPlayState {
     required this.correctCount,
     required this.remainingSeconds,
     this.lastAnswerResult,
+    this.answeredQuestions = const {},
   });
 
   @override
@@ -35,6 +38,7 @@ final class PictogramPlayInProgress extends PictogramPlayState {
         correctCount,
         remainingSeconds,
         lastAnswerResult,
+        answeredQuestions,
       ];
 }
 

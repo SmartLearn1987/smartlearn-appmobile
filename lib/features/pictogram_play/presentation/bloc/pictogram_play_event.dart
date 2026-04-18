@@ -44,3 +44,16 @@ final class NextQuestion extends PictogramPlayEvent {
 final class EndGame extends PictogramPlayEvent {
   const EndGame();
 }
+
+final class GoToQuestion extends PictogramPlayEvent {
+  final int index;
+
+  const GoToQuestion({required this.index});
+
+  @override
+  List<Object?> get props => [index];
+}
+
+final class PreviousQuestion extends PictogramPlayEvent {
+  const PreviousQuestion();
+}

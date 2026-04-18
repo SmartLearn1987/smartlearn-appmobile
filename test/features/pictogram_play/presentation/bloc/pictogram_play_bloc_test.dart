@@ -67,6 +67,7 @@ void main() {
           correctCount: 1,
           remainingSeconds: 120,
           lastAnswerResult: AnswerResult.correct,
+          answeredQuestions: {0: AnswerResult.correct},
         ),
       ],
     );
@@ -89,6 +90,7 @@ void main() {
           correctCount: 0,
           remainingSeconds: 120,
           lastAnswerResult: AnswerResult.incorrect,
+          answeredQuestions: {0: AnswerResult.incorrect},
         ),
       ],
     );
@@ -180,6 +182,7 @@ void main() {
           correctCount: 1,
           remainingSeconds: 118,
           lastAnswerResult: AnswerResult.correct,
+          answeredQuestions: {0: AnswerResult.correct},
         ),
         const PictogramPlayFinished(
           correctCount: 1,
