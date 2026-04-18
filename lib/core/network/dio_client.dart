@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:logger/logger.dart';
 
 import 'package:smart_learn/core/constants/api_constants.dart';
 import 'package:smart_learn/core/network/auth_interceptor.dart';
@@ -17,6 +16,7 @@ abstract class DioModule {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'x-api-key': ApiConstants.baseApiKey,
         },
       ),
     );
@@ -36,7 +36,10 @@ abstract class DioModule {
     return Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ApiConstants.baseApiKey,
+        },
       ),
     );
   }

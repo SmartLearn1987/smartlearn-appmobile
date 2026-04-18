@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:smart_learn/core/error/exceptions.dart';
+import 'package:smart_learn/core/error/error_utils.dart';
 import 'package:smart_learn/core/error/failures.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/subjects/data/datasources/subjects_remote_datasource.dart';
@@ -23,10 +23,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
     try {
       final result = await remoteDatasource.getSubjects();
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -35,10 +35,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
     try {
       final result = await remoteDatasource.getSubjectById(id);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -49,10 +49,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
     try {
       final result = await remoteDatasource.getCurricula(subjectId);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -86,10 +86,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
 
       final result = await remoteDatasource.createCurriculum(formData);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -123,10 +123,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
 
       final result = await remoteDatasource.updateCurriculum(params.id, data);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -135,10 +135,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
     try {
       await remoteDatasource.deleteCurriculum(id);
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -147,10 +147,10 @@ class SubjectsRepositoryImpl implements SubjectsRepository {
     try {
       final result = await remoteDatasource.uploadImage(file);
       return Right(result.url);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 }

@@ -192,7 +192,7 @@ class AppRouter {
               ],
             ),
             StatefulShellBranch(
-              routes: [ 
+              routes: [
                 GoRoute(
                   path: RoutePaths.subjects,
                   name: RouteNames.subjects,

@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/error/error_utils.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
@@ -38,9 +39,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right((response.user, response.sessionToken));
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -61,9 +62,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(null);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -83,9 +84,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await _remoteDatasource.getProfile();
       return Right(userModel);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -105,9 +106,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await _remoteDatasource.updateProfile(body);
       return Right(userModel);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -117,9 +118,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remoteDatasource.forgotPassword({'email': email});
       return const Right(null);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -134,9 +135,9 @@ class AuthRepositoryImpl implements AuthRepository {
       });
       return const Right(null);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -146,17 +147,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final url = await _remoteDatasource.uploadFile(file);
       return Right(url);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: _extractDioErrorMessage(e)));
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
-  String _extractDioErrorMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is Map<String, dynamic> && data.containsKey('message')) {
-      return data['message'] as String;
-    }
-    return e.message ?? 'An unexpected error occurred';
-  }
 }

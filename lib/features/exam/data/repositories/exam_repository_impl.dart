@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:smart_learn/core/error/exceptions.dart';
+import 'package:smart_learn/core/error/error_utils.dart';
 import 'package:smart_learn/core/error/failures.dart';
 import 'package:smart_learn/features/exam/data/datasources/exam_remote_datasource.dart';
 import 'package:smart_learn/features/exam/domain/entities/exam_detail_entity.dart';
@@ -18,10 +19,10 @@ class ExamRepositoryImpl implements ExamRepository {
     try {
       final result = await remoteDatasource.getExams();
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -30,10 +31,10 @@ class ExamRepositoryImpl implements ExamRepository {
     try {
       final result = await remoteDatasource.getExamDetail(id);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -49,10 +50,10 @@ class ExamRepositoryImpl implements ExamRepository {
         {'score': score, 'time_taken': timeTaken},
       );
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 }

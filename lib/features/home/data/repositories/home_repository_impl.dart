@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:smart_learn/core/error/exceptions.dart';
+import 'package:smart_learn/core/error/error_utils.dart';
 import 'package:smart_learn/core/error/failures.dart';
 import 'package:smart_learn/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:smart_learn/features/home/domain/entities/curriculum_entity.dart';
@@ -20,10 +21,10 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final result = await remoteDatasource.getSubjects();
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -32,10 +33,10 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final result = await remoteDatasource.getCurricula();
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -47,10 +48,10 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final result = await remoteDatasource.getPictogramQuestions(level, limit);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 
@@ -62,10 +63,10 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final result = await remoteDatasource.getRandomDictation(level, language);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
 }
