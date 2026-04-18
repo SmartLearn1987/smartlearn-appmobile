@@ -23,18 +23,15 @@ class _ClockWidgetState extends State<ClockWidget> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(
-      const Duration(milliseconds: 10),
-      (_) {
-        final now = DateTime.now();
-        final shouldToggle =
-            (now.millisecond ~/ 500) != (_now.millisecond ~/ 500);
-        setState(() {
-          _now = now;
-          if (shouldToggle) _colonVisible = !_colonVisible;
-        });
-      },
-    );
+    _timer = Timer.periodic(const Duration(milliseconds: 10), (_) {
+      final now = DateTime.now();
+      final shouldToggle =
+          (now.millisecond ~/ 500) != (_now.millisecond ~/ 500);
+      setState(() {
+        _now = now;
+        if (shouldToggle) _colonVisible = !_colonVisible;
+      });
+    });
   }
 
   @override
@@ -79,6 +76,13 @@ class _ClockWidgetState extends State<ClockWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Text(
+          '${vietnameseWeekday(_now)}, ${formatDate(_now)}',
+          style: AppTypography.bodyMedium.copyWith(
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -91,13 +95,6 @@ class _ClockWidgetState extends State<ClockWidget> {
             Text(secMs.split('.')[0], style: monoStyle),
             Text('.${secMs.split('.')[1]}', style: msStyle),
           ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          '${vietnameseWeekday(_now)}, ${formatDate(_now)}',
-          style: AppTypography.bodyMedium.copyWith(
-            color: Colors.white.withValues(alpha: 0.7),
-          ),
         ),
       ],
     );

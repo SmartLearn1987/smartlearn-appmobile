@@ -102,17 +102,20 @@ class FocusTab extends StatelessWidget {
     return BlocBuilder<FocusCubit, FocusState>(
       buildWhen: (prev, curr) => prev.mode != curr.mode,
       builder: (context, state) {
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: switch (state.mode) {
-            FocusMode.clock => const ClockWidget(key: ValueKey('clock')),
-            FocusMode.stopwatch => const StopwatchWidget(
-              key: ValueKey('stopwatch'),
-            ),
-            FocusMode.pomodoro => const PomodoroWidget(
-              key: ValueKey('pomodoro'),
-            ),
-          },
+        return SizedBox(
+          height: 200,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: switch (state.mode) {
+              FocusMode.clock => const ClockWidget(key: ValueKey('clock')),
+              FocusMode.stopwatch => const StopwatchWidget(
+                key: ValueKey('stopwatch'),
+              ),
+              FocusMode.pomodoro => const PomodoroWidget(
+                key: ValueKey('pomodoro'),
+              ),
+            },
+          ),
         );
       },
     );
