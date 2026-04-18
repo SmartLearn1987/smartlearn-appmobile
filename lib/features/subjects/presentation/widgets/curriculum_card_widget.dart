@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_cached_image.dart';
 import '../../domain/entities/curriculum_entity.dart';
 
 class CurriculumCardWidget extends StatelessWidget {
@@ -66,12 +67,12 @@ class CurriculumCardWidget extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: curriculum.imageUrl != null
-                ? Image.network(
-                    curriculum.imageUrl!,
+                ? AppCachedImage(
+                    imageUrl: curriculum.imageUrl!,
                     width: 64,
                     height: 64,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, error, stackTrace) => _buildFallbackIcon(),
+                    borderRadius: BorderRadius.circular(12),
+                    errorWidget: _buildFallbackIcon(),
                   )
                 : _buildFallbackIcon(),
           ),

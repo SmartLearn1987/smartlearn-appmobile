@@ -6,6 +6,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_cached_image.dart';
 import '../../domain/entities/education_level.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
@@ -57,13 +58,12 @@ class PreviewStepContent extends StatelessWidget {
                 fit: BoxFit.cover,
               )
             : state.existingImageUrl != null
-                ? Image.network(
-                    state.existingImageUrl!,
+                ? AppCachedImage(
+                    imageUrl: state.existingImageUrl!,
                     width: 96,
                     height: 96,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildFallbackIcon(),
+                    borderRadius: AppBorders.borderRadiusLg,
+                    errorWidget: _buildFallbackIcon(),
                   )
                 : _buildFallbackIcon(),
       ),

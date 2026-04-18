@@ -8,6 +8,7 @@ import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/widgets/app_cached_image.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/domain/usecases/upload_file_usecase.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
@@ -310,15 +311,12 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   Widget _buildAvatarImage() {
     final avatarUrl = _newAvatarUrl ?? widget.user.avatarUrl;
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          avatarUrl,
-          width: 80,
-          height: 80,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              _buildInitialAvatar(),
-        ),
+      return AppCachedImage(
+        imageUrl: avatarUrl,
+        width: 80,
+        height: 80,
+        shape: BoxShape.circle,
+        errorWidget: _buildInitialAvatar(),
       );
     }
     return _buildInitialAvatar();

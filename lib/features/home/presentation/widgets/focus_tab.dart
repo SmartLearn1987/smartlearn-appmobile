@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
@@ -118,27 +117,6 @@ class FocusTab extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildFullscreenButton() {
-    return GestureDetector(
-      onTap: () {
-        // TODO: Implement fullscreen mode
-      },
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
-          borderRadius: AppBorders.borderRadiusSm,
-        ),
-        child: Icon(
-          LucideIcons.maximize2,
-          size: 18,
-          color: Colors.white.withValues(alpha: 0.7),
-        ),
-      ),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_shadows.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/widgets/app_cached_image.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
@@ -110,9 +111,9 @@ class _ProfileView extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(title: const Text('Hồ sơ')),
           body: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.mdLg),
-          child: Column(
-            children: [
+            padding: const EdgeInsets.all(AppSpacing.mdLg),
+            child: Column(
+              children: [
               const SizedBox(height: AppSpacing.lg),
               // ─── Avatar ───
               _buildAvatar(user),
@@ -185,7 +186,7 @@ class _ProfileView extends StatelessWidget {
               ),
             ],
           ),
-        ),
+          ),
         );
       },
     );
@@ -193,15 +194,12 @@ class _ProfileView extends StatelessWidget {
 
   Widget _buildAvatar(UserEntity user) {
     if (user.avatarUrl != null && user.avatarUrl!.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          user.avatarUrl!,
-          width: 80,
-          height: 80,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              _buildInitialAvatar(user),
-        ),
+      return AppCachedImage(
+        imageUrl: user.avatarUrl!,
+        width: 80,
+        height: 80,
+        shape: BoxShape.circle,
+        errorWidget: _buildInitialAvatar(user),
       );
     }
     return _buildInitialAvatar(user);

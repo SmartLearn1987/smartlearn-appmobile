@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_cached_image.dart';
 import '../../domain/entities/quizlet_term_entity.dart';
 
 /// A flashcard widget with 3D flip animation.
@@ -129,15 +130,11 @@ class _FlashcardFront extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (imageUrl != null && imageUrl!.isNotEmpty) ...[
-                ClipRRect(
+                AppCachedImage(
+                  imageUrl: imageUrl!,
+                  height: 120,
                   borderRadius: AppBorders.borderRadiusMd,
-                  child: Image.network(
-                    imageUrl!,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const SizedBox.shrink(),
-                  ),
+                  errorWidget: const SizedBox.shrink(),
                 ),
                 const SizedBox(height: AppSpacing.md),
               ],

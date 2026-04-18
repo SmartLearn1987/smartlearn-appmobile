@@ -4,6 +4,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_cached_image.dart';
 import '../../../home/domain/entities/pictogram_entity.dart';
 import '../bloc/pictogram_play_bloc.dart';
 
@@ -308,32 +309,12 @@ class _QuestionViewState extends State<QuestionView> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          ClipRRect(
+          AppCachedImage(
+            imageUrl: widget.question.imageUrl,
+            height: 200,
+            width: double.infinity,
+            fit: BoxFit.contain,
             borderRadius: AppBorders.borderRadiusMd,
-            child: Image.network(
-              widget.question.imageUrl,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const SizedBox(
-                  height: 200,
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 200,
-                color: AppColors.muted,
-                child: const Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    size: 48,
-                    color: AppColors.mutedForeground,
-                  ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
