@@ -99,10 +99,9 @@ class TimetableCubit extends Cubit<TimetableState> {
     }
 
     final updatedGroups = [...state.groups]..removeAt(index);
-    final newSelectedIndex =
-        state.selectedGroupIndex >= updatedGroups.length
-            ? 0
-            : state.selectedGroupIndex;
+    final newSelectedIndex = state.selectedGroupIndex >= updatedGroups.length
+        ? 0
+        : state.selectedGroupIndex;
     emit(
       state.copyWith(
         groups: updatedGroups,
@@ -116,12 +115,7 @@ class TimetableCubit extends Cubit<TimetableState> {
   void addEntry(TimetableEntryEntity entry) {
     final error = validateSubjectName(entry.subject);
     if (error != null) {
-      emit(
-        state.copyWith(
-          status: TimetableStatus.error,
-          errorMessage: error,
-        ),
-      );
+      emit(state.copyWith(status: TimetableStatus.error, errorMessage: error));
       return;
     }
 
@@ -147,12 +141,7 @@ class TimetableCubit extends Cubit<TimetableState> {
   void editEntry(TimetableEntryEntity entry) {
     final error = validateSubjectName(entry.subject);
     if (error != null) {
-      emit(
-        state.copyWith(
-          status: TimetableStatus.error,
-          errorMessage: error,
-        ),
-      );
+      emit(state.copyWith(status: TimetableStatus.error, errorMessage: error));
       return;
     }
 
@@ -179,8 +168,9 @@ class TimetableCubit extends Cubit<TimetableState> {
 
   void deleteEntry(String entryId) {
     final currentGroup = state.groups[state.selectedGroupIndex];
-    final updatedEntries =
-        currentGroup.entries.where((e) => e.id != entryId).toList();
+    final updatedEntries = currentGroup.entries
+        .where((e) => e.id != entryId)
+        .toList();
     final updatedGroup = TimetableGroupEntity(
       id: currentGroup.id,
       name: currentGroup.name,
@@ -188,12 +178,7 @@ class TimetableCubit extends Cubit<TimetableState> {
     );
     final updatedGroups = [...state.groups];
     updatedGroups[state.selectedGroupIndex] = updatedGroup;
-    emit(
-      state.copyWith(
-        groups: updatedGroups,
-        status: TimetableStatus.loaded,
-      ),
-    );
+    emit(state.copyWith(groups: updatedGroups, status: TimetableStatus.loaded));
     _saveGroups();
   }
 
@@ -206,6 +191,10 @@ class TimetableCubit extends Cubit<TimetableState> {
   }
 
   void setEditingEntry(TimetableEntryEntity? entry) {
+    // Reset to null first so re-selecting the same entry still triggers the listener.
+    if (entry != null && state.editingEntry != null) {
+      emit(state.copyWith(editingEntry: null));
+    }
     emit(state.copyWith(editingEntry: entry));
   }
 

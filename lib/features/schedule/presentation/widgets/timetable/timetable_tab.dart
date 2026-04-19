@@ -16,6 +16,29 @@ import 'timetable_edit_modal.dart';
 class TimetableTab extends StatelessWidget {
   const TimetableTab({super.key});
 
+  void _showAddModal(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppBorders.radiusLg),
+        ),
+      ),
+      builder: (modalContext) => BlocProvider.value(
+        value: context.read<TimetableCubit>(),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+          ),
+          child: const SingleChildScrollView(
+            child: TimetableAddForm(),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TimetableCubit, TimetableState>(
@@ -71,14 +94,9 @@ class TimetableTab extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: cubit.toggleAddForm,
-                icon: Icon(
-                  state.isAddingEntry ? LucideIcons.x : LucideIcons.plus,
-                  size: 16,
-                ),
-                label: Text(
-                  state.isAddingEntry ? 'Đóng' : 'Thêm môn học',
-                ),
+                onPressed: () => _showAddModal(context),
+                icon: const Icon(LucideIcons.plus, size: 16),
+                label: const Text('Thêm môn học'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
@@ -87,11 +105,6 @@ class TimetableTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.smMd),
-            // Add form
-            if (state.isAddingEntry) ...[
-              const TimetableAddForm(),
-              const SizedBox(height: AppSpacing.md),
-            ],
             // Content
             Expanded(
               child: entries.isEmpty

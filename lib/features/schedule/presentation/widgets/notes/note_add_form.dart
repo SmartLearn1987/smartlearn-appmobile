@@ -52,6 +52,7 @@ class _NoteAddFormState extends State<NoteAddForm> {
     );
 
     context.read<NotesCubit>().addNote(note);
+    Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Đã thêm ghi chú'),
@@ -118,8 +119,7 @@ class _NoteAddFormState extends State<NoteAddForm> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () =>
-                        context.read<NotesCubit>().toggleAddForm(),
+                    onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       shape: AppBorders.shapeSm,
                     ),

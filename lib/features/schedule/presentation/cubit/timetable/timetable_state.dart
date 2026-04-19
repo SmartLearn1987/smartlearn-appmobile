@@ -1,5 +1,7 @@
 part of 'timetable_cubit.dart';
 
+const _sentinel = Object();
+
 enum TimetableStatus { initial, loaded, error }
 
 class TimetableState extends Equatable {
@@ -25,7 +27,7 @@ class TimetableState extends Equatable {
     List<TimetableGroupEntity>? groups,
     int? selectedGroupIndex,
     bool? isAddingEntry,
-    TimetableEntryEntity? editingEntry,
+    Object? editingEntry = _sentinel,
     bool? isAddingGroup,
     TimetableStatus? status,
     String? errorMessage,
@@ -34,7 +36,9 @@ class TimetableState extends Equatable {
         groups: groups ?? this.groups,
         selectedGroupIndex: selectedGroupIndex ?? this.selectedGroupIndex,
         isAddingEntry: isAddingEntry ?? this.isAddingEntry,
-        editingEntry: editingEntry ?? this.editingEntry,
+        editingEntry: editingEntry == _sentinel
+            ? this.editingEntry
+            : editingEntry as TimetableEntryEntity?,
         isAddingGroup: isAddingGroup ?? this.isAddingGroup,
         status: status ?? this.status,
         errorMessage: errorMessage,

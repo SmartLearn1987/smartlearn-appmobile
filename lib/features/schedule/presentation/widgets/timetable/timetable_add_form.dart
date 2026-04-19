@@ -76,6 +76,7 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
     );
 
     context.read<TimetableCubit>().addEntry(entry);
+    Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Đã thêm môn học'),
@@ -182,8 +183,7 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () =>
-                        context.read<TimetableCubit>().toggleAddForm(),
+                    onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       shape: AppBorders.shapeSm,
                     ),

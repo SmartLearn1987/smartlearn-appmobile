@@ -18,6 +18,29 @@ import 'task_item_card.dart';
 class TasksTab extends StatelessWidget {
   const TasksTab({super.key});
 
+  void _showAddModal(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppBorders.radiusLg),
+        ),
+      ),
+      builder: (modalContext) => BlocProvider.value(
+        value: context.read<TasksCubit>(),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+          ),
+          child: const SingleChildScrollView(
+            child: TaskAddForm(),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TasksCubit, TasksState>(
@@ -93,14 +116,9 @@ class TasksTab extends StatelessWidget {
                   ),
                 ),
                 OutlinedButton.icon(
-                  onPressed: cubit.toggleAddForm,
-                  icon: Icon(
-                    state.isAddingTask ? LucideIcons.x : LucideIcons.plus,
-                    size: 16,
-                  ),
-                  label: Text(
-                    state.isAddingTask ? 'Đóng' : 'Thêm nhiệm vụ',
-                  ),
+                  onPressed: () => _showAddModal(context),
+                  icon: const Icon(LucideIcons.plus, size: 16),
+                  label: const Text('Thêm nhiệm vụ'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -116,11 +134,6 @@ class TasksTab extends StatelessWidget {
               onFilterChanged: cubit.changeFilter,
             ),
             const SizedBox(height: AppSpacing.smMd),
-            // Add form
-            if (state.isAddingTask) ...[
-              const TaskAddForm(),
-              const SizedBox(height: AppSpacing.md),
-            ],
             // Content
             Expanded(
               child: sorted.isEmpty

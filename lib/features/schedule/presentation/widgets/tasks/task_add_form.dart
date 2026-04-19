@@ -75,6 +75,7 @@ class _TaskAddFormState extends State<TaskAddForm> {
     );
 
     context.read<TasksCubit>().addTask(task);
+    Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Đã thêm nhiệm vụ'),
@@ -165,8 +166,7 @@ class _TaskAddFormState extends State<TaskAddForm> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () =>
-                        context.read<TasksCubit>().toggleAddForm(),
+                    onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       shape: AppBorders.shapeSm,
                     ),
