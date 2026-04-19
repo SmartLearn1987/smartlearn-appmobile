@@ -123,7 +123,7 @@ class _LoadedContent extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () =>
-                    context.go(RoutePaths.examPlay(detail.id), extra: detail),
+                    context.push(RoutePaths.examPlay(detail.id), extra: detail),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.primaryForeground,

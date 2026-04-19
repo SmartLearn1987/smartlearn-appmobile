@@ -114,7 +114,7 @@ class _QuizletCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(RoutePaths.quizletDetail(quizlet.id)),
+      onTap: () => context.push(RoutePaths.quizletDetail(quizlet.id)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,

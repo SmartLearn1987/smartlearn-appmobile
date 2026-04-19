@@ -115,7 +115,7 @@ class _ExamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(RoutePaths.examDetail(exam.id)),
+      onTap: () => context.push(RoutePaths.examDetail(exam.id)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,
