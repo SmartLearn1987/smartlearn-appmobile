@@ -4,8 +4,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../../core/usecase/usecase.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../../home/domain/usecases/get_user_subjects.dart';
 import '../../../domain/usecases/get_curricula_by_subject_use_case.dart';
-import '../../../domain/usecases/get_subjects_use_case.dart';
 import '../../helpers/subject_count_helper.dart';
 import '../../models/subject_with_count.dart';
 
@@ -14,16 +14,24 @@ part 'subjects_list_state.dart';
 
 @injectable
 class SubjectsListBloc extends Bloc<SubjectsListEvent, SubjectsListState> {
-  final GetSubjectsUseCase _getSubjects;
+  final GetUserSubjectsUseCase _getUserSubjects;
   final GetCurriculaBySubjectUseCase _getCurricula;
   final AuthBloc _authBloc;
 
   SubjectsListBloc(
-    this._getSubjects,
+    this._getUserSubjects,
     this._getCurricula,
     this._authBloc,
   ) : super(const SubjectsListInitial()) {
     on<SubjectsListLoadRequested>(_onLoadRequested);
+    on<SubjectsListRefreshRequested>(_onRefreshRequested);
+  }
+
+  Future<void> _onRefreshRequested(
+    SubjectsListRefreshRequested event,
+    Emitter<SubjectsListState> emit,
+  ) async {
+    await _onLoadRequested(const SubjectsListLoadRequested(), emit);
   }
 
   Future<void> _onLoadRequested(
@@ -33,7 +41,7 @@ class SubjectsListBloc extends Bloc<SubjectsListEvent, SubjectsListState> {
     emit(const SubjectsListLoading());
 
     final results = await Future.wait([
-      _getSubjects(const NoParams()),
+      _getUserSubjects(const NoParams()),
       _getCurricula(''),
     ]);
 

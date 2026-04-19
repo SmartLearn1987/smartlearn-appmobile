@@ -10,3 +10,8 @@ sealed class SubjectsListEvent extends Equatable {
 final class SubjectsListLoadRequested extends SubjectsListEvent {
   const SubjectsListLoadRequested();
 }
+
+/// Dispatched after saving user-subjects to reload the list.
+final class SubjectsListRefreshRequested extends SubjectsListEvent {
+  const SubjectsListRefreshRequested();
+}

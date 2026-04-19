@@ -17,8 +17,9 @@ class QuizletDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<QuizletDetailBloc>(
-      create: (_) => getIt<QuizletDetailBloc>()
-        ..add(LoadQuizletDetail(quizletId: quizletId)),
+      create: (_) =>
+          getIt<QuizletDetailBloc>()
+            ..add(LoadQuizletDetail(quizletId: quizletId)),
       child: const _QuizletDetailView(),
     );
   }
@@ -57,11 +58,10 @@ class _QuizletDetailView extends StatelessWidget {
             curr is QuizletDetailError,
         builder: (context, state) => switch (state) {
           QuizletDetailLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: CircularProgressIndicator(),
+          ),
           QuizletDetailLoaded() => _LoadedContent(state: state),
-          QuizletDetailError(:final message) =>
-            _ErrorContent(message: message),
+          QuizletDetailError(:final message) => _ErrorContent(message: message),
           _ => const SizedBox.shrink(),
         },
       ),
@@ -80,9 +80,7 @@ class _LoadedContent extends StatelessWidget {
     final currentIndex = state.currentIndex;
     final isFirst = currentIndex == 0;
     final isLast = currentIndex == terms.length - 1;
-    final progress = terms.isNotEmpty
-        ? (currentIndex + 1) / terms.length
-        : 0.0;
+    final progress = terms.isNotEmpty ? (currentIndex + 1) / terms.length : 0.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
@@ -95,8 +93,9 @@ class _LoadedContent extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.muted,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
               minHeight: AppSpacing.xs,
             ),
           ),
@@ -115,21 +114,16 @@ class _LoadedContent extends StatelessWidget {
               onHorizontalDragEnd: (details) {
                 final velocity = details.primaryVelocity ?? 0;
                 if (velocity < -200 && !isLast) {
-                  context
-                      .read<QuizletDetailBloc>()
-                      .add(const NextCard());
+                  context.read<QuizletDetailBloc>().add(const NextCard());
                 } else if (velocity > 200 && !isFirst) {
-                  context
-                      .read<QuizletDetailBloc>()
-                      .add(const PreviousCard());
+                  context.read<QuizletDetailBloc>().add(const PreviousCard());
                 }
               },
               child: FlashcardWidget(
                 term: terms[currentIndex],
                 isFlipped: state.isFlipped,
-                onFlip: () => context
-                    .read<QuizletDetailBloc>()
-                    .add(const FlipCard()),
+                onFlip: () =>
+                    context.read<QuizletDetailBloc>().add(const FlipCard()),
               ),
             ),
           ),
@@ -141,16 +135,17 @@ class _LoadedContent extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: isFirst
                       ? null
-                      : () => context
-                            .read<QuizletDetailBloc>()
-                            .add(const PreviousCard()),
+                      : () => context.read<QuizletDetailBloc>().add(
+                          const PreviousCard(),
+                        ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.muted,
                     foregroundColor: AppColors.foreground,
-                    disabledBackgroundColor:
-                        AppColors.muted.withValues(alpha: 0.5),
-                    disabledForegroundColor:
-                        AppColors.mutedForeground.withValues(alpha: 0.5),
+                    disabledBackgroundColor: AppColors.muted.withValues(
+                      alpha: 0.5,
+                    ),
+                    disabledForegroundColor: AppColors.mutedForeground
+                        .withValues(alpha: 0.5),
                     textStyle: AppTypography.buttonMedium,
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.smMd,
@@ -164,16 +159,17 @@ class _LoadedContent extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: isLast
                       ? null
-                      : () => context
-                            .read<QuizletDetailBloc>()
-                            .add(const NextCard()),
+                      : () => context.read<QuizletDetailBloc>().add(
+                          const NextCard(),
+                        ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.primaryForeground,
-                    disabledBackgroundColor:
-                        AppColors.primary.withValues(alpha: 0.5),
-                    disabledForegroundColor:
-                        AppColors.primaryForeground.withValues(alpha: 0.5),
+                    disabledBackgroundColor: AppColors.primary.withValues(
+                      alpha: 0.5,
+                    ),
+                    disabledForegroundColor: AppColors.primaryForeground
+                        .withValues(alpha: 0.5),
                     textStyle: AppTypography.buttonMedium,
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.smMd,
@@ -218,8 +214,8 @@ class _ErrorContent extends StatelessWidget {
                     .findAncestorWidgetOfExactType<QuizletDetailPage>();
                 if (page != null) {
                   context.read<QuizletDetailBloc>().add(
-                        LoadQuizletDetail(quizletId: page.quizletId),
-                      );
+                    LoadQuizletDetail(quizletId: page.quizletId),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(

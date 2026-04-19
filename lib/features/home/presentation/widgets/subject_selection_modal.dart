@@ -20,20 +20,27 @@ class SubjectSelectionModal extends StatefulWidget {
 
   /// Shows the subject selection bottom sheet.
   ///
+  /// Returns `true` if subjects were saved successfully, `null` otherwise.
   /// [currentSubjectIds] — IDs of subjects already selected by the user
   /// (extracted from [HomeLoaded.subjects]).
-  static Future<void> show(
+  static Future<bool?> show(
     BuildContext context, {
     List<String> currentSubjectIds = const [],
   }) {
-    return showModalBottomSheet<void>(
+    // HomeBloc may not be available (e.g. when opened from SubjectsListPage).
+    final homeBloc = context.read<HomeBloc?>();
+
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<HomeBloc>(),
-        child: SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
-      ),
+      builder: (_) => homeBloc != null
+          ? BlocProvider.value(
+              value: homeBloc,
+              child:
+                  SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
+            )
+          : SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
     );
   }
 
@@ -100,8 +107,13 @@ class _SubjectSelectionModalState extends State<SubjectSelectionModal> {
         AppToast.error(context, failure.message);
       },
       (_) {
-        context.read<HomeBloc>().add(const HomeRefreshSubjects());
-        Navigator.of(context).pop();
+        // Refresh HomeBloc if available in the widget tree.
+        try {
+          context.read<HomeBloc>().add(const HomeRefreshSubjects());
+        } catch (_) {
+          // HomeBloc not in tree (e.g. opened from SubjectsListPage).
+        }
+        Navigator.of(context).pop(true);
       },
     );
   }

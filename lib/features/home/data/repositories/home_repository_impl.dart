@@ -45,9 +45,7 @@ class HomeRepositoryImpl implements HomeRepository {
     List<String> subjectIds,
   ) async {
     try {
-      await remoteDatasource.saveUserSubjects({
-        'subjectIds': subjectIds,
-      });
+      await remoteDatasource.saveUserSubjects({'subject_ids': subjectIds});
       return const Right(null);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));

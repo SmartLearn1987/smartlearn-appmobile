@@ -177,7 +177,7 @@ void main() {
 
       expect(result, equals(const Right(null)));
       verify(
-        () => mockDatasource.saveUserSubjects({'subjectIds': ['s1', 's2']}),
+          () => mockDatasource.saveUserSubjects({'subject_ids': ['s1', 's2']}),
       ).called(1);
     });
 
