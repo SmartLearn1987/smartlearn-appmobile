@@ -5,6 +5,9 @@ import 'package:smart_learn/features/home/data/models/curriculum_model.dart';
 import 'package:smart_learn/features/home/data/models/dictation_model.dart';
 import 'package:smart_learn/features/home/data/models/pictogram_model.dart';
 import 'package:smart_learn/features/home/data/models/subject_model.dart';
+import 'package:smart_learn/features/home/data/models/nnc_question_model.dart';
+import 'package:smart_learn/features/home/data/models/proverb_model.dart';
+import 'package:smart_learn/features/home/data/models/vtv_question_model.dart';
 
 part 'home_remote_datasource.g.dart';
 
@@ -36,5 +39,23 @@ abstract class HomeRemoteDatasource {
   Future<DictationModel> getRandomDictation(
     @Query('level') String? level,
     @Query('language') String? language,
+  );
+
+  @GET('/vuatiengviet/play')
+  Future<List<VTVQuestionModel>> getVTVQuestions(
+    @Query('level') String? level,
+    @Query('limit') int? limit,
+  );
+
+  @GET('/nhanhnhuchop/play')
+  Future<List<NNCQuestionModel>> getNNCQuestions(
+    @Query('level') String? level,
+    @Query('limit') int? limit,
+  );
+
+  @GET('/proverbs/play')
+  Future<List<ProverbModel>> getProverbQuestions(
+    @Query('level') String? level,
+    @Query('limit') int? limit,
   );
 }

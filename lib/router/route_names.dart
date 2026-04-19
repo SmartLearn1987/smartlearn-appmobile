@@ -16,6 +16,9 @@ abstract final class RoutePaths {
   static const pictogramGame = '/pictogram-game';
   static const pictogramPlay = '/games/pictogram/play';
   static const dictationPlay = '/games/dictation/play';
+  static const vtvPlay = '/games/vtv/play';
+  static const nncPlay = '/games/nhanh-nhu-chop/play';
+  static const cdtnPlay = '/games/ca-dao-tuc-ngu/play';
 
   // ─── Path templates (for GoRoute definitions) ───
   static const quizletDetailTemplate = '/quizlet/:id';
@@ -66,4 +69,7 @@ abstract final class RouteNames {
   static const pictogramGame = 'pictogramGame';
   static const pictogramPlay = 'pictogramPlay';
   static const dictationPlay = 'dictationPlay';
+  static const vtvPlay = 'vtvPlay';
+  static const nncPlay = 'nncPlay';
+  static const cdtnPlay = 'cdtnPlay';
 }

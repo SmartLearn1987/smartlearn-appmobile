@@ -7,7 +7,10 @@ import 'package:smart_learn/features/home/data/datasources/home_remote_datasourc
 import 'package:smart_learn/features/home/domain/entities/curriculum_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/dictation_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/proverb_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/nnc_question_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/vtv_question_entity.dart';
 import 'package:smart_learn/features/home/domain/repositories/home_repository.dart';
 
 @LazySingleton(as: HomeRepository)
@@ -88,6 +91,51 @@ class HomeRepositoryImpl implements HomeRepository {
   }) async {
     try {
       final result = await remoteDatasource.getRandomDictation(level, language);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<VTVQuestionEntity>>> getVTVQuestions({
+    String? level,
+    int? limit,
+  }) async {
+    try {
+      final result = await remoteDatasource.getVTVQuestions(level, limit);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<NNCQuestionEntity>>> getNNCQuestions({
+    String? level,
+    int? limit,
+  }) async {
+    try {
+      final result = await remoteDatasource.getNNCQuestions(level, limit);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ProverbEntity>>> getProverbQuestions({
+    String? level,
+    int? limit,
+  }) async {
+    try {
+      final result = await remoteDatasource.getProverbQuestions(level, limit);
       return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));

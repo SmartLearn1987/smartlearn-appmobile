@@ -70,11 +70,15 @@ import '../../features/home/data/repositories/home_repository_impl.dart'
 import '../../features/home/domain/repositories/home_repository.dart' as _i0;
 import '../../features/home/domain/usecases/get_all_subjects.dart' as _i376;
 import '../../features/home/domain/usecases/get_curricula.dart' as _i93;
+import '../../features/home/domain/usecases/get_nnc_questions.dart' as _i146;
 import '../../features/home/domain/usecases/get_pictogram_questions.dart'
     as _i654;
+import '../../features/home/domain/usecases/get_proverb_questions.dart'
+    as _i329;
 import '../../features/home/domain/usecases/get_random_dictation.dart' as _i900;
 import '../../features/home/domain/usecases/get_subjects.dart' as _i185;
 import '../../features/home/domain/usecases/get_user_subjects.dart' as _i839;
+import '../../features/home/domain/usecases/get_vtv_questions.dart' as _i182;
 import '../../features/home/domain/usecases/save_user_subjects.dart' as _i541;
 import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
@@ -325,8 +329,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i93.GetCurriculaUseCase>(
       () => _i93.GetCurriculaUseCase(gh<_i0.HomeRepository>()),
     );
+    gh.lazySingleton<_i146.GetNNCQuestionsUseCase>(
+      () => _i146.GetNNCQuestionsUseCase(gh<_i0.HomeRepository>()),
+    );
     gh.lazySingleton<_i654.GetPictogramQuestionsUseCase>(
       () => _i654.GetPictogramQuestionsUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.lazySingleton<_i329.GetProverbQuestionsUseCase>(
+      () => _i329.GetProverbQuestionsUseCase(gh<_i0.HomeRepository>()),
     );
     gh.lazySingleton<_i900.GetRandomDictationUseCase>(
       () => _i900.GetRandomDictationUseCase(gh<_i0.HomeRepository>()),
@@ -336,6 +346,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i839.GetUserSubjectsUseCase>(
       () => _i839.GetUserSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.lazySingleton<_i182.GetVTVQuestionsUseCase>(
+      () => _i182.GetVTVQuestionsUseCase(gh<_i0.HomeRepository>()),
     );
     gh.lazySingleton<_i541.SaveUserSubjectsUseCase>(
       () => _i541.SaveUserSubjectsUseCase(gh<_i0.HomeRepository>()),

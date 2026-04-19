@@ -22,7 +22,13 @@ import 'package:smart_learn/features/exam/presentation/pages/exam_detail_page.da
 import 'package:smart_learn/features/exam/presentation/pages/exam_list_page.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_play_page.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_result_page.dart';
+import 'package:smart_learn/features/home/domain/entities/vtv_question_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/nnc_question_entity.dart';
 import 'package:smart_learn/features/pictogram_play/presentation/pages/pictogram_play_screen.dart';
+import 'package:smart_learn/features/vtv_play/presentation/pages/vtv_play_screen.dart';
+import 'package:smart_learn/features/nnc_play/presentation/pages/nnc_play_screen.dart';
+import 'package:smart_learn/features/home/domain/entities/proverb_entity.dart';
+import 'package:smart_learn/features/cdtn_play/presentation/pages/cdtn_play_screen.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
@@ -106,6 +112,66 @@ class AppRouter {
               final questions = extra['questions'] as List<PictogramEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
               return PictogramPlayScreen(
+                questions: questions,
+                timeInMinutes: timeInMinutes,
+              );
+            } catch (_) {
+              return const _RedirectToHome();
+            }
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.vtvPlay,
+          name: RouteNames.vtvPlay,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra == null) return const _RedirectToHome();
+            try {
+              final questions =
+                  extra['questions'] as List<VTVQuestionEntity>;
+              final timeInMinutes = extra['timeInMinutes'] as int;
+              return VTVPlayScreen(
+                questions: questions,
+                timeInMinutes: timeInMinutes,
+              );
+            } catch (_) {
+              return const _RedirectToHome();
+            }
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.nncPlay,
+          name: RouteNames.nncPlay,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra == null) return const _RedirectToHome();
+            try {
+              final questions =
+                  extra['questions'] as List<NNCQuestionEntity>;
+              final timeInMinutes = extra['timeInMinutes'] as int;
+              return NNCPlayScreen(
+                questions: questions,
+                timeInMinutes: timeInMinutes,
+              );
+            } catch (_) {
+              return const _RedirectToHome();
+            }
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.cdtnPlay,
+          name: RouteNames.cdtnPlay,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra == null) return const _RedirectToHome();
+            try {
+              final questions =
+                  extra['questions'] as List<ProverbEntity>;
+              final timeInMinutes = extra['timeInMinutes'] as int;
+              return CDTNPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
               );

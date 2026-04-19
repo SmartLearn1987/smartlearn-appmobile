@@ -8,6 +8,9 @@ import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/presentation/widgets/dictation_selection_modal.dart';
 import 'package:smart_learn/features/home/presentation/widgets/game_card_widget.dart';
 import 'package:smart_learn/features/home/presentation/widgets/pictogram_selection_modal.dart';
+import 'package:smart_learn/features/home/presentation/widgets/vtv_selection_modal.dart';
+import 'package:smart_learn/features/home/presentation/widgets/cdtn_selection_modal.dart';
+import 'package:smart_learn/features/home/presentation/widgets/nnc_selection_modal.dart';
 
 class GameTab extends StatelessWidget {
   const GameTab({super.key});
@@ -23,7 +26,7 @@ class GameTab extends StatelessWidget {
       title: 'Vua tiếng Việt',
       description: 'Ông vua từ vựng và ngữ pháp tiếng Việt',
       image: AppAssets.gamevuatiengviet,
-      isAvailable: false,
+      isAvailable: true,
     ),
     (
       title: 'Chép chính tả',
@@ -43,14 +46,14 @@ class GameTab extends StatelessWidget {
       description:
           'Tìm hiểu kho tàng trí tuệ dân gian qua các câu ca dao truyền thống',
       image: AppAssets.gamecadao,
-      isAvailable: false,
+      isAvailable: true,
     ),
     (
       title: 'Nhanh như chớp',
       description:
           'Thử thách phản xạ và kiến thức cực nhanh với các câu hỏi hóc búa',
       image: AppAssets.gamenhanhnhuchop,
-      isAvailable: false,
+      isAvailable: true,
     ),
   ];
 
@@ -131,12 +134,33 @@ class GameTab extends StatelessWidget {
           backgroundColor: Colors.transparent,
           builder: (_) => const PictogramSelectionModal(),
         );
+      case 1: // Vua tiếng Việt
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const VTVSelectionModal(),
+        );
       case 2: // Chép chính tả
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (_) => const DictationSelectionModal(),
+        );
+      case 4: // Ca dao tục ngữ
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const CDTNSelectionModal(),
+        );
+      case 5: // Nhanh như chớp
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const NNCSelectionModal(),
         );
     }
   }
