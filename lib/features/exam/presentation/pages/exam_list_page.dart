@@ -39,67 +39,65 @@ class _ExamListView extends StatelessWidget {
       ),
       body: BlocBuilder<ExamBloc, ExamState>(
         builder: (context, state) => switch (state) {
-          ExamLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
-          ExamLoaded(:final exams) => exams.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: AppSpacing.paddingMd,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.quiz_outlined,
-                          size: AppSpacing.huge,
-                          color: AppColors.mutedForeground,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Chưa có bài trắc nghiệm nào',
-                          style: AppTypography.bodyLarge.copyWith(
+          ExamLoading() => const Center(child: CircularProgressIndicator()),
+          ExamLoaded(:final exams) =>
+            exams.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: AppSpacing.paddingMd,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.quiz_outlined,
+                            size: AppSpacing.huge,
                             color: AppColors.mutedForeground,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.mdLg),
-                  itemCount: exams.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.smMd),
-                  itemBuilder: (context, index) {
-                    final exam = exams[index];
-                    return _ExamCard(exam: exam);
-                  },
-                ),
-          ExamError(:final message) => Center(
-              child: Padding(
-                padding: AppSpacing.paddingMd,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      message,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.mutedForeground,
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            'Chưa có bài trắc nghiệm nào',
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<ExamBloc>()
-                          .add(const RefreshExams()),
-                      child: const Text('Thử lại'),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.mdLg),
+                    itemCount: exams.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.smMd),
+                    itemBuilder: (context, index) {
+                      final exam = exams[index];
+                      return _ExamCard(exam: exam);
+                    },
+                  ),
+          ExamError(:final message) => Center(
+            child: Padding(
+              padding: AppSpacing.paddingMd,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    message,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.mutedForeground,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.read<ExamBloc>().add(const RefreshExams()),
+                    child: const Text('Thử lại'),
+                  ),
+                ],
               ),
             ),
+          ),
           _ => const SizedBox.shrink(),
         },
       ),
@@ -137,9 +135,7 @@ class _ExamCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               exam.subjectName,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(
@@ -197,7 +193,7 @@ class _ExamCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
-                  '${exam.averageScore.toStringAsFixed(1)} điểm TB',
+                  '${exam.averageScore != null ? exam.averageScore!.toStringAsFixed(1) : "N/A"} điểm TB',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.mutedForeground,
                   ),

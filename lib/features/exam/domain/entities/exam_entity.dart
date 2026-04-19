@@ -6,8 +6,8 @@ class ExamEntity extends Equatable {
   final String? description;
   final int duration;
   final String subjectName;
-  final int questionCount;
-  final double averageScore;
+  final String questionCount;
+  final double? averageScore;
   final String authorName;
   final bool isPublic;
   final String createdAt;
@@ -19,7 +19,7 @@ class ExamEntity extends Equatable {
     required this.duration,
     required this.subjectName,
     required this.questionCount,
-    required this.averageScore,
+    this.averageScore,
     required this.authorName,
     required this.isPublic,
     required this.createdAt,

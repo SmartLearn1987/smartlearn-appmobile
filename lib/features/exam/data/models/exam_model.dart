@@ -12,7 +12,7 @@ class ExamModel extends ExamEntity {
     required super.duration,
     required super.subjectName,
     required super.questionCount,
-    required super.averageScore,
+    super.averageScore,
     required super.authorName,
     required super.isPublic,
     required super.createdAt,
