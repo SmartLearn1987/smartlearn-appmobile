@@ -11,6 +11,7 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 class RegisterFormCard extends StatefulWidget {
@@ -28,15 +29,7 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  late String _selectedEducationLevel = _educationLevels.first;
-
-  static const _educationLevels = [
-    'Tiểu học',
-    'Trung học cơ sở',
-    'Trung học phổ thông',
-    'Đại học/Cao đẳng',
-    'Khác',
-  ];
+  late EducationLevel _selectedEducationLevel = EducationLevel.values.first;
 
   @override
   void dispose() {
@@ -54,7 +47,7 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
           username: _usernameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          educationLevel: _selectedEducationLevel,
+          educationLevel: _selectedEducationLevel.label,
         ),
       );
     }
@@ -166,7 +159,7 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<EducationLevel>(
           initialValue: _selectedEducationLevel,
           decoration: InputDecoration(
             hintText: 'Chọn cấp học',
@@ -209,9 +202,12 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
             ),
           ),
           style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
-          items: _educationLevels
+          items: EducationLevel.values
               .map(
-                (level) => DropdownMenuItem(value: level, child: Text(level)),
+                (level) => DropdownMenuItem(
+                  value: level,
+                  child: Text(level.label),
+                ),
               )
               .toList(),
           onChanged: (value) => value != null

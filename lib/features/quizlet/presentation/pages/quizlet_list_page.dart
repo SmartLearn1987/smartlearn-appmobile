@@ -39,67 +39,66 @@ class _QuizletListView extends StatelessWidget {
       ),
       body: BlocBuilder<QuizletBloc, QuizletState>(
         builder: (context, state) => switch (state) {
-          QuizletLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
-          QuizletLoaded(:final quizlets) => quizlets.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: AppSpacing.paddingMd,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.style_outlined,
-                          size: AppSpacing.huge,
-                          color: AppColors.mutedForeground,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Chưa có bộ flashcard nào',
-                          style: AppTypography.bodyLarge.copyWith(
+          QuizletLoading() => const Center(child: CircularProgressIndicator()),
+          QuizletLoaded(:final quizlets) =>
+            quizlets.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: AppSpacing.paddingMd,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.style_outlined,
+                            size: AppSpacing.huge,
                             color: AppColors.mutedForeground,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.mdLg),
-                  itemCount: quizlets.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.smMd),
-                  itemBuilder: (context, index) {
-                    final quizlet = quizlets[index];
-                    return _QuizletCard(quizlet: quizlet);
-                  },
-                ),
-          QuizletError(:final message) => Center(
-              child: Padding(
-                padding: AppSpacing.paddingMd,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      message,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.mutedForeground,
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            'Chưa có bộ flashcard nào',
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<QuizletBloc>()
-                          .add(const RefreshQuizlets()),
-                      child: const Text('Thử lại'),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.mdLg),
+                    itemCount: quizlets.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.smMd),
+                    itemBuilder: (context, index) {
+                      final quizlet = quizlets[index];
+                      return _QuizletCard(quizlet: quizlet);
+                    },
+                  ),
+          QuizletError(:final message) => Center(
+            child: Padding(
+              padding: AppSpacing.paddingMd,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    message,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.mutedForeground,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ElevatedButton(
+                    onPressed: () => context.read<QuizletBloc>().add(
+                      const RefreshQuizlets(),
+                    ),
+                    child: const Text('Thử lại'),
+                  ),
+                ],
               ),
             ),
+          ),
           _ => const SizedBox.shrink(),
         },
       ),
@@ -136,10 +135,8 @@ class _QuizletCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              quizlet.subjectName,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-              ),
+              quizlet.subjectName ?? '',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(

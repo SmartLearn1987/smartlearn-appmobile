@@ -14,7 +14,7 @@ class QuizletDetailModel extends QuizletDetailEntity {
     required super.id,
     required super.title,
     super.description,
-    required super.subjectName,
+    super.subjectName,
     required this.terms,
   }) : super(terms: terms);
 

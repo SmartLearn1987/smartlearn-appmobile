@@ -5,7 +5,7 @@ import 'package:smart_learn/features/subjects/presentation/models/subject_with_c
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/usecases/get_curricula.dart';
-import '../../domain/usecases/get_subjects.dart';
+import '../../domain/usecases/get_user_subjects.dart';
 import '../helpers/subject_count_helper.dart';
 import '../../../../core/usecase/usecase.dart';
 
@@ -14,13 +14,21 @@ part 'home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final GetSubjectsUseCase _getSubjects;
+  final GetUserSubjectsUseCase _getUserSubjects;
   final GetCurriculaUseCase _getCurricula;
   final AuthBloc _authBloc;
 
-  HomeBloc(this._getSubjects, this._getCurricula, this._authBloc)
+  HomeBloc(this._getUserSubjects, this._getCurricula, this._authBloc)
     : super(const HomeInitial()) {
     on<HomeLoadSubjects>(_onLoadSubjects);
+    on<HomeRefreshSubjects>(_onRefreshSubjects);
+  }
+
+  Future<void> _onRefreshSubjects(
+    HomeRefreshSubjects event,
+    Emitter<HomeState> emit,
+  ) async {
+    await _onLoadSubjects(const HomeLoadSubjects(), emit);
   }
 
   Future<void> _onLoadSubjects(
@@ -30,7 +38,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(const HomeLoading());
 
     final results = await Future.wait([
-      _getSubjects(const NoParams()),
+      _getUserSubjects(const NoParams()),
       _getCurricula(const NoParams()),
     ]);
 

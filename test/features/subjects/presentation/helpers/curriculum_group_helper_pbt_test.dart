@@ -17,7 +17,7 @@ const _expectedOrder = [
   '🏫 Trung học cơ sở',
   '🏫 Trung học Phổ Thông',
   '🎓 Đại Học / Cao Đẳng',
-  '✨ Khác',
+  '📝 Luyện thi chứng chỉ',
   'Chưa phân loại',
 ];
 

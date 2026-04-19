@@ -8,8 +8,8 @@ class QuizletModel extends QuizletEntity {
   const QuizletModel({
     required super.id,
     required super.title,
-    required super.subjectName,
-    required super.educationLevel,
+    super.subjectName,
+    super.educationLevel,
     required super.isPublic,
     required super.userId,
     required super.termCount,

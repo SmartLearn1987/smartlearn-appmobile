@@ -6,14 +6,14 @@ class QuizletDetailEntity extends Equatable {
   final String id;
   final String title;
   final String? description;
-  final String subjectName;
+  final String? subjectName;
   final List<QuizletTermEntity> terms;
 
   const QuizletDetailEntity({
     required this.id,
     required this.title,
     this.description,
-    required this.subjectName,
+    this.subjectName,
     required this.terms,
   });
 

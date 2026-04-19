@@ -4,9 +4,10 @@ class AppAssets {
   static const String _imagePath = 'assets/images';
 
   // Images
-  static const String game1 = '$_imagePath/game_1.png';
-  static const String game2 = '$_imagePath/game_2.png';
-  static const String game3 = '$_imagePath/game_3.png';
-  static const String game4 = '$_imagePath/game_4.png';
-  static const String game5 = '$_imagePath/game_5.png';
+  static const String gameduoihinhbatchu = '$_imagePath/game_duoihinhbatchu.png';
+  static const String gamevuatiengviet = '$_imagePath/game_vuatiengviet.png';
+  static const String gamecadao = '$_imagePath/game_cadao.png';
+  static const String gamechepchinhta = '$_imagePath/game_chepchinhta.png';
+  static const String gamehoccungbe = '$_imagePath/game_hoccungbe.png';
+  static const String gamenhanhnhuchop = '$_imagePath/game_nhanhnhuchop.png';
 }

@@ -16,31 +16,40 @@ class GameTab extends StatelessWidget {
     (
       title: 'Đuổi hình bắt chữ',
       description: 'Thách thức tư duy với những câu đố hình ảnh đầy thú vị',
-      image: AppAssets.game1,
+      image: AppAssets.gameduoihinhbatchu,
       isAvailable: true,
-    ),
-    (
-      title: 'Ai thông minh hơn',
-      description: 'Kiểm tra kiến thức với các câu hỏi tư duy logic',
-      image: AppAssets.game2,
-      isAvailable: false,
     ),
     (
       title: 'Vua tiếng Việt',
       description: 'Ông vua từ vựng và ngữ pháp tiếng Việt',
-      image: AppAssets.game3,
+      image: AppAssets.gamevuatiengviet,
       isAvailable: false,
     ),
     (
       title: 'Chép chính tả',
       description: 'Luyện nghe và viết tiếng Việt chuẩn xác nhất',
-      image: AppAssets.game4,
+      image: AppAssets.gamechepchinhta,
       isAvailable: true,
     ),
     (
-      title: 'Đố vui',
-      description: 'Giải trí với vô vàn câu đố vui nhộn, hack não',
-      image: AppAssets.game5,
+      title: 'Học cùng bé',
+      description:
+          'Khám phá thế giới tri thức cùng những bài học vui nhộn cho bé',
+      image: AppAssets.gamehoccungbe,
+      isAvailable: false,
+    ),
+    (
+      title: 'Ca dao tục ngữ',
+      description:
+          'Tìm hiểu kho tàng trí tuệ dân gian qua các câu ca dao truyền thống',
+      image: AppAssets.gamecadao,
+      isAvailable: false,
+    ),
+    (
+      title: 'Nhanh như chớp',
+      description:
+          'Thử thách phản xạ và kiến thức cực nhanh với các câu hỏi hóc búa',
+      image: AppAssets.gamenhanhnhuchop,
       isAvailable: false,
     ),
   ];
@@ -115,14 +124,14 @@ class GameTab extends StatelessWidget {
     }
 
     switch (index) {
-      case 0:
+      case 0: // Đuổi hình bắt chữ
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (_) => const PictogramSelectionModal(),
         );
-      case 3:
+      case 2: // Chép chính tả
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,

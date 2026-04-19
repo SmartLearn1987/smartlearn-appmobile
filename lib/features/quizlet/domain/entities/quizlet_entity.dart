@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 class QuizletEntity extends Equatable {
   final String id;
   final String title;
-  final String subjectName;
-  final String educationLevel;
+  final String? subjectName;
+  final String? educationLevel;
   final bool isPublic;
   final String userId;
   final int termCount;
@@ -14,8 +14,8 @@ class QuizletEntity extends Equatable {
   const QuizletEntity({
     required this.id,
     required this.title,
-    required this.subjectName,
-    required this.educationLevel,
+    this.subjectName,
+    this.educationLevel,
     required this.isPublic,
     required this.userId,
     required this.termCount,

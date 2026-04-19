@@ -9,18 +9,21 @@ void main() {
   // **Validates: Requirements 11.4, 11.8**
   group('Property 4: Pomodoro initial remaining equals configured duration',
       () {
-    Glados(any.intInRange(1, 121)).test(
-      'setPomodoroMinutes sets remaining, startPomodoro preserves it',
+    Glados(any.intInRange(1, 121), ExploreConfig(numRuns: 100)).test(
+      'setPomodoroMinutes sets remaining, startPomodoro preserves it, resetPomodoro resets it',
       (minutes) {
         final cubit = FocusCubit();
         addTearDown(cubit.close);
 
+        // Setting pomodoro minutes should update remaining
         cubit.setPomodoroMinutes(minutes);
         expect(
           cubit.state.remaining,
           equals(Duration(minutes: minutes)),
         );
+        expect(cubit.state.pomodoroMinutes, equals(minutes));
 
+        // Starting pomodoro should set remaining to Duration(minutes: minutes)
         cubit.startPomodoro();
         expect(
           cubit.state.remaining,
@@ -28,7 +31,14 @@ void main() {
         );
         expect(cubit.state.isRunning, isTrue);
 
+        // Resetting pomodoro should restore remaining to Duration(minutes: pomodoroMinutes)
         cubit.resetPomodoro();
+        expect(
+          cubit.state.remaining,
+          equals(Duration(minutes: cubit.state.pomodoroMinutes)),
+        );
+        expect(cubit.state.isRunning, isFalse);
+        expect(cubit.state.pomodoroCompleted, isFalse);
       },
     );
   });

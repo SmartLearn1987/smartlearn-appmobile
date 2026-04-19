@@ -9,18 +9,18 @@ import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/domain/entities/curriculum_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_curricula.dart';
-import 'package:smart_learn/features/home/domain/usecases/get_subjects.dart';
+import 'package:smart_learn/features/home/domain/usecases/get_user_subjects.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/subjects/presentation/models/subject_with_count.dart';
 
-class MockGetSubjectsUseCase extends Mock implements GetSubjectsUseCase {}
+class MockGetUserSubjectsUseCase extends Mock implements GetUserSubjectsUseCase {}
 
 class MockGetCurriculaUseCase extends Mock implements GetCurriculaUseCase {}
 
 class MockAuthBloc extends Mock implements AuthBloc {}
 
 void main() {
-  late MockGetSubjectsUseCase mockGetSubjects;
+  late MockGetUserSubjectsUseCase mockGetSubjects;
   late MockGetCurriculaUseCase mockGetCurricula;
   late MockAuthBloc mockAuthBloc;
 
@@ -77,7 +77,7 @@ void main() {
   ];
 
   setUp(() {
-    mockGetSubjects = MockGetSubjectsUseCase();
+    mockGetSubjects = MockGetUserSubjectsUseCase();
     mockGetCurricula = MockGetCurriculaUseCase();
     mockAuthBloc = MockAuthBloc();
   });

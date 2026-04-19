@@ -14,8 +14,14 @@ abstract class HomeRemoteDatasource {
   @factoryMethod
   factory HomeRemoteDatasource(Dio dio) = _HomeRemoteDatasource;
 
+  @GET('/user-subjects')
+  Future<List<SubjectModel>> getUserSubjects();
+
   @GET('/subjects')
-  Future<List<SubjectModel>> getSubjects();
+  Future<List<SubjectModel>> getAllSubjects();
+
+  @POST('/user-subjects')
+  Future<void> saveUserSubjects(@Body() Map<String, dynamic> body);
 
   @GET('/curricula')
   Future<List<CurriculumModel>> getCurricula();

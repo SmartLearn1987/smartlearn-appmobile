@@ -3,14 +3,14 @@ enum EducationLevel {
   secondary,
   highSchool,
   university,
-  other;
+  certification;
 
   int get sortOrder => switch (this) {
         EducationLevel.primary => 0,
         EducationLevel.secondary => 1,
         EducationLevel.highSchool => 2,
         EducationLevel.university => 3,
-        EducationLevel.other => 4,
+        EducationLevel.certification => 4,
       };
 
   String get displayLabel => switch (this) {
@@ -18,7 +18,16 @@ enum EducationLevel {
         EducationLevel.secondary => '🏫 Trung học cơ sở',
         EducationLevel.highSchool => '🏫 Trung học Phổ Thông',
         EducationLevel.university => '🎓 Đại Học / Cao Đẳng',
-        EducationLevel.other => '✨ Khác',
+        EducationLevel.certification => '📝 Luyện thi chứng chỉ',
+      };
+
+  /// Label không có emoji — dùng chung cho form đăng ký và các nơi khác.
+  String get label => switch (this) {
+        EducationLevel.primary => 'Tiểu học',
+        EducationLevel.secondary => 'Trung học cơ sở',
+        EducationLevel.highSchool => 'Trung học phổ thông',
+        EducationLevel.university => 'Đại học/Cao đẳng',
+        EducationLevel.certification => 'Luyện thi chứng chỉ',
       };
 
   String get emoji => switch (this) {
@@ -26,7 +35,7 @@ enum EducationLevel {
         EducationLevel.secondary => '🏫',
         EducationLevel.highSchool => '🏫',
         EducationLevel.university => '🎓',
-        EducationLevel.other => '✨',
+        EducationLevel.certification => '📝',
       };
 
   String toApiValue() => switch (this) {
@@ -34,7 +43,7 @@ enum EducationLevel {
         EducationLevel.secondary => 'secondary',
         EducationLevel.highSchool => 'high_school',
         EducationLevel.university => 'university',
-        EducationLevel.other => 'other',
+        EducationLevel.certification => 'certification',
       };
 
   static EducationLevel? fromApiValue(String? value) => switch (value) {
@@ -42,7 +51,7 @@ enum EducationLevel {
         'secondary' => EducationLevel.secondary,
         'high_school' => EducationLevel.highSchool,
         'university' => EducationLevel.university,
-        'other' => EducationLevel.other,
+        'certification' => EducationLevel.certification,
         _ => null,
       };
 }

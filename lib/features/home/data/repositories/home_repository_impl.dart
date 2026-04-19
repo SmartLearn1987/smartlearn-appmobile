@@ -17,10 +17,38 @@ class HomeRepositoryImpl implements HomeRepository {
   HomeRepositoryImpl(this.remoteDatasource);
 
   @override
-  Future<Either<Failure, List<SubjectEntity>>> getSubjects() async {
+  Future<Either<Failure, List<SubjectEntity>>> getUserSubjects() async {
     try {
-      final result = await remoteDatasource.getSubjects();
+      final result = await remoteDatasource.getUserSubjects();
       return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<SubjectEntity>>> getAllSubjects() async {
+    try {
+      final result = await remoteDatasource.getAllSubjects();
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveUserSubjects(
+    List<String> subjectIds,
+  ) async {
+    try {
+      await remoteDatasource.saveUserSubjects({
+        'subjectIds': subjectIds,
+      });
+      return const Right(null);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {

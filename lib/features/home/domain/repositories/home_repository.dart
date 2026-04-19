@@ -6,7 +6,9 @@ import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart'
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 
 abstract class HomeRepository {
-  Future<Either<Failure, List<SubjectEntity>>> getSubjects();
+  Future<Either<Failure, List<SubjectEntity>>> getUserSubjects();
+  Future<Either<Failure, List<SubjectEntity>>> getAllSubjects();
+  Future<Either<Failure, void>> saveUserSubjects(List<String> subjectIds);
   Future<Either<Failure, List<CurriculumEntity>>> getCurricula();
   Future<Either<Failure, List<PictogramEntity>>> getPictogramQuestions({
     String? level,

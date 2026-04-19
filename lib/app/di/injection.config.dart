@@ -68,11 +68,14 @@ import '../../features/home/data/datasources/home_remote_datasource.dart'
 import '../../features/home/data/repositories/home_repository_impl.dart'
     as _i76;
 import '../../features/home/domain/repositories/home_repository.dart' as _i0;
+import '../../features/home/domain/usecases/get_all_subjects.dart' as _i376;
 import '../../features/home/domain/usecases/get_curricula.dart' as _i93;
 import '../../features/home/domain/usecases/get_pictogram_questions.dart'
     as _i654;
 import '../../features/home/domain/usecases/get_random_dictation.dart' as _i900;
 import '../../features/home/domain/usecases/get_subjects.dart' as _i185;
+import '../../features/home/domain/usecases/get_user_subjects.dart' as _i839;
+import '../../features/home/domain/usecases/save_user_subjects.dart' as _i541;
 import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/home/presentation/bloc/profile/profile_bloc.dart'
@@ -316,6 +319,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i797.AuthBloc>(),
       ),
     );
+    gh.lazySingleton<_i376.GetAllSubjectsUseCase>(
+      () => _i376.GetAllSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
     gh.lazySingleton<_i93.GetCurriculaUseCase>(
       () => _i93.GetCurriculaUseCase(gh<_i0.HomeRepository>()),
     );
@@ -328,6 +334,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i185.GetSubjectsUseCase>(
       () => _i185.GetSubjectsUseCase(gh<_i0.HomeRepository>()),
     );
+    gh.lazySingleton<_i839.GetUserSubjectsUseCase>(
+      () => _i839.GetUserSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.lazySingleton<_i541.SaveUserSubjectsUseCase>(
+      () => _i541.SaveUserSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
     gh.factory<_i518.QuizletDetailBloc>(
       () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
     );
@@ -335,6 +347,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i900.SubjectsListBloc(
         gh<_i181.GetSubjectsUseCase>(),
         gh<_i995.GetCurriculaBySubjectUseCase>(),
+        gh<_i797.AuthBloc>(),
+      ),
+    );
+    gh.factory<_i202.HomeBloc>(
+      () => _i202.HomeBloc(
+        gh<_i839.GetUserSubjectsUseCase>(),
+        gh<_i93.GetCurriculaUseCase>(),
         gh<_i797.AuthBloc>(),
       ),
     );
@@ -351,13 +370,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i638.GetSubjectDetailUseCase>(),
         gh<_i995.GetCurriculaBySubjectUseCase>(),
         gh<_i644.DeleteCurriculumUseCase>(),
-        gh<_i797.AuthBloc>(),
-      ),
-    );
-    gh.factory<_i202.HomeBloc>(
-      () => _i202.HomeBloc(
-        gh<_i185.GetSubjectsUseCase>(),
-        gh<_i93.GetCurriculaUseCase>(),
         gh<_i797.AuthBloc>(),
       ),
     );

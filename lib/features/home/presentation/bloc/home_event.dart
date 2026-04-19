@@ -10,3 +10,8 @@ abstract class HomeEvent extends Equatable {
 class HomeLoadSubjects extends HomeEvent {
   const HomeLoadSubjects();
 }
+
+/// Dispatched after successfully saving user-subjects to reload the list.
+class HomeRefreshSubjects extends HomeEvent {
+  const HomeRefreshSubjects();
+}
