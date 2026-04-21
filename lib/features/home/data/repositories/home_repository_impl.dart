@@ -7,6 +7,8 @@ import 'package:smart_learn/features/home/data/datasources/home_remote_datasourc
 import 'package:smart_learn/features/home/domain/entities/curriculum_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/dictation_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/learning_category_entity.dart';
+import 'package:smart_learn/features/home/domain/entities/learning_question_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/proverb_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/home/domain/entities/nnc_question_entity.dart';
@@ -136,6 +138,33 @@ class HomeRepositoryImpl implements HomeRepository {
   }) async {
     try {
       final result = await remoteDatasource.getProverbQuestions(level, limit);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LearningCategoryEntity>>>
+      getLearningCategories() async {
+    try {
+      final result = await remoteDatasource.getLearningCategories();
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LearningQuestionEntity>>> getLearningQuestions(
+    String categoryId,
+  ) async {
+    try {
+      final result = await remoteDatasource.getLearningQuestions(categoryId);
       return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));

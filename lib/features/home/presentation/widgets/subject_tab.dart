@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
@@ -7,6 +8,7 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/home_subject_grid.dart';
 import 'package:smart_learn/features/home/presentation/widgets/subject_selection_modal.dart';
+import 'package:smart_learn/router/route_names.dart';
 
 class SubjectTab extends StatelessWidget {
   const SubjectTab({super.key});
@@ -101,35 +103,22 @@ class SubjectTab extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                Icon(
-                  LucideIcons.bookOpen,
-                  size: 48,
-                  color: AppColors.mutedForeground.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Bạn chưa chọn môn học nào',
+                  'Bạn chưa chọn môn học nào để đưa vào sổ tay.',
                   style: AppTypography.bodyMedium.copyWith(
                     color: AppColors.mutedForeground,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                ElevatedButton.icon(
-                  onPressed: () => SubjectSelectionModal.show(
-                    context,
-                    currentSubjectIds: const [],
-                  ),
-                  icon: const Icon(LucideIcons.settings, size: 18),
-                  label: const Text('Thiết lập môn học'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    textStyle: AppTypography.buttonLarge,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.smMd,
+                const SizedBox(height: AppSpacing.sm),
+                GestureDetector(
+                  onTap: () => context.go(RoutePaths.subjects),
+                  child: Text(
+                    'Bấm vào đây để cấu hình Thiết định môn học nhé',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.primary,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],

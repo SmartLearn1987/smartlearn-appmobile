@@ -70,6 +70,10 @@ import '../../features/home/data/repositories/home_repository_impl.dart'
 import '../../features/home/domain/repositories/home_repository.dart' as _i0;
 import '../../features/home/domain/usecases/get_all_subjects.dart' as _i376;
 import '../../features/home/domain/usecases/get_curricula.dart' as _i93;
+import '../../features/home/domain/usecases/get_learning_categories.dart'
+    as _i535;
+import '../../features/home/domain/usecases/get_learning_questions.dart'
+    as _i821;
 import '../../features/home/domain/usecases/get_nnc_questions.dart' as _i146;
 import '../../features/home/domain/usecases/get_pictogram_questions.dart'
     as _i654;
@@ -328,6 +332,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i93.GetCurriculaUseCase>(
       () => _i93.GetCurriculaUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.lazySingleton<_i535.GetLearningCategoriesUseCase>(
+      () => _i535.GetLearningCategoriesUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.lazySingleton<_i821.GetLearningQuestionsUseCase>(
+      () => _i821.GetLearningQuestionsUseCase(gh<_i0.HomeRepository>()),
     );
     gh.lazySingleton<_i146.GetNNCQuestionsUseCase>(
       () => _i146.GetNNCQuestionsUseCase(gh<_i0.HomeRepository>()),

@@ -47,19 +47,8 @@ void main() {
       expect(find.text('Nhanh như chớp'), findsOneWidget);
     });
 
-    testWidgets(
-        'tapping an unavailable game shows "Sắp ra mắt" snackbar',
-        (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // "Vua tiếng Việt" is unavailable (isAvailable: false)
-      await tester.tap(find.text('Vua tiếng Việt'));
-      await tester.pump();
-
-      // AppToast.info shows a SnackBar with "Sắp ra mắt"
-      expect(find.widgetWithText(SnackBar, 'Sắp ra mắt'), findsOneWidget);
-    });
+    // Note: The "tapping an unavailable game shows Sắp ra mắt" test was removed
+    // because all games are now available (isAvailable: true).
 
     testWidgets(
         'tapping "Đuổi hình bắt chữ" opens PictogramSelectionModal',

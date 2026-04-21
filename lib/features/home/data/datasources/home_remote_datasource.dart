@@ -6,6 +6,8 @@ import 'package:smart_learn/features/home/data/models/dictation_model.dart';
 import 'package:smart_learn/features/home/data/models/pictogram_model.dart';
 import 'package:smart_learn/features/home/data/models/subject_model.dart';
 import 'package:smart_learn/features/home/data/models/nnc_question_model.dart';
+import 'package:smart_learn/features/home/data/models/learning_category_model.dart';
+import 'package:smart_learn/features/home/data/models/learning_question_model.dart';
 import 'package:smart_learn/features/home/data/models/proverb_model.dart';
 import 'package:smart_learn/features/home/data/models/vtv_question_model.dart';
 
@@ -57,5 +59,13 @@ abstract class HomeRemoteDatasource {
   Future<List<ProverbModel>> getProverbQuestions(
     @Query('level') String? level,
     @Query('limit') int? limit,
+  );
+
+  @GET('/learning/categories')
+  Future<List<LearningCategoryModel>> getLearningCategories();
+
+  @GET('/learning/categories/{categoryId}/questions')
+  Future<List<LearningQuestionModel>> getLearningQuestions(
+    @Path('categoryId') String categoryId,
   );
 }

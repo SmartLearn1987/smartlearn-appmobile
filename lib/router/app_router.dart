@@ -29,6 +29,8 @@ import 'package:smart_learn/features/vtv_play/presentation/pages/vtv_play_screen
 import 'package:smart_learn/features/nnc_play/presentation/pages/nnc_play_screen.dart';
 import 'package:smart_learn/features/home/domain/entities/proverb_entity.dart';
 import 'package:smart_learn/features/cdtn_play/presentation/pages/cdtn_play_screen.dart';
+import 'package:smart_learn/features/hcb_play/presentation/pages/hcb_play_screen.dart';
+import 'package:smart_learn/features/home/domain/entities/learning_question_entity.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
@@ -174,6 +176,26 @@ class AppRouter {
               return CDTNPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
+              );
+            } catch (_) {
+              return const _RedirectToHome();
+            }
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.hcbPlay,
+          name: RouteNames.hcbPlay,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra == null) return const _RedirectToHome();
+            try {
+              final questions =
+                  extra['questions'] as List<LearningQuestionEntity>;
+              final generalQuestion = extra['generalQuestion'] as String;
+              return HCBPlayScreen(
+                questions: questions,
+                generalQuestion: generalQuestion,
               );
             } catch (_) {
               return const _RedirectToHome();

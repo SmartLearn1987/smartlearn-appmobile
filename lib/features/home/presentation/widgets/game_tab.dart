@@ -11,6 +11,7 @@ import 'package:smart_learn/features/home/presentation/widgets/pictogram_selecti
 import 'package:smart_learn/features/home/presentation/widgets/vtv_selection_modal.dart';
 import 'package:smart_learn/features/home/presentation/widgets/cdtn_selection_modal.dart';
 import 'package:smart_learn/features/home/presentation/widgets/nnc_selection_modal.dart';
+import 'package:smart_learn/features/home/presentation/widgets/hcb_category_selection_modal.dart';
 
 class GameTab extends StatelessWidget {
   const GameTab({super.key});
@@ -39,7 +40,7 @@ class GameTab extends StatelessWidget {
       description:
           'Khám phá thế giới tri thức cùng những bài học vui nhộn cho bé',
       image: AppAssets.gamehoccungbe,
-      isAvailable: false,
+      isAvailable: true,
     ),
     (
       title: 'Ca dao tục ngữ',
@@ -147,6 +148,13 @@ class GameTab extends StatelessWidget {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (_) => const DictationSelectionModal(),
+        );
+      case 3: // Học cùng bé
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const HCBCategorySelectionModal(),
         );
       case 4: // Ca dao tục ngữ
         showModalBottomSheet(
