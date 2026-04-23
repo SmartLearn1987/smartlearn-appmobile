@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_theme.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
+import 'package:smart_learn/features/subjects/presentation/bloc/subjects_list/subjects_list_bloc.dart';
 import 'package:smart_learn/router/app_router.dart';
 
 class App extends StatelessWidget {
@@ -12,8 +14,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>.value(
-      value: getIt<AuthBloc>()..add(const AuthCheckStatusRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>.value(
+          value: getIt<AuthBloc>()..add(const AuthCheckStatusRequested()),
+        ),
+        BlocProvider<HomeBloc>.value(
+          value: getIt<HomeBloc>(),
+        ),
+        BlocProvider<SubjectsListBloc>.value(
+          value: getIt<SubjectsListBloc>(),
+        ),
+      ],
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Color(0xFFF9F7F3),

@@ -12,7 +12,7 @@ import '../../models/subject_with_count.dart';
 part 'subjects_list_event.dart';
 part 'subjects_list_state.dart';
 
-@injectable
+@lazySingleton
 class SubjectsListBloc extends Bloc<SubjectsListEvent, SubjectsListState> {
   final GetUserSubjectsUseCase _getUserSubjects;
   final GetCurriculaBySubjectUseCase _getCurricula;

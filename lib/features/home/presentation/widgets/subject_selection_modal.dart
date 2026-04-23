@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
@@ -11,6 +10,7 @@ import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_all_subjects.dart';
 import 'package:smart_learn/features/home/domain/usecases/save_user_subjects.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
+import 'package:smart_learn/features/subjects/presentation/bloc/subjects_list/subjects_list_bloc.dart';
 
 class SubjectSelectionModal extends StatefulWidget {
   const SubjectSelectionModal({
@@ -27,20 +27,12 @@ class SubjectSelectionModal extends StatefulWidget {
     BuildContext context, {
     List<String> currentSubjectIds = const [],
   }) {
-    // HomeBloc may not be available (e.g. when opened from SubjectsListPage).
-    final homeBloc = context.read<HomeBloc?>();
-
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => homeBloc != null
-          ? BlocProvider.value(
-              value: homeBloc,
-              child:
-                  SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
-            )
-          : SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
+      builder: (_) =>
+          SubjectSelectionModal(initialSelectedIds: currentSubjectIds),
     );
   }
 
@@ -107,12 +99,9 @@ class _SubjectSelectionModalState extends State<SubjectSelectionModal> {
         AppToast.error(context, failure.message);
       },
       (_) {
-        // Refresh HomeBloc if available in the widget tree.
-        try {
-          context.read<HomeBloc>().add(const HomeRefreshSubjects());
-        } catch (_) {
-          // HomeBloc not in tree (e.g. opened from SubjectsListPage).
-        }
+        // Refresh both blocs (singletons, always available).
+        getIt<HomeBloc>().add(const HomeRefreshSubjects());
+        getIt<SubjectsListBloc>().add(const SubjectsListRefreshRequested());
         Navigator.of(context).pop(true);
       },
     );

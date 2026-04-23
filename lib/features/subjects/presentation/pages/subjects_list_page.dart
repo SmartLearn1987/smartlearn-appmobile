@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../app/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -10,28 +9,29 @@ import '../../../home/presentation/widgets/subject_selection_modal.dart';
 import '../bloc/subjects_list/subjects_list_bloc.dart';
 import '../widgets/subject_card_widget.dart';
 
-class SubjectsListPage extends StatelessWidget {
+class SubjectsListPage extends StatefulWidget {
   const SubjectsListPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<SubjectsListBloc>(
-      create: (_) =>
-          getIt<SubjectsListBloc>()..add(const SubjectsListLoadRequested()),
-      child: const _SubjectsListView(),
-    );
-  }
+  State<SubjectsListPage> createState() => _SubjectsListPageState();
 }
 
-class _SubjectsListView extends StatelessWidget {
-  const _SubjectsListView();
+class _SubjectsListPageState extends State<SubjectsListPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh whenever this page becomes visible (e.g. switching tabs).
+    context
+        .read<SubjectsListBloc>()
+        .add(const SubjectsListRefreshRequested());
+  }
 
-  void _openSelectionModal(BuildContext context, List<String> currentIds) {
+  void _openSelectionModal(List<String> currentIds) {
     SubjectSelectionModal.show(
       context,
       currentSubjectIds: currentIds,
     ).then((saved) {
-      if (saved == true && context.mounted) {
+      if (saved == true && mounted) {
         context
             .read<SubjectsListBloc>()
             .add(const SubjectsListRefreshRequested());
@@ -61,7 +61,6 @@ class _SubjectsListView extends StatelessWidget {
                     color: AppColors.mutedForeground,
                   ),
                   onPressed: () => _openSelectionModal(
-                    context,
                     state.subjects.map((s) => s.subject.id).toList(),
                   ),
                 );
@@ -91,20 +90,19 @@ class _SubjectsListView extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                SubjectsListLoaded(:final subjects) =>
-                  subjects.isEmpty
-                      ? _buildEmptyState(context)
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: subjects.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: AppSpacing.smMd),
-                          itemBuilder: (context, index) {
-                            final item = subjects[index];
-                            return SubjectCardWidget(subjectWithCount: item);
-                          },
-                        ),
+                SubjectsListLoaded(:final subjects) => subjects.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: subjects.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpacing.smMd),
+                        itemBuilder: (context, index) {
+                          final item = subjects[index];
+                          return SubjectCardWidget(subjectWithCount: item);
+                        },
+                      ),
                 SubjectsListError(:final message) => Center(
                     child: Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.xxl),
@@ -139,7 +137,7 @@ class _SubjectsListView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(top: AppSpacing.xxl),
@@ -160,7 +158,7 @@ class _SubjectsListView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton.icon(
-              onPressed: () => _openSelectionModal(context, const []),
+              onPressed: () => _openSelectionModal(const []),
               icon: const Icon(LucideIcons.settings, size: 18),
               label: const Text('Thiết lập môn học'),
               style: ElevatedButton.styleFrom(

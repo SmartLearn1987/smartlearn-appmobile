@@ -366,7 +366,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i518.QuizletDetailBloc>(
       () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
     );
-    gh.factory<_i202.HomeBloc>(
+    gh.lazySingleton<_i202.HomeBloc>(
       () => _i202.HomeBloc(
         gh<_i839.GetUserSubjectsUseCase>(),
         gh<_i93.GetCurriculaUseCase>(),
@@ -389,7 +389,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i797.AuthBloc>(),
       ),
     );
-    gh.factory<_i900.SubjectsListBloc>(
+    gh.lazySingleton<_i900.SubjectsListBloc>(
       () => _i900.SubjectsListBloc(
         gh<_i839.GetUserSubjectsUseCase>(),
         gh<_i995.GetCurriculaBySubjectUseCase>(),

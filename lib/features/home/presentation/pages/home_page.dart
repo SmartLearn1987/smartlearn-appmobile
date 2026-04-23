@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/focus_tab.dart';
@@ -20,27 +19,31 @@ class _HomePageState extends State<HomePage> {
   int _selectedTabIndex = 0;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh subjects whenever HomePage becomes visible again
+    // (e.g. switching back from Subjects tab after editing).
+    context.read<HomeBloc>().add(const HomeRefreshSubjects());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<HomeBloc>()..add(const HomeLoadSubjects()),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const HomeHeroSection(),
-            HomeCategoryTabs(
-              selectedIndex: _selectedTabIndex,
-              onChanged: (index) =>
-                  setState(() => _selectedTabIndex = index),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildTabContent(),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const HomeHeroSection(),
+          HomeCategoryTabs(
+            selectedIndex: _selectedTabIndex,
+            onChanged: (index) => setState(() => _selectedTabIndex = index),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _buildTabContent(),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+        ],
       ),
     );
   }

@@ -12,7 +12,7 @@ import '../../../../core/usecase/usecase.dart';
 part 'home_event.dart';
 part 'home_state.dart';
 
-@injectable
+@lazySingleton
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetUserSubjectsUseCase _getUserSubjects;
   final GetCurriculaUseCase _getCurricula;

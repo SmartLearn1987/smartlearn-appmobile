@@ -7,7 +7,6 @@ import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/home_subject_grid.dart';
-import 'package:smart_learn/features/home/presentation/widgets/subject_selection_modal.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 class SubjectTab extends StatelessWidget {
@@ -130,9 +129,6 @@ class SubjectTab extends StatelessWidget {
   }
 
   Widget _buildSubjectList(BuildContext context, HomeLoaded state) {
-    final currentSubjectIds =
-        state.subjects.map((s) => s.subject.id).toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -151,23 +147,10 @@ class SubjectTab extends StatelessWidget {
                     color: AppColors.secondary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      'Các môn học',
-                      style: AppTypography.h3.copyWith(
-                        color: AppColors.foreground,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => SubjectSelectionModal.show(
-                      context,
-                      currentSubjectIds: currentSubjectIds,
-                    ),
-                    child: const Icon(
-                      LucideIcons.settings,
-                      size: 20,
-                      color: AppColors.mutedForeground,
+                  Text(
+                    'Các môn học',
+                    style: AppTypography.h3.copyWith(
+                      color: AppColors.foreground,
                     ),
                   ),
                 ],
