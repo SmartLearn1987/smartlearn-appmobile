@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/validators/form_validators.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -15,39 +16,49 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/education_level.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
-class ConfigStepForm extends StatelessWidget {
+class ConfigStepForm extends StatefulWidget {
   const ConfigStepForm({this.onCancel, super.key});
 
   final VoidCallback? onCancel;
 
   @override
+  State<ConfigStepForm> createState() => _ConfigStepFormState();
+}
+
+class _ConfigStepFormState extends State<ConfigStepForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
       builder: (context, state) {
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (state.errorMessage != null) ...[
-                _buildErrorBanner(state.errorMessage!),
+        return Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (state.errorMessage != null) ...[
+                  _buildErrorBanner(state.errorMessage!),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                _buildVisibilityDropdown(context, state),
                 const SizedBox(height: AppSpacing.md),
+                _buildEducationLevelDropdown(context, state),
+                const SizedBox(height: AppSpacing.md),
+                _buildNameField(context, state),
+                const SizedBox(height: AppSpacing.md),
+                _buildGradeField(context, state),
+                const SizedBox(height: AppSpacing.md),
+                _buildPublisherField(context, state),
+                const SizedBox(height: AppSpacing.md),
+                _buildLessonCountField(context, state),
+                const SizedBox(height: AppSpacing.md),
+                _buildImagePicker(context, state),
+                const SizedBox(height: AppSpacing.lg),
+                _buildButtons(context),
               ],
-              _buildVisibilityDropdown(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildEducationLevelDropdown(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildNameField(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildGradeField(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildPublisherField(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildLessonCountField(context, state),
-              const SizedBox(height: AppSpacing.md),
-              _buildImagePicker(context, state),
-              const SizedBox(height: AppSpacing.lg),
-              _buildButtons(context),
-            ],
+            ),
           ),
         );
       },
@@ -102,8 +113,8 @@ class ConfigStepForm extends StatelessWidget {
           onChanged: (value) {
             if (value != null) {
               context.read<CurriculumFormBloc>().add(
-                    CurriculumFormFieldChanged(field: 'isPublic', value: value),
-                  );
+                CurriculumFormFieldChanged(field: 'isPublic', value: value),
+              );
             }
           },
         ),
@@ -127,7 +138,9 @@ class ConfigStepForm extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         DropdownButtonFormField<String>(
           key: ValueKey('level_${state.educationLevel}'),
-          initialValue: state.educationLevel.isEmpty ? null : state.educationLevel,
+          initialValue: state.educationLevel.isEmpty
+              ? null
+              : state.educationLevel,
           decoration: _dropdownDecoration(),
           style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
           hint: Text(
@@ -145,11 +158,11 @@ class ConfigStepForm extends StatelessWidget {
           onChanged: (value) {
             if (value != null) {
               context.read<CurriculumFormBloc>().add(
-                    CurriculumFormFieldChanged(
-                      field: 'educationLevel',
-                      value: value,
-                    ),
-                  );
+                CurriculumFormFieldChanged(
+                  field: 'educationLevel',
+                  value: value,
+                ),
+              );
             }
           },
         ),
@@ -163,9 +176,11 @@ class ConfigStepForm extends StatelessWidget {
       hintText: 'VD: Tiếng Việt 4 - Kết nối tri thức',
       controller: TextEditingController(text: state.name)
         ..selection = TextSelection.collapsed(offset: state.name.length),
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) => FormValidators.required(value, 'Tên giáo trình'),
       onChanged: (value) => context.read<CurriculumFormBloc>().add(
-            CurriculumFormFieldChanged(field: 'name', value: value),
-          ),
+        CurriculumFormFieldChanged(field: 'name', value: value),
+      ),
     );
   }
 
@@ -176,23 +191,20 @@ class ConfigStepForm extends StatelessWidget {
       controller: TextEditingController(text: state.grade)
         ..selection = TextSelection.collapsed(offset: state.grade.length),
       onChanged: (value) => context.read<CurriculumFormBloc>().add(
-            CurriculumFormFieldChanged(field: 'grade', value: value),
-          ),
+        CurriculumFormFieldChanged(field: 'grade', value: value),
+      ),
     );
   }
 
-  Widget _buildPublisherField(
-    BuildContext context,
-    CurriculumFormState state,
-  ) {
+  Widget _buildPublisherField(BuildContext context, CurriculumFormState state) {
     return AppTextField(
       label: 'Nhà xuất bản',
       hintText: 'VD: NXB Giáo dục',
       controller: TextEditingController(text: state.publisher)
         ..selection = TextSelection.collapsed(offset: state.publisher.length),
       onChanged: (value) => context.read<CurriculumFormBloc>().add(
-            CurriculumFormFieldChanged(field: 'publisher', value: value),
-          ),
+        CurriculumFormFieldChanged(field: 'publisher', value: value),
+      ),
     );
   }
 
@@ -209,20 +221,28 @@ class ConfigStepForm extends StatelessWidget {
         ..selection = TextSelection.collapsed(
           offset: '${state.lessonCount}'.length,
         ),
+      validator: (value) {
+        if (value != null && value.isNotEmpty) {
+          final parsed = int.tryParse(value);
+          if (parsed == null || parsed < 1) {
+            return 'Số bài học phải lớn hơn 0';
+          }
+        }
+        return null;
+      },
       onChanged: (value) {
         final parsed = int.tryParse(value);
         if (parsed != null && parsed >= 1) {
           context.read<CurriculumFormBloc>().add(
-                CurriculumFormFieldChanged(field: 'lessonCount', value: parsed),
-              );
+            CurriculumFormFieldChanged(field: 'lessonCount', value: parsed),
+          );
         }
       },
     );
   }
 
   Widget _buildImagePicker(BuildContext context, CurriculumFormState state) {
-    final hasImage =
-        state.imageFile != null || state.existingImageUrl != null;
+    final hasImage = state.imageFile != null || state.existingImageUrl != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,9 +320,9 @@ class ConfigStepForm extends StatelessWidget {
           top: 0,
           right: 0,
           child: GestureDetector(
-            onTap: () => context
-                .read<CurriculumFormBloc>()
-                .add(const CurriculumFormImageRemoved()),
+            onTap: () => context.read<CurriculumFormBloc>().add(
+              const CurriculumFormImageRemoved(),
+            ),
             child: Container(
               width: 24,
               height: 24,
@@ -343,8 +363,8 @@ class ConfigStepForm extends StatelessWidget {
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null && context.mounted) {
       context.read<CurriculumFormBloc>().add(
-            CurriculumFormImageSelected(file: File(picked.path)),
-          );
+        CurriculumFormImageSelected(file: File(picked.path)),
+      );
     }
   }
 
@@ -353,7 +373,8 @@ class ConfigStepForm extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: onCancel ?? () => Navigator.of(context).maybePop(),
+            onPressed:
+                widget.onCancel ?? () => Navigator.of(context).maybePop(),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.mutedForeground,
               textStyle: AppTypography.buttonMedium,
@@ -370,9 +391,13 @@ class ConfigStepForm extends StatelessWidget {
         Expanded(
           flex: 2,
           child: ElevatedButton(
-            onPressed: () => context
-                .read<CurriculumFormBloc>()
-                .add(const CurriculumFormStepChanged(step: 1)),
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                context.read<CurriculumFormBloc>().add(
+                  const CurriculumFormStepChanged(step: 1),
+                );
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.primaryForeground,

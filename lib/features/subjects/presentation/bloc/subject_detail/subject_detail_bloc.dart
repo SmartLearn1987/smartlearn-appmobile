@@ -13,7 +13,7 @@ import '../../helpers/curriculum_group_helper.dart';
 part 'subject_detail_event.dart';
 part 'subject_detail_state.dart';
 
-@injectable
+@lazySingleton
 class SubjectDetailBloc
     extends Bloc<SubjectDetailEvent, SubjectDetailState> {
   final GetSubjectDetailUseCase _getSubjectDetail;

@@ -300,17 +300,27 @@ class AppRouter {
                         GoRoute(
                           path: RoutePaths.createCurriculumSegment,
                           name: RouteNames.createCurriculum,
-                          builder: (context, state) => CreateCurriculumPage(
-                            subjectId: state.pathParameters['subjectId']!,
-                          ),
+                          builder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>?;
+                            final subjectName = extra?['subjectName'] as String?;
+                            return CreateCurriculumPage(
+                              subjectId: state.pathParameters['subjectId']!,
+                              subjectName: subjectName,
+                            );
+                          },
                         ),
                         GoRoute(
                           path: RoutePaths.editCurriculumSegment,
                           name: RouteNames.editCurriculum,
-                          builder: (context, state) => EditCurriculumPage(
-                            subjectId: state.pathParameters['subjectId']!,
-                            curriculumId: state.pathParameters['curriculumId']!,
-                          ),
+                          builder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>?;
+                            final subjectName = extra?['subjectName'] as String?;
+                            return EditCurriculumPage(
+                              subjectId: state.pathParameters['subjectId']!,
+                              curriculumId: state.pathParameters['curriculumId']!,
+                              subjectName: subjectName,
+                            );
+                          },
                         ),
                       ],
                     ),

@@ -381,7 +381,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i797.AuthBloc>(),
       ),
     );
-    gh.factory<_i121.SubjectDetailBloc>(
+    gh.lazySingleton<_i121.SubjectDetailBloc>(
       () => _i121.SubjectDetailBloc(
         gh<_i638.GetSubjectDetailUseCase>(),
         gh<_i995.GetCurriculaBySubjectUseCase>(),

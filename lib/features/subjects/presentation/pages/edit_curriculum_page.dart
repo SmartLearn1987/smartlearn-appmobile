@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/curriculum_entity.dart';
 import '../../domain/usecases/get_curricula_by_subject_use_case.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
+import '../bloc/subject_detail/subject_detail_bloc.dart';
 import '../widgets/config_step_form.dart';
 import '../widgets/preview_step_content.dart';
 import '../widgets/step_indicator.dart';
@@ -18,11 +19,13 @@ class EditCurriculumPage extends StatelessWidget {
   const EditCurriculumPage({
     required this.subjectId,
     required this.curriculumId,
+    this.subjectName,
     super.key,
   });
 
   final String subjectId;
   final String curriculumId;
+  final String? subjectName;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,7 @@ class EditCurriculumPage extends StatelessWidget {
       child: _EditCurriculumView(
         subjectId: subjectId,
         curriculumId: curriculumId,
+        subjectName: subjectName,
       ),
     );
   }
@@ -40,10 +44,12 @@ class _EditCurriculumView extends StatefulWidget {
   const _EditCurriculumView({
     required this.subjectId,
     required this.curriculumId,
+    this.subjectName,
   });
 
   final String subjectId;
   final String curriculumId;
+  final String? subjectName;
 
   @override
   State<_EditCurriculumView> createState() => _EditCurriculumViewState();
@@ -74,14 +80,14 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
       },
       (curricula) {
         final curriculum = curricula.cast<CurriculumEntity?>().firstWhere(
-              (c) => c!.id == widget.curriculumId,
-              orElse: () => null,
-            );
+          (c) => c!.id == widget.curriculumId,
+          orElse: () => null,
+        );
 
         if (curriculum != null) {
           context.read<CurriculumFormBloc>().add(
-                CurriculumFormInitialized(curriculum: curriculum),
-              );
+            CurriculumFormInitialized(curriculum: curriculum),
+          );
         } else {
           _loadError = 'Không tìm thấy giáo trình';
         }
@@ -91,26 +97,18 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
     );
   }
 
-  static const _title = 'Chỉnh sửa giáo trình';
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          leading: BackButton(onPressed: () => context.pop()),
-          title: const Text(_title),
-        ),
+        appBar: _AppBarTitle(subjectName: widget.subjectName),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_loadError != null) {
       return Scaffold(
-        appBar: AppBar(
-          leading: BackButton(onPressed: () => context.pop()),
-          title: const Text(_title),
-        ),
+        appBar: _AppBarTitle(subjectName: widget.subjectName),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -136,16 +134,15 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
       listener: (context, state) {
         if (state.isSuccess) {
           AppToast.success(context, 'Đã cập nhật giáo trình thành công');
+          getIt<SubjectDetailBloc>().add(const SubjectDetailRefreshRequested());
           context.pop();
         } else if (state.errorMessage != null && state.step == 1) {
           AppToast.error(context, state.errorMessage!);
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: BackButton(onPressed: () => context.pop()),
-          title: const Text(_title),
-        ),
+        backgroundColor: AppColors.background,
+        appBar: _AppBarTitle(subjectName: widget.subjectName),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.mdLg),
@@ -162,9 +159,7 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
                   child: BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
                     buildWhen: (prev, curr) => prev.step != curr.step,
                     builder: (context, state) => state.step == 0
-                        ? ConfigStepForm(
-                            onCancel: () => context.pop(),
-                          )
+                        ? ConfigStepForm(onCancel: () => context.pop())
                         : PreviewStepContent(subjectId: widget.subjectId),
                   ),
                 ),
@@ -175,5 +170,32 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
       ),
     );
   }
+}
 
+class _AppBarTitle extends StatelessWidget implements PreferredSizeWidget {
+  const _AppBarTitle({required this.subjectName});
+
+  final String? subjectName;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: BackButton(onPressed: () => context.pop()),
+      title: Column(
+        children: [
+          Text(
+            'Chỉnh sửa giáo trình',
+            style: AppTypography.h3.copyWith(color: AppColors.foreground),
+          ),
+          Text(
+            "Môn học: ${subjectName ?? ''}",
+            style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+          ),
+        ],
+      ),
+    );
+  }
 }

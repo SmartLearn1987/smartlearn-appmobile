@@ -7,6 +7,7 @@ import 'package:smart_learn/core/theme/app_theme.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/subjects/presentation/bloc/subjects_list/subjects_list_bloc.dart';
+import 'package:smart_learn/features/subjects/presentation/bloc/subject_detail/subject_detail_bloc.dart';
 import 'package:smart_learn/router/app_router.dart';
 
 class App extends StatelessWidget {
@@ -24,6 +25,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<SubjectsListBloc>.value(
           value: getIt<SubjectsListBloc>(),
+        ),
+        BlocProvider<SubjectDetailBloc>.value(
+          value: getIt<SubjectDetailBloc>(),
         ),
       ],
       child: AnnotatedRegion<SystemUiOverlayStyle>(

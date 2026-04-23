@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../app/di/injection.dart';
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -17,18 +16,37 @@ import '../widgets/curriculum_card_widget.dart';
 import '../widgets/curriculum_group_header.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 
-class SubjectDetailPage extends StatelessWidget {
+class SubjectDetailPage extends StatefulWidget {
   const SubjectDetailPage({required this.subjectId, super.key});
 
   final String subjectId;
 
   @override
+  State<SubjectDetailPage> createState() => _SubjectDetailPageState();
+}
+
+class _SubjectDetailPageState extends State<SubjectDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SubjectDetailBloc>().add(
+          SubjectDetailLoadRequested(subjectId: widget.subjectId),
+        );
+  }
+
+  @override
+  void didUpdateWidget(covariant SubjectDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.subjectId != widget.subjectId) {
+      context.read<SubjectDetailBloc>().add(
+            SubjectDetailLoadRequested(subjectId: widget.subjectId),
+          );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider<SubjectDetailBloc>(
-      create: (_) => getIt<SubjectDetailBloc>()
-        ..add(SubjectDetailLoadRequested(subjectId: subjectId)),
-      child: _SubjectDetailView(subjectId: subjectId),
-    );
+    return _SubjectDetailView(subjectId: widget.subjectId);
   }
 }
 
@@ -47,8 +65,8 @@ class _SubjectDetailView extends StatelessWidget {
           curr is SubjectDetailError,
       builder: (context, state) => switch (state) {
         SubjectDetailLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: CircularProgressIndicator(),
+        ),
         SubjectDetailLoaded() => _buildContent(context, state),
         SubjectDetailError(:final message) => _buildError(context, message),
         _ => const SizedBox.shrink(),
@@ -72,11 +90,7 @@ class _SubjectDetailView extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go(RoutePaths.subjects)),
-        title: Text(
-          subject.name,
-          style: AppTypography.h4.copyWith(color: AppColors.foreground),
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(subject.name, overflow: TextOverflow.ellipsis),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.mdLg),
@@ -89,59 +103,50 @@ class _SubjectDetailView extends StatelessWidget {
               subject.description,
             ),
             const SizedBox(height: AppSpacing.md),
-            _buildCreateButton(context),
+            _buildCreateButton(context, subject.name),
             const SizedBox(height: AppSpacing.md),
             if (grouped.isEmpty)
               _buildEmptyState()
             else
-              _buildGroupedList(context, grouped),
+              _buildGroupedList(context, grouped, subject.name),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSubjectHeader(
-    String? icon,
-    String name,
-    String? description,
-  ) {
+  Widget _buildSubjectHeader(String? icon, String name, String? description) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (icon != null)
-          Text(icon, style: const TextStyle(fontSize: 40)),
-        if (icon != null) const SizedBox(height: AppSpacing.sm),
-        Text(
-          name,
-          style: AppTypography.h2.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        if (description != null) ...[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            description,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.mutedForeground,
+        Row(
+          children: [
+            if (icon != null) Text(icon, style: const TextStyle(fontSize: 40)),
+            if (icon != null) const SizedBox(width: AppSpacing.md),
+            Text(
+              name,
+              style: AppTypography.h1.copyWith(
+                color: AppColors.foreground,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildCreateButton(BuildContext context) {
-    final isAuthenticated =
-        context.read<AuthBloc>().state is AuthAuthenticated;
+  Widget _buildCreateButton(BuildContext context, String subjectName) {
+    final isAuthenticated = context.read<AuthBloc>().state is AuthAuthenticated;
     if (!isAuthenticated) return const SizedBox.shrink();
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () =>
-            context.go(RoutePaths.createCurriculum(subjectId)),
+        onPressed: () => context.go(
+          RoutePaths.createCurriculum(subjectId),
+          extra: {'subjectName': subjectName},
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.primaryForeground,
@@ -186,6 +191,7 @@ class _SubjectDetailView extends StatelessWidget {
   Widget _buildGroupedList(
     BuildContext context,
     Map<String, List<CurriculumEntity>> grouped,
+    String subjectName,
   ) {
     final children = <Widget>[];
     for (final entry in grouped.entries) {
@@ -209,6 +215,7 @@ class _SubjectDetailView extends StatelessWidget {
               },
               onEdit: () => context.go(
                 RoutePaths.editCurriculum(subjectId, curriculum.id),
+                extra: {'subjectName': subjectName},
               ),
               onDelete: () => _showDeleteConfirmation(context, curriculum),
             ),
@@ -229,9 +236,9 @@ class _SubjectDetailView extends StatelessWidget {
     DeleteConfirmationDialog.show(
       context,
       onConfirm: () {
-        context
-            .read<SubjectDetailBloc>()
-            .add(CurriculumDeleteRequested(curriculumId: curriculum.id));
+        context.read<SubjectDetailBloc>().add(
+          CurriculumDeleteRequested(curriculumId: curriculum.id),
+        );
       },
     );
   }
@@ -252,9 +259,9 @@ class _SubjectDetailView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             ElevatedButton(
-              onPressed: () => context
-                  .read<SubjectDetailBloc>()
-                  .add(SubjectDetailLoadRequested(subjectId: subjectId)),
+              onPressed: () => context.read<SubjectDetailBloc>().add(
+                SubjectDetailLoadRequested(subjectId: subjectId),
+              ),
               child: const Text('Thử lại'),
             ),
           ],
