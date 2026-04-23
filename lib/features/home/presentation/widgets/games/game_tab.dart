@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/constants/app_assets.dart';
@@ -5,13 +6,14 @@ import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
-import 'package:smart_learn/features/home/presentation/widgets/dictation_selection_modal.dart';
-import 'package:smart_learn/features/home/presentation/widgets/game_card_widget.dart';
-import 'package:smart_learn/features/home/presentation/widgets/pictogram_selection_modal.dart';
-import 'package:smart_learn/features/home/presentation/widgets/vtv_selection_modal.dart';
-import 'package:smart_learn/features/home/presentation/widgets/cdtn_selection_modal.dart';
-import 'package:smart_learn/features/home/presentation/widgets/nnc_selection_modal.dart';
-import 'package:smart_learn/features/home/presentation/widgets/hcb_category_selection_modal.dart';
+
+import 'dictation_selection_modal.dart';
+import 'game_card_widget.dart';
+import 'pictogram_selection_modal.dart';
+import 'vtv_selection_modal.dart';
+import 'nnc_selection_modal.dart';
+import 'cdtn_selection_modal.dart';
+import 'hcb_category_selection_modal.dart';
 
 class GameTab extends StatelessWidget {
   const GameTab({super.key});
@@ -80,32 +82,16 @@ class GameTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          _buildGrid(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGrid(BuildContext context) {
-    return Column(
-      children: [
-        for (int i = 0; i < _games.length; i += 2)
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: i + 2 < _games.length ? AppSpacing.sm : 0,
-            ),
-            child: Row(
-              children: [
-                Expanded(child: _buildCard(context, i)),
-                const SizedBox(width: AppSpacing.smMd),
-                if (i + 1 < _games.length)
-                  Expanded(child: _buildCard(context, i + 1))
-                else
-                  const Expanded(child: SizedBox.shrink()),
-              ],
+          ..._games.mapIndexed(
+            (index, game) => Padding(
+              padding: EdgeInsets.only(
+                bottom: index < _games.length - 1 ? AppSpacing.sm : 0,
+              ),
+              child: _buildCard(context, index),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -4,7 +4,7 @@ import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/focus_tab.dart';
-import 'package:smart_learn/features/home/presentation/widgets/game_tab.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/game_tab.dart';
 import 'package:smart_learn/features/home/presentation/widgets/home_category_tabs.dart';
 import 'package:smart_learn/features/home/presentation/widgets/home_hero_section.dart';
 import 'package:smart_learn/features/home/presentation/widgets/subject_tab.dart';

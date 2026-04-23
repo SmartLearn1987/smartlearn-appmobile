@@ -8,7 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:smart_learn/core/error/failures.dart';
 import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_pictogram_questions.dart';
-import 'package:smart_learn/features/home/presentation/widgets/pictogram_selection_modal.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/pictogram_selection_modal.dart';
 
 class MockGetPictogramQuestionsUseCase extends Mock
     implements GetPictogramQuestionsUseCase {}

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_shadows.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
 class GameCardWidget extends StatelessWidget {
   const GameCardWidget({
@@ -31,6 +28,7 @@ class GameCardWidget extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
+          width: double.infinity,
           decoration: BoxDecoration(
             color: AppColors.card,
             borderRadius: AppBorders.borderRadiusLg,
@@ -49,7 +47,7 @@ class GameCardWidget extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   title,
-                  style: AppTypography.labelMedium.copyWith(
+                  style: AppTypography.h4.bold.copyWith(
                     color: AppColors.foreground,
                   ),
                   maxLines: 1,
@@ -65,25 +63,43 @@ class GameCardWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  width: double.infinity,
-                  height: 32,
-                  child: ElevatedButton(
-                    onPressed: onTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isAvailable
-                          ? AppColors.primary
-                          : AppColors.muted,
-                      foregroundColor: isAvailable
-                          ? Colors.white
-                          : AppColors.mutedForeground,
-                      shape: AppBorders.shapeSm,
-                      padding: EdgeInsets.zero,
-                      textStyle: AppTypography.buttonSmall,
+                if (isAvailable)
+                  GestureDetector(
+                    onTap: onTap,
+                    child: SizedBox(
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: onTap,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.primary,
+                          shape: AppBorders.shapeSm,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                          ),
+                          textStyle: AppTypography.buttonSmall,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Bắt đầu'),
+                            Icon(
+                              LucideIcons.chevronRight,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Text(isAvailable ? 'Bắt đầu' : 'Sắp ra mắt'),
+                  )
+                else
+                  Text(
+                    'Sắp ra mắt',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
