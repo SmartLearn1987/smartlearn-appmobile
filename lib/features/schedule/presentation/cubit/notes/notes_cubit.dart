@@ -72,7 +72,7 @@ class NotesCubit extends Cubit<NotesState> {
     emit(
       state.copyWith(
         notes: updatedNotes,
-        editingNoteId: null,
+        editingNote: null,
         status: NotesStatus.loaded,
       ),
     );
@@ -95,11 +95,19 @@ class NotesCubit extends Cubit<NotesState> {
     emit(state.copyWith(isAddingNote: !state.isAddingNote));
   }
 
-  void setEditingNote(String? noteId) {
-    emit(state.copyWith(editingNoteId: noteId));
+  void setEditingNote(NoteItemEntity? note) {
+    // Reset to null first so re-selecting the same note still triggers the listener.
+    if (note != null && state.editingNote != null) {
+      emit(state.copyWith(editingNote: null));
+    }
+    emit(state.copyWith(editingNote: note));
   }
 
   void setViewingNote(NoteItemEntity? note) {
+    // Reset to null first so re-selecting the same note still triggers the listener.
+    if (note != null && state.viewingNote != null) {
+      emit(state.copyWith(viewingNote: null));
+    }
     emit(state.copyWith(viewingNote: note));
   }
 

@@ -72,7 +72,7 @@ class TasksCubit extends Cubit<TasksState> {
     emit(
       state.copyWith(
         tasks: updatedTasks,
-        editingTask: null,
+        clearEditingTask: true,
         status: TasksStatus.loaded,
       ),
     );
@@ -134,11 +134,27 @@ class TasksCubit extends Cubit<TasksState> {
   }
 
   void setEditingTask(TaskItemEntity? task) {
-    emit(state.copyWith(editingTask: task));
+    // Reset to null first so re-selecting the same task still triggers the listener.
+    if (task != null && state.editingTask != null) {
+      emit(state.copyWith(clearEditingTask: true));
+    }
+    if (task == null) {
+      emit(state.copyWith(clearEditingTask: true));
+    } else {
+      emit(state.copyWith(editingTask: task));
+    }
   }
 
   void setViewingTask(TaskItemEntity? task) {
-    emit(state.copyWith(viewingTask: task));
+    // Reset to null first so re-selecting the same task still triggers the listener.
+    if (task != null && state.viewingTask != null) {
+      emit(state.copyWith(clearViewingTask: true));
+    }
+    if (task == null) {
+      emit(state.copyWith(clearViewingTask: true));
+    } else {
+      emit(state.copyWith(viewingTask: task));
+    }
   }
 
   Future<void> _saveTasks() async {

@@ -2,10 +2,12 @@ part of 'notes_cubit.dart';
 
 enum NotesStatus { initial, loaded, error }
 
+const _sentinel = Object();
+
 class NotesState extends Equatable {
   final List<NoteItemEntity> notes;
   final bool isAddingNote;
-  final String? editingNoteId;
+  final NoteItemEntity? editingNote;
   final NoteItemEntity? viewingNote;
   final NotesStatus status;
   final String? errorMessage;
@@ -13,7 +15,7 @@ class NotesState extends Equatable {
   const NotesState({
     this.notes = const [],
     this.isAddingNote = false,
-    this.editingNoteId,
+    this.editingNote,
     this.viewingNote,
     this.status = NotesStatus.initial,
     this.errorMessage,
@@ -22,16 +24,20 @@ class NotesState extends Equatable {
   NotesState copyWith({
     List<NoteItemEntity>? notes,
     bool? isAddingNote,
-    String? editingNoteId,
-    NoteItemEntity? viewingNote,
+    Object? editingNote = _sentinel,
+    Object? viewingNote = _sentinel,
     NotesStatus? status,
     String? errorMessage,
   }) =>
       NotesState(
         notes: notes ?? this.notes,
         isAddingNote: isAddingNote ?? this.isAddingNote,
-        editingNoteId: editingNoteId ?? this.editingNoteId,
-        viewingNote: viewingNote ?? this.viewingNote,
+        editingNote: editingNote == _sentinel
+            ? this.editingNote
+            : editingNote as NoteItemEntity?,
+        viewingNote: viewingNote == _sentinel
+            ? this.viewingNote
+            : viewingNote as NoteItemEntity?,
         status: status ?? this.status,
         errorMessage: errorMessage,
       );
@@ -40,7 +46,7 @@ class NotesState extends Equatable {
   List<Object?> get props => [
         notes,
         isAddingNote,
-        editingNoteId,
+        editingNote,
         viewingNote,
         status,
         errorMessage,

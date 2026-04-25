@@ -28,7 +28,9 @@ class TasksState extends Equatable {
     String? filter,
     bool? isAddingTask,
     TaskItemEntity? editingTask,
+    bool clearEditingTask = false,
     TaskItemEntity? viewingTask,
+    bool clearViewingTask = false,
     Set<String>? collapsedMonths,
     TasksStatus? status,
     String? errorMessage,
@@ -37,8 +39,10 @@ class TasksState extends Equatable {
         tasks: tasks ?? this.tasks,
         filter: filter ?? this.filter,
         isAddingTask: isAddingTask ?? this.isAddingTask,
-        editingTask: editingTask ?? this.editingTask,
-        viewingTask: viewingTask ?? this.viewingTask,
+        editingTask:
+            clearEditingTask ? null : (editingTask ?? this.editingTask),
+        viewingTask:
+            clearViewingTask ? null : (viewingTask ?? this.viewingTask),
         collapsedMonths: collapsedMonths ?? this.collapsedMonths,
         status: status ?? this.status,
         errorMessage: errorMessage,
