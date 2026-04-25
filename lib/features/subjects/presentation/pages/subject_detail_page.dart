@@ -206,13 +206,13 @@ class _SubjectDetailView extends StatelessWidget {
             child: CurriculumCardWidget(
               curriculum: curriculum,
               index: i,
-              onManageLessons: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tính năng quản lý bài học sắp ra mắt'),
-                  ),
-                );
-              },
+              onManageLessons: () => context.go(
+                RoutePaths.lessons(subjectId, curriculum.id),
+                extra: {
+                  'curriculumName': curriculum.name,
+                  'publisher': curriculum.publisher,
+                },
+              ),
               onEdit: () => context.go(
                 RoutePaths.editCurriculum(subjectId, curriculum.id),
                 extra: {'subjectName': subjectName},

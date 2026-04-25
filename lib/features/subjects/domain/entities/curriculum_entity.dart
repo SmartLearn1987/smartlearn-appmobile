@@ -9,7 +9,7 @@ class CurriculumEntity extends Equatable {
   final bool isPublic;
   final String? publisher;
   final String? imageUrl;
-  final String createdBy;
+  final String? createdBy;
   final int lessonCount;
 
   const CurriculumEntity({
@@ -21,7 +21,7 @@ class CurriculumEntity extends Equatable {
     required this.isPublic,
     this.publisher,
     this.imageUrl,
-    required this.createdBy,
+    this.createdBy,
     required this.lessonCount,
   });
 

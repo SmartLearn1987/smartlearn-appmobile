@@ -58,5 +58,10 @@ final class AuthProfileUpdateRequested extends AuthEvent {
 }
 
 final class AuthForceLogout extends AuthEvent {
-  const AuthForceLogout();
+  final String? message;
+
+  const AuthForceLogout({this.message});
+
+  @override
+  List<Object?> get props => [message];
 }

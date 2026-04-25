@@ -14,7 +14,7 @@ class CurriculumModel extends CurriculumEntity {
     required super.isPublic,
     super.publisher,
     super.imageUrl,
-    required super.createdBy,
+    super.createdBy,
     required super.lessonCount,
   });
 

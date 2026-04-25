@@ -16,19 +16,17 @@ class CurriculumGroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: AppSpacing.sm,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
       child: Row(
         children: [
           const Text(
             '●',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppColors.primary, fontSize: 20),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_theme.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/subjects/presentation/bloc/subjects_list/subjects_list_bloc.dart';
@@ -44,6 +45,18 @@ class App extends StatelessWidget {
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
+          builder: (context, child) {
+            return BlocListener<AuthBloc, AuthState>(
+              listenWhen: (prev, curr) =>
+                  curr is AuthUnauthenticated && curr.message != null,
+              listener: (context, state) {
+                if (state is AuthUnauthenticated && state.message != null) {
+                  AppToast.error(context, state.message!);
+                }
+              },
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
         ),
       ),
     );

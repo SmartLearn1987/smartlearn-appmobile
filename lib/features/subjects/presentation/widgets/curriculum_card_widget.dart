@@ -32,14 +32,17 @@ class CurriculumCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusLg,
-        border: Border.all(color: AppColors.border, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
         boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTopRow(),
-          const SizedBox(height: AppSpacing.sm),
+          const Divider(height: AppSpacing.mdLg),
           _buildActionButtons(),
         ],
       ),
@@ -209,10 +212,7 @@ class CurriculumCardWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        _IconActionButton(
-          icon: LucideIcons.pencil,
-          onPressed: onEdit,
-        ),
+        _IconActionButton(icon: LucideIcons.pencil, onPressed: onEdit),
         const SizedBox(width: AppSpacing.xs),
         _IconActionButton(
           icon: LucideIcons.trash2,

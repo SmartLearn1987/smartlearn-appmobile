@@ -5,6 +5,7 @@
 abstract final class RoutePaths {
   // ─── Static paths (no parameters) ───
   static const home = '/';
+  static const splash = '/splash';
   static const login = '/login';
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
@@ -30,6 +31,9 @@ abstract final class RoutePaths {
   static const subjectIdSegment = ':subjectId';
   static const createCurriculumSegment = 'create-curriculum';
   static const editCurriculumSegment = 'edit-curriculum/:curriculumId';
+  static const lessonsSegment = 'curricula/:curriculumId/lessons';
+  static const lessonFormSegment = 'form';
+  static const lessonReviewSegment = 'review/:lessonId';
 
   // ─── Path builders (for navigation calls) ───
   static String subjectDetail(String subjectId) =>
@@ -48,10 +52,24 @@ abstract final class RoutePaths {
   static String examPlay(String id) => '/exams/$id/play';
 
   static String examResult(String id) => '/exams/$id/result';
+
+  static String lessons(String subjectId, String curriculumId) =>
+      '/subjects/$subjectId/curricula/$curriculumId/lessons';
+
+  static String lessonForm(String subjectId, String curriculumId) =>
+      '/subjects/$subjectId/curricula/$curriculumId/lessons/form';
+
+  static String lessonReview(
+    String subjectId,
+    String curriculumId,
+    String lessonId,
+  ) =>
+      '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId';
 }
 
 abstract final class RouteNames {
   static const home = 'home';
+  static const splash = 'splash';
   static const login = 'login';
   static const register = 'register';
   static const forgotPassword = 'forgotPassword';
@@ -74,4 +92,7 @@ abstract final class RouteNames {
   static const nncPlay = 'nncPlay';
   static const cdtnPlay = 'cdtnPlay';
   static const hcbPlay = 'hcbPlay';
+  static const lessons = 'lessons';
+  static const lessonForm = 'lessonForm';
+  static const lessonReview = 'lessonReview';
 }

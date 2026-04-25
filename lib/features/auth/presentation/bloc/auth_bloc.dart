@@ -139,6 +139,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthForceLogout event,
     Emitter<AuthState> emit,
   ) {
-    emit(const AuthUnauthenticated(message: 'Phiên đăng nhập đã hết hạn'));
+    emit(AuthUnauthenticated(message: event.message));
   }
 }

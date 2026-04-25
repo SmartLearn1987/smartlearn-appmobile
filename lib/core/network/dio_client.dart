@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
 import 'package:smart_learn/core/constants/api_constants.dart';
 import 'package:smart_learn/core/network/auth_interceptor.dart';
@@ -23,7 +24,13 @@ abstract class DioModule {
 
     dio.interceptors.add(authInterceptor);
 
-    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (obj) => Logger().d(obj),
+      ),
+    );
 
     return dio;
   }

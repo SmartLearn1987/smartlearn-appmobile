@@ -33,6 +33,10 @@ import 'package:smart_learn/features/hcb_play/presentation/pages/hcb_play_screen
 import 'package:smart_learn/features/home/domain/entities/learning_question_entity.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
+import 'package:smart_learn/features/lessons/presentation/pages/lesson_form_page.dart';
+import 'package:smart_learn/features/lessons/presentation/pages/lesson_management_page.dart';
+import 'package:smart_learn/features/lessons/presentation/pages/lesson_review_page.dart';
+import 'package:smart_learn/features/auth/presentation/pages/splash_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
 import 'package:smart_learn/router/route_names.dart';
 
@@ -52,10 +56,14 @@ class AppRouter {
 
     return GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: RoutePaths.home,
+      initialLocation: RoutePaths.splash,
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (context, state) {
         final authState = authBloc.state;
+        final isSplash = state.matchedLocation == RoutePaths.splash;
+
+        // While on splash, let it handle navigation itself
+        if (isSplash) return null;
 
         // While checking session status, don't redirect anywhere
         if (authState is AuthInitial || authState is AuthLoading) {
@@ -73,6 +81,14 @@ class AppRouter {
         return null;
       },
       routes: [
+        // ─── Splash route ───
+        GoRoute(
+          path: RoutePaths.splash,
+          name: RouteNames.splash,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const SplashPage(),
+        ),
+
         // ─── Auth routes (no shell) ───
         GoRoute(
           path: RoutePaths.login,
@@ -321,6 +337,49 @@ class AppRouter {
                               subjectName: subjectName,
                             );
                           },
+                        ),
+                        GoRoute(
+                          path: RoutePaths.lessonsSegment,
+                          name: RouteNames.lessons,
+                          builder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>?;
+                            return LessonManagementPage(
+                              subjectId: state.pathParameters['subjectId']!,
+                              curriculumId: state.pathParameters['curriculumId']!,
+                              curriculumName: extra?['curriculumName'] as String?,
+                              publisher: extra?['publisher'] as String?,
+                            );
+                          },
+                          routes: [
+                            GoRoute(
+                              path: RoutePaths.lessonFormSegment,
+                              name: RouteNames.lessonForm,
+                              builder: (context, state) {
+                                final extra = state.extra as Map<String, dynamic>?;
+                                return LessonFormPage(
+                                  subjectId: state.pathParameters['subjectId']!,
+                                  curriculumId: state.pathParameters['curriculumId']!,
+                                  curriculumName: extra?['curriculumName'] as String?,
+                                  publisher: extra?['publisher'] as String?,
+                                  lessonId: extra?['lessonId'] as String?,
+                                );
+                              },
+                            ),
+                            GoRoute(
+                              path: RoutePaths.lessonReviewSegment,
+                              name: RouteNames.lessonReview,
+                              builder: (context, state) {
+                                final extra = state.extra as Map<String, dynamic>?;
+                                return LessonReviewPage(
+                                  subjectId: state.pathParameters['subjectId']!,
+                                  curriculumId: state.pathParameters['curriculumId']!,
+                                  lessonId: state.pathParameters['lessonId']!,
+                                  curriculumName: extra?['curriculumName'] as String?,
+                                  publisher: extra?['publisher'] as String?,
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

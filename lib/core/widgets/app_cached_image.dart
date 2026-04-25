@@ -47,8 +47,7 @@ class AppCachedImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (context, url, error) =>
-          errorWidget ?? _defaultError(),
+      errorWidget: (context, url, error) => errorWidget ?? _defaultError(),
     );
 
     if (shape == BoxShape.circle) {

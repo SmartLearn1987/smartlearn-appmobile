@@ -14,10 +14,7 @@ class AuthInterceptor extends QueuedInterceptor {
   /// AuthInterceptor → AuthBloc → UseCases → Dio → AuthInterceptor.
   AuthBloc get _authBloc => GetIt.instance<AuthBloc>();
 
-  AuthInterceptor(
-    this._localDatasource,
-    @Named('refreshDio') this._refreshDio,
-  );
+  AuthInterceptor(this._localDatasource, @Named('refreshDio') this._refreshDio);
 
   @override
   void onRequest(
@@ -39,29 +36,55 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401 && _isTokenExpiredError(err)) {
-      try {
-        await _refreshTokens();
-
-        // Retry the original request with new tokens
-        final newToken = await _localDatasource.getSessionToken();
-        final userId = await _localDatasource.getUserId();
-        err.requestOptions.headers['x-session-token'] = newToken;
-        err.requestOptions.headers['x-user-id'] = userId;
-
-        final response = await _refreshDio.fetch(err.requestOptions);
-        handler.resolve(response);
-        return;
-      } catch (_) {
-        // Refresh failed → force logout
+    if (err.response?.statusCode == 401) {
+      // Session invalidated (logged in on another device/browser) → force logout
+      if (_isSessionInvalidatedError(err)) {
         await _localDatasource.clearTokens();
-        _authBloc.add(const AuthForceLogout());
+        _authBloc.add(const AuthForceLogout(
+          message:
+              'Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị/trình duyệt khác.',
+        ));
         handler.reject(err);
         return;
+      }
+
+      // Token expired → attempt refresh
+      if (_isTokenExpiredError(err)) {
+        try {
+          await _refreshTokens();
+
+          // Retry the original request with new tokens
+          final newToken = await _localDatasource.getSessionToken();
+          final userId = await _localDatasource.getUserId();
+          err.requestOptions.headers['x-session-token'] = newToken;
+          err.requestOptions.headers['x-user-id'] = userId;
+
+          final response = await _refreshDio.fetch(err.requestOptions);
+          handler.resolve(response);
+          return;
+        } catch (_) {
+          // Refresh failed → force logout
+          await _localDatasource.clearTokens();
+          _authBloc.add(const AuthForceLogout(
+            message: 'Phiên đăng nhập đã hết hạn',
+          ));
+          handler.reject(err);
+          return;
+        }
       }
     }
 
     handler.next(err);
+  }
+
+  bool _isSessionInvalidatedError(DioException err) {
+    final data = err.response?.data;
+    if (data is Map<String, dynamic>) {
+      final message = data['error'] as String?;
+      return message ==
+          'Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị/trình duyệt khác.';
+    }
+    return false;
   }
 
   bool _isTokenExpiredError(DioException err) {
@@ -79,10 +102,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
     final response = await _refreshDio.post(
       '/refresh-token',
-      data: {
-        'userId': userId,
-        'refreshToken': refreshToken,
-      },
+      data: {'userId': userId, 'refreshToken': refreshToken},
     );
 
     final newSessionToken = response.data['sessionToken'] as String;

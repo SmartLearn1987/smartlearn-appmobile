@@ -88,6 +88,38 @@ import '../../features/home/presentation/bloc/focus_cubit.dart' as _i128;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/home/presentation/bloc/profile/profile_bloc.dart'
     as _i124;
+import '../../features/lessons/data/datasources/lessons_remote_datasource.dart'
+    as _i753;
+import '../../features/lessons/data/repositories/lessons_repository_impl.dart'
+    as _i393;
+import '../../features/lessons/domain/repositories/lessons_repository.dart'
+    as _i265;
+import '../../features/lessons/domain/usecases/create_lesson_use_case.dart'
+    as _i200;
+import '../../features/lessons/domain/usecases/delete_lesson_image_use_case.dart'
+    as _i470;
+import '../../features/lessons/domain/usecases/delete_lesson_use_case.dart'
+    as _i896;
+import '../../features/lessons/domain/usecases/get_lesson_by_id_use_case.dart'
+    as _i231;
+import '../../features/lessons/domain/usecases/get_lesson_images_use_case.dart'
+    as _i1056;
+import '../../features/lessons/domain/usecases/get_lesson_progress_use_case.dart'
+    as _i75;
+import '../../features/lessons/domain/usecases/get_lessons_use_case.dart'
+    as _i46;
+import '../../features/lessons/domain/usecases/update_lesson_progress_use_case.dart'
+    as _i400;
+import '../../features/lessons/domain/usecases/update_lesson_use_case.dart'
+    as _i969;
+import '../../features/lessons/domain/usecases/update_quiz_flashcards_use_case.dart'
+    as _i721;
+import '../../features/lessons/domain/usecases/upload_lesson_images_use_case.dart'
+    as _i847;
+import '../../features/lessons/presentation/bloc/lesson_detail/lesson_detail_bloc.dart'
+    as _i367;
+import '../../features/lessons/presentation/bloc/lessons_list/lessons_list_bloc.dart'
+    as _i966;
 import '../../features/quizlet/data/datasources/quizlet_remote_datasource.dart'
     as _i237;
 import '../../features/quizlet/data/repositories/quizlet_repository_impl.dart'
@@ -201,6 +233,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i278.HomeRemoteDatasource>(
       () => _i278.HomeRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i753.LessonsRemoteDatasource>(
+      () => _i753.LessonsRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i237.QuizletRemoteDatasource>(
       () => _i237.QuizletRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -249,6 +284,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i91.UploadFileUseCase>(
       () => _i91.UploadFileUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.lazySingleton<_i265.LessonsRepository>(
+      () => _i393.LessonsRepositoryImpl(gh<_i753.LessonsRemoteDatasource>()),
+    );
     gh.lazySingleton<_i1072.GetExamDetailUseCase>(
       () => _i1072.GetExamDetailUseCase(gh<_i413.ExamRepository>()),
     );
@@ -261,11 +299,56 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i0.HomeRepository>(
       () => _i76.HomeRepositoryImpl(gh<_i278.HomeRemoteDatasource>()),
     );
+    gh.lazySingleton<_i200.CreateLessonUseCase>(
+      () => _i200.CreateLessonUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i470.DeleteLessonImageUseCase>(
+      () => _i470.DeleteLessonImageUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i896.DeleteLessonUseCase>(
+      () => _i896.DeleteLessonUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i231.GetLessonByIdUseCase>(
+      () => _i231.GetLessonByIdUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i1056.GetLessonImagesUseCase>(
+      () => _i1056.GetLessonImagesUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i75.GetLessonProgressUseCase>(
+      () => _i75.GetLessonProgressUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i46.GetLessonsUseCase>(
+      () => _i46.GetLessonsUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i400.UpdateLessonProgressUseCase>(
+      () => _i400.UpdateLessonProgressUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i969.UpdateLessonUseCase>(
+      () => _i969.UpdateLessonUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i721.UpdateQuizFlashcardsUseCase>(
+      () => _i721.UpdateQuizFlashcardsUseCase(gh<_i265.LessonsRepository>()),
+    );
+    gh.lazySingleton<_i847.UploadLessonImagesUseCase>(
+      () => _i847.UploadLessonImagesUseCase(gh<_i265.LessonsRepository>()),
+    );
     gh.lazySingleton<_i640.SubjectsRepository>(
       () => _i962.SubjectsRepositoryImpl(gh<_i574.SubjectsRemoteDatasource>()),
     );
     gh.lazySingleton<_i718.QuizletRepository>(
       () => _i364.QuizletRepositoryImpl(gh<_i237.QuizletRemoteDatasource>()),
+    );
+    gh.factory<_i966.LessonsListBloc>(
+      () => _i966.LessonsListBloc(
+        gh<_i46.GetLessonsUseCase>(),
+        gh<_i75.GetLessonProgressUseCase>(),
+        gh<_i896.DeleteLessonUseCase>(),
+        gh<_i200.CreateLessonUseCase>(),
+        gh<_i969.UpdateLessonUseCase>(),
+        gh<_i721.UpdateQuizFlashcardsUseCase>(),
+        gh<_i847.UploadLessonImagesUseCase>(),
+        gh<_i470.DeleteLessonImageUseCase>(),
+      ),
     );
     gh.factory<_i711.ExamPlayBloc>(
       () => _i711.ExamPlayBloc(gh<_i891.SubmitExamResultUseCase>()),
@@ -362,6 +445,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i541.SaveUserSubjectsUseCase>(
       () => _i541.SaveUserSubjectsUseCase(gh<_i0.HomeRepository>()),
+    );
+    gh.factory<_i367.LessonDetailBloc>(
+      () => _i367.LessonDetailBloc(
+        gh<_i231.GetLessonByIdUseCase>(),
+        gh<_i1056.GetLessonImagesUseCase>(),
+        gh<_i75.GetLessonProgressUseCase>(),
+        gh<_i400.UpdateLessonProgressUseCase>(),
+      ),
     );
     gh.factory<_i518.QuizletDetailBloc>(
       () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
