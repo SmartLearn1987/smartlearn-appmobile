@@ -1,43 +1,50 @@
 import 'package:equatable/equatable.dart';
 
-import 'quizlet_term_entity.dart';
+import 'create_quizlet_params.dart';
 
-class QuizletDetailEntity extends Equatable {
+class UpdateQuizletParams extends Equatable {
   final String id;
   final String title;
   final String? description;
-  final String? subjectName;
   final String? subjectId;
   final String? grade;
   final String? educationLevel;
   final bool isPublic;
-  final String userId;
-  final List<QuizletTermEntity> terms;
+  final List<TermParams> terms;
 
-  const QuizletDetailEntity({
+  const UpdateQuizletParams({
     required this.id,
     required this.title,
     this.description,
-    this.subjectName,
     this.subjectId,
     this.grade,
     this.educationLevel,
-    this.isPublic = false,
-    this.userId = '',
+    required this.isPublic,
     required this.terms,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'subject_id': subjectId,
+      'grade': grade,
+      'education_level': educationLevel,
+      'is_public': isPublic,
+      'terms': terms.map((t) => t.toJson()).toList(),
+    };
+  }
 
   @override
   List<Object?> get props => [
         id,
         title,
         description,
-        subjectName,
         subjectId,
         grade,
         educationLevel,
         isPublic,
-        userId,
         terms,
       ];
 }

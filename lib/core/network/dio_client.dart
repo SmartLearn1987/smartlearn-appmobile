@@ -28,7 +28,6 @@ abstract class DioModule {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (obj) => Logger().d(obj),
       ),
     );
 

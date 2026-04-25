@@ -126,12 +126,20 @@ import '../../features/quizlet/data/repositories/quizlet_repository_impl.dart'
     as _i364;
 import '../../features/quizlet/domain/repositories/quizlet_repository.dart'
     as _i718;
+import '../../features/quizlet/domain/usecases/create_quizlet_use_case.dart'
+    as _i743;
+import '../../features/quizlet/domain/usecases/delete_quizlet_use_case.dart'
+    as _i231;
 import '../../features/quizlet/domain/usecases/get_quizlet_detail_use_case.dart'
     as _i595;
 import '../../features/quizlet/domain/usecases/get_quizlets_use_case.dart'
     as _i1064;
+import '../../features/quizlet/domain/usecases/update_quizlet_use_case.dart'
+    as _i600;
 import '../../features/quizlet/presentation/bloc/quizlet/quizlet_bloc.dart'
     as _i252;
+import '../../features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart'
+    as _i496;
 import '../../features/quizlet/presentation/bloc/quizlet_detail/quizlet_detail_bloc.dart'
     as _i518;
 import '../../features/schedule/data/datasources/schedule_local_datasource.dart'
@@ -353,11 +361,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i711.ExamPlayBloc>(
       () => _i711.ExamPlayBloc(gh<_i891.SubmitExamResultUseCase>()),
     );
+    gh.lazySingleton<_i743.CreateQuizletUseCase>(
+      () => _i743.CreateQuizletUseCase(gh<_i718.QuizletRepository>()),
+    );
+    gh.lazySingleton<_i231.DeleteQuizletUseCase>(
+      () => _i231.DeleteQuizletUseCase(gh<_i718.QuizletRepository>()),
+    );
     gh.lazySingleton<_i595.GetQuizletDetailUseCase>(
       () => _i595.GetQuizletDetailUseCase(gh<_i718.QuizletRepository>()),
     );
     gh.lazySingleton<_i1064.GetQuizletsUseCase>(
       () => _i1064.GetQuizletsUseCase(gh<_i718.QuizletRepository>()),
+    );
+    gh.lazySingleton<_i600.UpdateQuizletUseCase>(
+      () => _i600.UpdateQuizletUseCase(gh<_i718.QuizletRepository>()),
     );
     gh.factory<_i591.ExamDetailBloc>(
       () => _i591.ExamDetailBloc(gh<_i1072.GetExamDetailUseCase>()),
@@ -371,9 +388,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i798.UpdateProfileUseCase>(),
         gh<_i992.AuthLocalDatasource>(),
       ),
-    );
-    gh.factory<_i252.QuizletBloc>(
-      () => _i252.QuizletBloc(gh<_i1064.GetQuizletsUseCase>()),
     );
     gh.factory<_i104.ForgotPasswordCubit>(
       () => _i104.ForgotPasswordCubit(gh<_i560.ForgotPasswordUseCase>()),
@@ -456,6 +470,20 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i518.QuizletDetailBloc>(
       () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
+    );
+    gh.factory<_i252.QuizletBloc>(
+      () => _i252.QuizletBloc(
+        gh<_i1064.GetQuizletsUseCase>(),
+        gh<_i231.DeleteQuizletUseCase>(),
+      ),
+    );
+    gh.factory<_i496.QuizletCreateBloc>(
+      () => _i496.QuizletCreateBloc(
+        gh<_i743.CreateQuizletUseCase>(),
+        gh<_i600.UpdateQuizletUseCase>(),
+        gh<_i595.GetQuizletDetailUseCase>(),
+        gh<_i181.GetSubjectsUseCase>(),
+      ),
     );
     gh.lazySingleton<_i202.HomeBloc>(
       () => _i202.HomeBloc(

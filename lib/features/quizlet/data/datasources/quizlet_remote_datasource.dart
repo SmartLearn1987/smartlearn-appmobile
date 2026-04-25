@@ -17,4 +17,16 @@ abstract class QuizletRemoteDatasource {
 
   @GET('/quizlets/{id}')
   Future<QuizletDetailModel> getQuizletDetail(@Path('id') String id);
+
+  @POST('/quizlets')
+  Future<void> createQuizlet(@Body() Map<String, dynamic> body);
+
+  @PUT('/quizlets/{id}')
+  Future<void> updateQuizlet(
+    @Path('id') String id,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/quizlets/{id}')
+  Future<void> deleteQuizlet(@Path('id') String id);
 }

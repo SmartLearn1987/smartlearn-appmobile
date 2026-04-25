@@ -97,8 +97,14 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('Bạn chưa chọn môn học nào'), findsOneWidget);
-      expect(find.text('Thiết lập môn học'), findsOneWidget);
+      expect(
+        find.text('Bạn chưa chọn môn học nào để đưa vào sổ tay.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Bấm vào đây để cấu hình Thiết định môn học nhé'),
+        findsOneWidget,
+      );
     });
   });
 }

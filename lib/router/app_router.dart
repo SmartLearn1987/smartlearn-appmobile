@@ -32,6 +32,8 @@ import 'package:smart_learn/features/cdtn_play/presentation/pages/cdtn_play_scre
 import 'package:smart_learn/features/hcb_play/presentation/pages/hcb_play_screen.dart';
 import 'package:smart_learn/features/home/domain/entities/learning_question_entity.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_detail_page.dart';
+import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_create_page.dart';
+import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_edit_page.dart';
 import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_list_page.dart';
 import 'package:smart_learn/features/lessons/presentation/pages/lesson_form_page.dart';
 import 'package:smart_learn/features/lessons/presentation/pages/lesson_management_page.dart';
@@ -226,6 +228,21 @@ class AppRouter {
             final entity = state.extra as DictationEntity?;
             if (entity == null) return const _RedirectToHome();
             return DictationPlayScreen(entity: entity);
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.quizletCreate,
+          name: RouteNames.quizletCreate,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const QuizletCreatePage(),
+        ),
+        GoRoute(
+          path: RoutePaths.quizletEditTemplate,
+          name: RouteNames.quizletEdit,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return QuizletEditPage(quizletId: id);
           },
         ),
         GoRoute(

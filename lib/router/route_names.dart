@@ -12,6 +12,8 @@ abstract final class RoutePaths {
   static const subjects = '/subjects';
   static const schedule = '/schedule';
   static const quizlet = '/quizlet';
+  static const quizletCreate = '/quizlet/create';
+  static const quizletEditTemplate = '/quizlet/edit/:id';
   static const quizzes = '/quizzes';
   static const profile = '/profile';
   static const pictogramGame = '/pictogram-game';
@@ -46,6 +48,7 @@ abstract final class RoutePaths {
       '/subjects/$subjectId/edit-curriculum/$curriculumId';
 
   static String quizletDetail(String id) => '/quizlet/$id';
+  static String quizletEdit(String id) => '/quizlet/edit/$id';
 
   static String examDetail(String id) => '/exams/$id';
 
@@ -79,6 +82,8 @@ abstract final class RouteNames {
   static const editCurriculum = 'editCurriculum';
   static const schedule = 'schedule';
   static const quizlet = 'quizlet';
+  static const quizletCreate = 'quizletCreate';
+  static const quizletEdit = 'quizletEdit';
   static const quizletDetail = 'quizletDetail';
   static const quizzes = 'quizzes';
   static const examDetail = 'examDetail';
