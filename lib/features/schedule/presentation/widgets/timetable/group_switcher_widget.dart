@@ -105,72 +105,66 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
 
   Widget _buildInlineInput(BuildContext context) {
     return SizedBox(
+      height: 40,
       width: 180,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: AppBorders.borderRadiusFull,
-          border: Border.all(color: AppColors.primary),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _nameController,
-                  autofocus: true,
-                  style: AppTypography.labelSmall,
-                  decoration: const InputDecoration(
-                    hintText: 'Tên nhóm mới',
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.only(right: AppSpacing.sm),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _nameController,
+                autofocus: true,
+                style: AppTypography.labelSmall,
+                decoration: const InputDecoration(
+                  hintText: 'Tên nhóm mới',
+                  border: InputBorder.none,
+                  isDense: true,
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  final cubit = context.read<TimetableCubit>();
-                  final name = _nameController.text;
-                  if (name.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vui lòng nhập tên loại'),
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                    return;
-                  }
-                  cubit.addGroup(name);
-                  _nameController.clear();
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            GestureDetector(
+              onTap: () {
+                final cubit = context.read<TimetableCubit>();
+                final name = _nameController.text;
+                if (name.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Đã thêm loại thời khóa biểu mới'),
+                      content: Text('Vui lòng nhập tên loại'),
                       duration: Duration(seconds: 3),
                     ),
                   );
-                },
-                child: const Icon(
-                  Icons.check,
-                  size: 18,
-                  color: AppColors.primary,
-                ),
+                  return;
+                }
+                cubit.addGroup(name);
+                _nameController.clear();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã thêm loại thời khóa biểu mới'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.check,
+                size: 18,
+                color: AppColors.primary,
               ),
-              const SizedBox(width: AppSpacing.xs),
-              GestureDetector(
-                onTap: () {
-                  _nameController.clear();
-                  context.read<TimetableCubit>().toggleAddGroup();
-                },
-                child: const Icon(
-                  Icons.close,
-                  size: 18,
-                  color: AppColors.mutedForeground,
-                ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            GestureDetector(
+              onTap: () {
+                _nameController.clear();
+                context.read<TimetableCubit>().toggleAddGroup();
+              },
+              child: const Icon(
+                Icons.close,
+                size: 18,
+                color: AppColors.mutedForeground,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -210,10 +204,7 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
                 ),
               );
             },
-            child: Text(
-              'Xóa',
-              style: TextStyle(color: AppColors.destructive),
-            ),
+            child: Text('Xóa', style: TextStyle(color: AppColors.destructive)),
           ),
         ],
       ),
