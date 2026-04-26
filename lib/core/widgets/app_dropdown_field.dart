@@ -14,6 +14,8 @@ class AppDropdownField<T> extends StatelessWidget {
     this.label,
     this.hintText,
     this.enabled = true,
+    this.validator,
+    this.autovalidateMode,
   });
 
   final List<DropdownMenuItem<T>> items;
@@ -22,6 +24,8 @@ class AppDropdownField<T> extends StatelessWidget {
   final String? label;
   final String? hintText;
   final bool enabled;
+  final String? Function(T?)? validator;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,8 @@ class AppDropdownField<T> extends StatelessWidget {
           value: value,
           items: items,
           onChanged: enabled ? onChanged : null,
+          validator: validator,
+          autovalidateMode: autovalidateMode,
           isExpanded: true,
           style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
           icon: const Icon(

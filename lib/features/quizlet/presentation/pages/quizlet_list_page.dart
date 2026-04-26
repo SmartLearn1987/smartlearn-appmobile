@@ -175,7 +175,16 @@ class _LoadedView extends StatelessWidget {
                       if (isPersonal) ...[
                         const SizedBox(width: AppSpacing.sm),
                         ElevatedButton.icon(
-                          onPressed: () => context.push('/quizlet/create'),
+                          onPressed: () async {
+                            final shouldRefresh = await context.push<bool>(
+                              '/quizlet/create',
+                            );
+                            if (shouldRefresh == true && context.mounted) {
+                              context.read<QuizletBloc>().add(
+                                const RefreshQuizlets(),
+                              );
+                            }
+                          },
                           label: const Icon(Icons.add),
                         ),
                       ],
@@ -203,8 +212,16 @@ class _LoadedView extends StatelessWidget {
                             if (isPersonal) ...[
                               const SizedBox(height: AppSpacing.sm),
                               TextButton(
-                                onPressed: () =>
-                                    context.push('/quizlet/create'),
+                                onPressed: () async {
+                                  final shouldRefresh = await context
+                                      .push<bool>('/quizlet/create');
+                                  if (shouldRefresh == true &&
+                                      context.mounted) {
+                                    context.read<QuizletBloc>().add(
+                                      const RefreshQuizlets(),
+                                    );
+                                  }
+                                },
                                 child: const Text(
                                   'Tạo học phần đầu tiên của bạn',
                                 ),
@@ -271,26 +288,41 @@ class _LoadedView extends StatelessWidget {
                                   onTap: () => context.push(
                                     RoutePaths.quizletDetail(quizlet.id),
                                   ),
-                                  onEdit: () => context.push(
-                                    '/quizlet/edit/${quizlet.id}',
-                                  ),
+                                  onEdit: () async {
+                                    final shouldRefresh = await context
+                                        .push<bool>(
+                                          '/quizlet/edit/${quizlet.id}',
+                                        );
+                                    if (shouldRefresh == true &&
+                                        context.mounted) {
+                                      context.read<QuizletBloc>().add(
+                                        const RefreshQuizlets(),
+                                      );
+                                    }
+                                  },
                                   onDelete: () async {
                                     final confirmDelete = await showDialog<bool>(
                                       context: context,
-                                      builder: (_) => AlertDialog(
+                                      builder: (dialogContext) => AlertDialog(
                                         title: const Text('Xác nhận'),
                                         content: const Text(
                                           'Bạn có chắc chắn muốn xóa học phần này?',
                                         ),
                                         actions: [
                                           TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, false),
+                                            onPressed: () => Navigator.of(
+                                              dialogContext,
+                                            ).pop(false),
                                             child: const Text('Hủy'),
                                           ),
                                           TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, true),
+                                            onPressed: () => Navigator.of(
+                                              dialogContext,
+                                            ).pop(true),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  AppColors.destructive,
+                                            ),
                                             child: const Text('Xóa'),
                                           ),
                                         ],

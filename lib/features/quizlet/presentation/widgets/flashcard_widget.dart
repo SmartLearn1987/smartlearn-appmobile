@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_cached_image.dart';
@@ -48,10 +47,7 @@ class _FlashcardWidgetState extends State<FlashcardWidget>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     if (widget.isFlipped) {
       _controller.value = 1.0;
@@ -106,26 +102,25 @@ class _FlashcardWidgetState extends State<FlashcardWidget>
 
 /// Front side of the flashcard showing the term and optional image.
 class _FlashcardFront extends StatelessWidget {
-  const _FlashcardFront({
-    required this.term,
-    this.imageUrl,
-  });
+  const _FlashcardFront({required this.term, this.imageUrl});
 
   final String term;
   final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = _adaptiveFontSize(term, context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusXl,
-        boxShadow: AppShadows.card,
+        borderRadius: AppBorders.borderRadiusMd,
+        border: Border.all(color: AppColors.border),
       ),
       child: SizedBox(
         width: double.infinity,
         child: Padding(
-          padding: AppSpacing.paddingLg,
+          padding: AppSpacing.paddingMd,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -141,7 +136,8 @@ class _FlashcardFront extends StatelessWidget {
               Text(
                 term,
                 style: AppTypography.h3.copyWith(
-                  color: AppColors.foreground,
+                  color: AppColors.destructive,
+                  fontSize: fontSize,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -164,24 +160,27 @@ class _FlashcardBack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = _adaptiveFontSize(definition, context);
+
     return Transform(
       alignment: Alignment.center,
       transform: Matrix4.identity()..rotateY(pi),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: AppBorders.borderRadiusXl,
-          boxShadow: AppShadows.card,
+          color: AppColors.card,
+          borderRadius: AppBorders.borderRadiusMd,
+          border: Border.all(color: AppColors.border),
         ),
         child: SizedBox(
           width: double.infinity,
           child: Padding(
-            padding: AppSpacing.paddingLg,
+            padding: AppSpacing.paddingMd,
             child: Center(
               child: Text(
                 definition,
                 style: AppTypography.h3.copyWith(
-                  color: AppColors.primaryForeground,
+                  color: Colors.blue.shade700,
+                  fontSize: fontSize,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -191,4 +190,20 @@ class _FlashcardBack extends StatelessWidget {
       ),
     );
   }
+}
+
+double _adaptiveFontSize(String text, BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  var size = width < 380 ? 26.0 : 32.0;
+  final length = text.trim().length;
+
+  if (length > 120) {
+    size = width < 380 ? 16 : 18;
+  } else if (length > 70) {
+    size = width < 380 ? 18 : 22;
+  } else if (length > 40) {
+    size = width < 380 ? 20 : 26;
+  }
+
+  return size;
 }
