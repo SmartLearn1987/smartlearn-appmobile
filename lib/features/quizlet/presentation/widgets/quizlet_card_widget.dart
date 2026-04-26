@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_shadows.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/text_style_extensions.dart';
 import 'package:smart_learn/features/quizlet/domain/entities/quizlet_entity.dart';
 import 'package:smart_learn/features/quizlet/presentation/helpers/quizlet_filter_helper.dart';
 
@@ -43,15 +45,29 @@ class QuizletCardWidget extends StatelessWidget {
         ),
         padding: AppSpacing.paddingCard,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.gray400.withValues(alpha: 0.1),
+                  ),
+                  child: Icon(
+                    LucideIcons.layers,
+                    size: AppSpacing.mdLg,
+                    color: AppColors.gray400,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     quizlet.title,
-                    style: AppTypography.labelLarge.copyWith(
+                    style: AppTypography.bodyLarge.bold.copyWith(
                       color: AppColors.foreground,
                     ),
                     maxLines: 2,
@@ -77,81 +93,104 @@ class QuizletCardWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (showVisibilityIcon)
-                  Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.sm),
-                    child: Icon(
-                      quizlet.isPublic ? Icons.visibility : Icons.visibility_off,
+                Row(
+                  children: [
+                    if (showVisibilityIcon)
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: quizlet.isPublic
+                                ? AppColors.blue600
+                                : AppColors.secondary,
+                            width: AppBorders.widthThin,
+                          ),
+                          color: quizlet.isPublic
+                              ? AppColors.blue600Light
+                              : AppColors.secondaryLight,
+                        ),
+                        child: Icon(
+                          quizlet.isPublic
+                              ? LucideIcons.eye
+                              : LucideIcons.eyeOff,
+                          size: AppSpacing.mdLg,
+                          color: quizlet.isPublic
+                              ? AppColors.blue600
+                              : AppColors.secondary,
+                        ),
+                      ),
+                    if (showMenu)
+                      PopupMenuButton<String>(
+                        icon: const Icon(LucideIcons.moreVertical),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            onEdit();
+                          } else if (value == 'delete') {
+                            onDelete();
+                          }
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem<String>(
+                            value: 'edit',
+                            child: ListTile(
+                              leading: Icon(LucideIcons.edit),
+                              title: Text('Chỉnh sửa'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'delete',
+                            child: ListTile(
+                              leading: Icon(LucideIcons.trash),
+                              title: Text('Xóa học phần'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(height: AppSpacing.mdLg),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.style_outlined,
                       size: AppSpacing.md,
                       color: AppColors.mutedForeground,
                     ),
-                  ),
-                if (showMenu)
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        onEdit();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem<String>(
-                        value: 'edit',
-                        child: ListTile(
-                          leading: Icon(Icons.edit),
-                          title: Text('Chỉnh sửa'),
-                          contentPadding: EdgeInsets.zero,
-                        ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${quizlet.termCount} thuật ngữ',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.mutedForeground,
                       ),
-                      PopupMenuItem<String>(
-                        value: 'delete',
-                        child: ListTile(
-                          leading: Icon(Icons.delete_outline),
-                          title: Text('Xóa học phần'),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              quizlet.subjectName ?? '',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Icon(
-                  Icons.style_outlined,
-                  size: AppSpacing.md,
-                  color: AppColors.mutedForeground,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '${quizlet.termCount} thuật ngữ',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.mutedForeground,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Icon(
-                  Icons.person_outline,
-                  size: AppSpacing.md,
-                  color: AppColors.mutedForeground,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    quizlet.authorName,
-                    style: AppTypography.caption.copyWith(
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: AppSpacing.md,
                       color: AppColors.mutedForeground,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      quizlet.authorName,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.mutedForeground,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ],
             ),

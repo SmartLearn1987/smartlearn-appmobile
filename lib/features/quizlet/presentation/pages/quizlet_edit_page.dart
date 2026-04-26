@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_learn/app/di/injection.dart';
+import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
+import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
+import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/quizlet/domain/usecases/delete_quizlet_use_case.dart';
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
@@ -38,16 +41,16 @@ class _QuizletEditView extends StatelessWidget {
             previous.errorMessage != current.errorMessage,
         listener: (context, state) {
           if (state.isSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã lưu thành công!')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Đã lưu thành công!')));
             context.go('/quizlet');
             return;
           }
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         child: BlocBuilder<QuizletCreateBloc, QuizletCreateState>(
@@ -60,31 +63,22 @@ class _QuizletEditView extends StatelessWidget {
             return ListView(
               padding: AppSpacing.paddingMd,
               children: [
-                TextFormField(
+                AppTextField(
                   key: const Key('quizlet_edit_title_field'),
                   initialValue: state.title,
-                  decoration: const InputDecoration(
-                    labelText: 'Tiêu đề *',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Tiêu đề *',
                   onChanged: (value) => bloc.add(UpdateTitle(value)),
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                TextFormField(
+                AppTextField(
                   initialValue: state.description,
-                  decoration: const InputDecoration(
-                    labelText: 'Mô tả',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Mô tả',
                   onChanged: (value) => bloc.add(UpdateDescription(value)),
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<bool>(
-                  initialValue: state.isPublic,
-                  decoration: const InputDecoration(
-                    labelText: 'Chế độ hiển thị',
-                    border: OutlineInputBorder(),
-                  ),
+                AppDropdownField<bool>(
+                  value: state.isPublic,
+                  label: 'Chế độ hiển thị',
                   items: const [
                     DropdownMenuItem(
                       value: true,
@@ -99,12 +93,9 @@ class _QuizletEditView extends StatelessWidget {
                       value != null ? bloc.add(ToggleVisibility(value)) : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<String>(
-                  initialValue: state.selectedSubjectId,
-                  decoration: const InputDecoration(
-                    labelText: 'Môn học',
-                    border: OutlineInputBorder(),
-                  ),
+                AppDropdownField<String>(
+                  value: state.selectedSubjectId,
+                  label: 'Môn học',
                   items: state.subjects
                       .map(
                         (subject) => DropdownMenuItem<String>(
@@ -117,12 +108,9 @@ class _QuizletEditView extends StatelessWidget {
                       value != null ? bloc.add(SelectSubject(value)) : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<String>(
-                  initialValue: state.educationLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'Cấp học',
-                    border: OutlineInputBorder(),
-                  ),
+                AppDropdownField<String>(
+                  value: state.educationLevel,
+                  label: 'Cấp học',
                   items: EducationLevel.values
                       .map(
                         (level) => DropdownMenuItem<String>(
@@ -136,12 +124,9 @@ class _QuizletEditView extends StatelessWidget {
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                TextFormField(
+                AppTextField(
                   initialValue: state.grade,
-                  decoration: const InputDecoration(
-                    labelText: 'Lớp',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Lớp',
                   onChanged: (value) => bloc.add(UpdateGrade(value)),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -179,8 +164,8 @@ class _QuizletEditView extends StatelessWidget {
                           );
                           if (csvContent != null && context.mounted) {
                             context.read<QuizletCreateBloc>().add(
-                                  ImportCards(csvContent),
-                                );
+                              ImportCards(csvContent),
+                            );
                           }
                         },
                         icon: const Icon(Icons.upload_file_outlined),
@@ -204,8 +189,12 @@ class _QuizletEditView extends StatelessWidget {
                       : const Text('Lưu thay đổi'),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
+                ElevatedButton.icon(
                   key: const Key('delete_quizlet_button'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.destructive,
+                    foregroundColor: AppColors.destructiveForeground,
+                  ),
                   onPressed: () async {
                     final confirmDelete = await showDialog<bool>(
                       context: context,
@@ -239,9 +228,9 @@ class _QuizletEditView extends StatelessWidget {
                       return;
                     }
                     result.fold(
-                      (failure) => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(failure.message)),
-                      ),
+                      (failure) => ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(failure.message))),
                       (_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Đã xóa học phần')),

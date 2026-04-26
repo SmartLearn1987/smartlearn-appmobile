@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../../core/usecase/usecase.dart';
 import '../../../domain/entities/quizlet_entity.dart';
 import '../../../domain/usecases/delete_quizlet_use_case.dart';
 import '../../../domain/usecases/get_quizlets_use_case.dart';
@@ -15,8 +14,6 @@ part 'quizlet_state.dart';
 class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
   final GetQuizletsUseCase _getQuizlets;
   final DeleteQuizletUseCase _deleteQuizlet;
-  String _currentUserId = '';
-  String? _currentUserEducationLevel;
 
   QuizletBloc(this._getQuizlets, this._deleteQuizlet)
     : super(const QuizletInitial()) {
@@ -33,50 +30,44 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
     Emitter<QuizletState> emit,
   ) async {
     emit(const QuizletLoading());
-    await _fetchQuizlets(emit);
+    await _fetchQuizlets(emit, viewMode: ViewMode.community);
   }
 
   Future<void> _onRefreshQuizlets(
     RefreshQuizlets event,
     Emitter<QuizletState> emit,
   ) async {
-    emit(const QuizletLoading());
-    await _fetchQuizlets(emit);
+    final currentState = state;
+    final isLoaded = currentState is QuizletLoaded;
+    final viewMode = isLoaded ? currentState.viewMode : ViewMode.community;
+    final searchQuery = isLoaded ? currentState.searchQuery : '';
+
+    if (isLoaded) {
+      emit(currentState.copyWith(isFetching: true));
+    } else {
+      emit(const QuizletLoading());
+    }
+    await _fetchQuizlets(emit, viewMode: viewMode, searchQuery: searchQuery);
   }
 
   Future<void> _onSyncUserContext(
     SyncUserContext event,
     Emitter<QuizletState> emit,
   ) async {
-    _currentUserId = event.userId;
-    _currentUserEducationLevel = event.educationLevel;
-
-    final currentState = state;
-    if (currentState is! QuizletLoaded) {
-      return;
-    }
-
-    emit(
-      currentState.copyWith(
-        filteredQuizlets: _applyFilters(
-          allQuizlets: currentState.allQuizlets,
-          viewMode: currentState.viewMode,
-          searchQuery: currentState.searchQuery,
-        ),
-      ),
-    );
+    // User context is currently consumed by UI and API auth, no local filtering.
   }
 
-  Future<void> _fetchQuizlets(Emitter<QuizletState> emit) async {
-    final result = await _getQuizlets(const NoParams());
+  Future<void> _fetchQuizlets(
+    Emitter<QuizletState> emit, {
+    required ViewMode viewMode,
+    String searchQuery = '',
+  }) async {
+    final result = await _getQuizlets(_toApiTab(viewMode));
     result.fold((failure) => emit(QuizletError(message: failure.message)), (
       quizlets,
     ) {
-      const viewMode = ViewMode.community;
-      const searchQuery = '';
       final filteredQuizlets = _applyFilters(
         allQuizlets: quizlets,
-        viewMode: viewMode,
         searchQuery: searchQuery,
       );
       emit(
@@ -85,10 +76,14 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
           filteredQuizlets: filteredQuizlets,
           viewMode: viewMode,
           searchQuery: searchQuery,
+          isFetching: false,
         ),
       );
     });
   }
+
+  String _toApiTab(ViewMode viewMode) =>
+      viewMode == ViewMode.personal ? 'personal' : 'community';
 
   Future<void> _onChangeViewMode(
     ChangeViewMode event,
@@ -99,15 +94,15 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
       return;
     }
 
-    emit(
-      currentState.copyWith(
-        viewMode: event.viewMode,
-        filteredQuizlets: _applyFilters(
-          allQuizlets: currentState.allQuizlets,
-          viewMode: event.viewMode,
-          searchQuery: currentState.searchQuery,
-        ),
-      ),
+    if (event.viewMode == currentState.viewMode) {
+      return;
+    }
+
+    emit(currentState.copyWith(viewMode: event.viewMode, isFetching: true));
+    await _fetchQuizlets(
+      emit,
+      viewMode: event.viewMode,
+      searchQuery: currentState.searchQuery,
     );
   }
 
@@ -125,7 +120,6 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
         searchQuery: event.query,
         filteredQuizlets: _applyFilters(
           allQuizlets: currentState.allQuizlets,
-          viewMode: currentState.viewMode,
           searchQuery: event.query,
         ),
       ),
@@ -151,7 +145,6 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
           allQuizlets: updatedAllQuizlets,
           filteredQuizlets: _applyFilters(
             allQuizlets: updatedAllQuizlets,
-            viewMode: currentState.viewMode,
             searchQuery: currentState.searchQuery,
           ),
         ),
@@ -161,15 +154,8 @@ class QuizletBloc extends Bloc<QuizletEvent, QuizletState> {
 
   List<QuizletEntity> _applyFilters({
     required List<QuizletEntity> allQuizlets,
-    required ViewMode viewMode,
     required String searchQuery,
   }) {
-    return filterQuizlets(
-      allQuizlets: allQuizlets,
-      viewMode: viewMode,
-      currentUserId: _currentUserId,
-      currentUserEducationLevel: _currentUserEducationLevel,
-      searchQuery: searchQuery,
-    );
+    return filterQuizlets(allQuizlets: allQuizlets, searchQuery: searchQuery);
   }
 }

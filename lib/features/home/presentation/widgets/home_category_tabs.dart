@@ -35,47 +35,86 @@ class HomeCategoryTabs extends StatelessWidget {
           boxShadow: AppShadows.tab,
         ),
         padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Row(
-          children: List.generate(_tabs.length, (index) {
-            final tab = _tabs[index];
-            final isSelected = selectedIndex == index;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onChanged(index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(AppSpacing.smMd),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                    borderRadius: AppBorders.borderRadiusLg,
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        tab.icon,
-                        size: 18,
-                        color: isSelected
-                            ? AppColors.primaryForeground
-                            : AppColors.mutedForeground,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        tab.label,
-                        style: AppTypography.buttonMedium.copyWith(
-                          color: isSelected
-                              ? AppColors.primaryForeground
-                              : AppColors.mutedForeground,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tabWidth = constraints.maxWidth / _tabs.length;
+            return Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  left: tabWidth * selectedIndex,
+                  top: 0,
+                  bottom: 0,
+                  width: tabWidth,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: AppBorders.borderRadiusLg,
+                    ),
                   ),
                 ),
-              ),
+                Row(
+                  children: List.generate(_tabs.length, (index) {
+                    final tab = _tabs[index];
+                    final isSelected = selectedIndex == index;
+                    return Expanded(
+                      child: InkWell(
+                        borderRadius: AppBorders.borderRadiusLg,
+                        onTap: () => onChanged(index),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.smMd),
+                          child: Column(
+                            children: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 220),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                transitionBuilder: (child, animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: ScaleTransition(
+                                      scale: Tween<double>(
+                                        begin: 0.95,
+                                        end: 1,
+                                      ).animate(animation),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  tab.icon,
+                                  key: ValueKey('${tab.label}-$isSelected'),
+                                  size: 18,
+                                  color: isSelected
+                                      ? AppColors.primaryForeground
+                                      : AppColors.mutedForeground,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOut,
+                                style: AppTypography.buttonMedium.copyWith(
+                                  color: isSelected
+                                      ? AppColors.primaryForeground
+                                      : AppColors.mutedForeground,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                ),
+                                child: Text(tab.label),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             );
-          }),
+          },
         ),
       ),
     );

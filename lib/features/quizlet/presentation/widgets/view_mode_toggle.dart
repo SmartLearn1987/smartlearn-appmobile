@@ -23,6 +23,8 @@ class ViewModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeIndex = _tabs.indexWhere((tab) => tab.mode == value);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card.withValues(alpha: 0.8),
@@ -31,34 +33,54 @@ class ViewModeToggle extends StatelessWidget {
         boxShadow: AppShadows.tab,
       ),
       padding: const EdgeInsets.all(AppSpacing.xs),
-      child: Row(
-        children: List.generate(_tabs.length, (index) {
-          final tab = _tabs[index];
-          final isActive = value == tab.mode;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(tab.mode),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(AppSpacing.smMd),
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : Colors.transparent,
-                  borderRadius: AppBorders.borderRadiusLg,
-                ),
-                child: Text(
-                  tab.label,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.buttonMedium.copyWith(
-                    color: isActive
-                        ? AppColors.primaryForeground
-                        : AppColors.mutedForeground,
-                    fontWeight: FontWeight.w700,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tabWidth = constraints.maxWidth / _tabs.length;
+          return Stack(
+            children: [
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutCubic,
+                left: tabWidth * activeIndex,
+                top: 0,
+                bottom: 0,
+                width: tabWidth,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: AppBorders.borderRadiusLg,
                   ),
                 ),
               ),
-            ),
+              Row(
+                children: List.generate(_tabs.length, (index) {
+                  final tab = _tabs[index];
+                  final isActive = activeIndex == index;
+                  return Expanded(
+                    child: InkWell(
+                      borderRadius: AppBorders.borderRadiusLg,
+                      onTap: () => onChanged(tab.mode),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.smMd),
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOut,
+                          style: AppTypography.buttonMedium.copyWith(
+                            color: isActive
+                                ? AppColors.primaryForeground
+                                : AppColors.mutedForeground,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          child: Text(tab.label, textAlign: TextAlign.center),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           );
-        }),
+        },
       ),
     );
   }

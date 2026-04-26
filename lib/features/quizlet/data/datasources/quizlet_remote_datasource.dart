@@ -13,7 +13,7 @@ abstract class QuizletRemoteDatasource {
   factory QuizletRemoteDatasource(Dio dio) = _QuizletRemoteDatasource;
 
   @GET('/quizlets')
-  Future<List<QuizletModel>> getQuizlets();
+  Future<List<QuizletModel>> getQuizlets(@Query('tab') String tab);
 
   @GET('/quizlets/{id}')
   Future<QuizletDetailModel> getQuizletDetail(@Path('id') String id);

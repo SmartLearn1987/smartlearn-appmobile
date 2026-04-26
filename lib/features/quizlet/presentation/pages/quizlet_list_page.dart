@@ -28,12 +28,7 @@ class QuizletListPage extends StatelessWidget {
 
     return BlocProvider<QuizletBloc>(
       create: (_) => getIt<QuizletBloc>()
-        ..add(
-          SyncUserContext(
-            userId: userId,
-            educationLevel: educationLevel,
-          ),
-        )
+        ..add(SyncUserContext(userId: userId, educationLevel: educationLevel))
         ..add(const LoadQuizlets()),
       child: _QuizletListView(currentUserId: userId),
     );
@@ -60,9 +55,27 @@ class _QuizletListView extends StatelessWidget {
           if (current is QuizletError) {
             return true;
           }
-          return previous is QuizletLoaded &&
-              current is QuizletLoaded &&
-              current.allQuizlets.length < previous.allQuizlets.length;
+          if (previous is! QuizletLoaded || current is! QuizletLoaded) {
+            return false;
+          }
+
+          // Only show delete success when the list shrinks without background
+          // fetching transitions (e.g. tab switch/refetch), and exactly one item
+          // from previous list is removed.
+          if (previous.isFetching || current.isFetching) {
+            return false;
+          }
+
+          if (current.allQuizlets.length != previous.allQuizlets.length - 1) {
+            return false;
+          }
+
+          final currentIds = current.allQuizlets.map((q) => q.id).toSet();
+          final removedCount = previous.allQuizlets
+              .where((q) => !currentIds.contains(q.id))
+              .length;
+
+          return removedCount == 1;
         },
         listener: (context, state) {
           if (state is QuizletError) {
@@ -120,10 +133,7 @@ class _LoadedView extends StatelessWidget {
   final QuizletLoaded state;
   final String currentUserId;
 
-  const _LoadedView({
-    required this.state,
-    required this.currentUserId,
-  });
+  const _LoadedView({required this.state, required this.currentUserId});
 
   @override
   Widget build(BuildContext context) {
@@ -132,168 +142,187 @@ class _LoadedView extends StatelessWidget {
     );
     final isPersonal = state.viewMode == ViewMode.personal;
 
-    return Column(
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.mdLg,
-            AppSpacing.md,
-            AppSpacing.mdLg,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            children: [
-              ViewModeToggle(
-                value: state.viewMode,
-                onChanged: (mode) =>
-                    context.read<QuizletBloc>().add(ChangeViewMode(mode)),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.mdLg,
+                AppSpacing.md,
+                AppSpacing.mdLg,
+                AppSpacing.sm,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: AppTextField(
-                      onChanged: (query) => context.read<QuizletBloc>().add(
-                        SearchQuizlets(query),
-                      ),
-                      hintText: 'Tìm kiếm học phần...',
-                      prefixIcon: Icons.search,
-                    ),
+                  ViewModeToggle(
+                    value: state.viewMode,
+                    onChanged: (mode) =>
+                        context.read<QuizletBloc>().add(ChangeViewMode(mode)),
                   ),
-                  if (isPersonal) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    ElevatedButton.icon(
-                      onPressed: () => context.push('/quizlet/create'),
-                      label: const Icon(Icons.add),
-                    ),
-                  ],
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          onChanged: (query) => context.read<QuizletBloc>().add(
+                            SearchQuizlets(query),
+                          ),
+                          hintText: 'Tìm kiếm học phần...',
+                          prefixIcon: Icons.search,
+                        ),
+                      ),
+                      if (isPersonal) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        ElevatedButton.icon(
+                          onPressed: () => context.push('/quizlet/create'),
+                          label: const Icon(Icons.add),
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: state.filteredQuizlets.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: AppSpacing.paddingMd,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isPersonal
-                              ? 'Bạn chưa tạo học phần nào'
-                              : 'Chưa có bộ flashcard nào',
-                          style: AppTypography.bodyLarge.copyWith(
-                            color: AppColors.mutedForeground,
-                          ),
-                        ),
-                        if (isPersonal) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          TextButton(
-                            onPressed: () => context.push('/quizlet/create'),
-                            child: const Text('Tạo học phần đầu tiên của bạn'),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                )
-              : ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.mdLg,
-                    0,
-                    AppSpacing.mdLg,
-                    AppSpacing.mdLg,
-                  ),
-                  children: groupedQuizlets.entries.expand((levelEntry) {
-                    final widgets = <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: AppSpacing.md,
-                          bottom: AppSpacing.sm,
-                        ),
-                        child: Row(
+            ),
+            Expanded(
+              child: state.filteredQuizlets.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: AppSpacing.paddingMd,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.layers_outlined,
-                              size: AppSpacing.md,
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
                             Text(
-                              levelEntry.key,
-                              style: AppTypography.labelLarge,
+                              isPersonal
+                                  ? 'Bạn chưa tạo học phần nào'
+                                  : 'Chưa có bộ flashcard nào',
+                              style: AppTypography.bodyLarge.copyWith(
+                                color: AppColors.mutedForeground,
+                              ),
                             ),
+                            if (isPersonal) ...[
+                              const SizedBox(height: AppSpacing.sm),
+                              TextButton(
+                                onPressed: () =>
+                                    context.push('/quizlet/create'),
+                                child: const Text(
+                                  'Tạo học phần đầu tiên của bạn',
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                    ];
-
-                    for (final subjectEntry in levelEntry.value.entries) {
-                      widgets.add(
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                          child: Text(
-                            '${subjectEntry.key} (${subjectEntry.value.length})',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.mutedForeground,
-                            ),
-                          ),
-                        ),
-                      );
-                      widgets.addAll(
-                        subjectEntry.value.map(
-                          (quizlet) => Padding(
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.mdLg,
+                        0,
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                      ),
+                      children: groupedQuizlets.entries.expand((levelEntry) {
+                        final widgets = <Widget>[
+                          Padding(
                             padding: const EdgeInsets.only(
-                              bottom: AppSpacing.smMd,
+                              top: AppSpacing.md,
+                              bottom: AppSpacing.sm,
                             ),
-                            child: QuizletCardWidget(
-                              quizlet: quizlet,
-                              viewMode: state.viewMode,
-                              currentUserId: currentUserId,
-                              onTap: () => context.push(
-                                RoutePaths.quizletDetail(quizlet.id),
-                              ),
-                              onEdit: () =>
-                                  context.push('/quizlet/edit/${quizlet.id}'),
-                              onDelete: () async {
-                                final confirmDelete = await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text('Xác nhận'),
-                                    content: const Text(
-                                      'Bạn có chắc chắn muốn xóa học phần này?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                        child: const Text('Hủy'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const Text('Xóa'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirmDelete == true) {
-                                  context.read<QuizletBloc>().add(
-                                    DeleteQuizlet(quizlet.id),
-                                  );
-                                }
-                              },
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.layers_outlined,
+                                  size: AppSpacing.md,
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Text(
+                                  levelEntry.key,
+                                  style: AppTypography.labelLarge,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      );
-                    }
+                        ];
 
-                    return widgets;
-                  }).toList(),
-                ),
+                        for (final subjectEntry in levelEntry.value.entries) {
+                          widgets.add(
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.xs,
+                              ),
+                              child: Text(
+                                '${subjectEntry.key} (${subjectEntry.value.length})',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.mutedForeground,
+                                ),
+                              ),
+                            ),
+                          );
+                          widgets.addAll(
+                            subjectEntry.value.map(
+                              (quizlet) => Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.smMd,
+                                ),
+                                child: QuizletCardWidget(
+                                  quizlet: quizlet,
+                                  viewMode: state.viewMode,
+                                  currentUserId: currentUserId,
+                                  onTap: () => context.push(
+                                    RoutePaths.quizletDetail(quizlet.id),
+                                  ),
+                                  onEdit: () => context.push(
+                                    '/quizlet/edit/${quizlet.id}',
+                                  ),
+                                  onDelete: () async {
+                                    final confirmDelete = await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Xác nhận'),
+                                        content: const Text(
+                                          'Bạn có chắc chắn muốn xóa học phần này?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: const Text('Hủy'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            child: const Text('Xóa'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirmDelete == true) {
+                                      context.read<QuizletBloc>().add(
+                                        DeleteQuizlet(quizlet.id),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return widgets;
+                      }).toList(),
+                    ),
+            ),
+          ],
         ),
+        if (state.isFetching)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: AppColors.background.withValues(alpha: 0.6),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          ),
       ],
     );
   }

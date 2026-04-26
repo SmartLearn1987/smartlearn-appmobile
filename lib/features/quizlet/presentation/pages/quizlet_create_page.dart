@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
+import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
+import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/csv_import_dialog.dart';
@@ -40,9 +42,9 @@ class _QuizletCreateView extends StatelessWidget {
             return;
           }
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         child: BlocBuilder<QuizletCreateBloc, QuizletCreateState>(
@@ -51,33 +53,24 @@ class _QuizletCreateView extends StatelessWidget {
             return ListView(
               padding: AppSpacing.paddingMd,
               children: [
-                TextFormField(
+                AppTextField(
                   key: const Key('quizlet_title_field'),
                   initialValue: state.title,
-                  decoration: const InputDecoration(
-                    labelText: 'Tiêu đề *',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Tiêu đề *',
                   onChanged: (value) => bloc.add(UpdateTitle(value)),
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                TextFormField(
+                AppTextField(
                   key: const Key('quizlet_description_field'),
                   initialValue: state.description,
-                  decoration: const InputDecoration(
-                    labelText: 'Mô tả',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Mô tả',
                   onChanged: (value) => bloc.add(UpdateDescription(value)),
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<bool>(
+                AppDropdownField<bool>(
                   key: const Key('quizlet_visibility_field'),
-                  initialValue: state.isPublic,
-                  decoration: const InputDecoration(
-                    labelText: 'Chế độ hiển thị',
-                    border: OutlineInputBorder(),
-                  ),
+                  value: state.isPublic,
+                  label: 'Chế độ hiển thị',
                   items: const [
                     DropdownMenuItem(
                       value: true,
@@ -92,13 +85,10 @@ class _QuizletCreateView extends StatelessWidget {
                       value != null ? bloc.add(ToggleVisibility(value)) : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<String>(
+                AppDropdownField<String>(
                   key: const Key('quizlet_subject_field'),
-                  initialValue: state.selectedSubjectId,
-                  decoration: const InputDecoration(
-                    labelText: 'Môn học',
-                    border: OutlineInputBorder(),
-                  ),
+                  value: state.selectedSubjectId,
+                  label: 'Môn học',
                   items: state.subjects
                       .map(
                         (subject) => DropdownMenuItem<String>(
@@ -111,13 +101,10 @@ class _QuizletCreateView extends StatelessWidget {
                       value != null ? bloc.add(SelectSubject(value)) : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                DropdownButtonFormField<String>(
+                AppDropdownField<String>(
                   key: const Key('quizlet_education_level_field'),
-                  initialValue: state.educationLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'Cấp học',
-                    border: OutlineInputBorder(),
-                  ),
+                  value: state.educationLevel,
+                  label: 'Cấp học',
                   items: EducationLevel.values
                       .map(
                         (level) => DropdownMenuItem<String>(
@@ -131,13 +118,10 @@ class _QuizletCreateView extends StatelessWidget {
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.smMd),
-                TextFormField(
+                AppTextField(
                   key: const Key('quizlet_grade_field'),
                   initialValue: state.grade,
-                  decoration: const InputDecoration(
-                    labelText: 'Lớp',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Lớp',
                   onChanged: (value) => bloc.add(UpdateGrade(value)),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -175,8 +159,8 @@ class _QuizletCreateView extends StatelessWidget {
                           );
                           if (csvContent != null && context.mounted) {
                             context.read<QuizletCreateBloc>().add(
-                                  ImportCards(csvContent),
-                                );
+                              ImportCards(csvContent),
+                            );
                           }
                         },
                         icon: const Icon(Icons.upload_file_outlined),

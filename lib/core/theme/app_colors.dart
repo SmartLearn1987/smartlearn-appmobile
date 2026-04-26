@@ -38,5 +38,8 @@ abstract final class AppColors {
   static const Color accentLight = Color(0x182FA3D9);
   static const Color secondaryLight = Color(0x18F0943E);
   static const Color quizLight = Color(0x189645CC);
+  static const Color blue600Light = Color(0x182563EB);
   static const Color brandBrownLight = Color(0x18C08447);
+  static const Color gray400 = Color(0xFF9CA3AF);
+  static const Color blue600 = Color(0xFF2563EB);
 }

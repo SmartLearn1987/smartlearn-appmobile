@@ -16,6 +16,7 @@ class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
     this.controller,
+    this.initialValue,
     this.focusNode,
     this.label,
     this.hintText,
@@ -44,6 +45,7 @@ class AppTextField extends StatelessWidget {
   });
 
   final TextEditingController? controller;
+  final String? initialValue;
   final FocusNode? focusNode;
   final String? label;
   final String? hintText;
@@ -96,6 +98,7 @@ class AppTextField extends StatelessWidget {
         ],
         TextFormField(
           controller: controller,
+          initialValue: initialValue,
           focusNode: focusNode,
           obscureText: obscureText,
           enabled: enabled,
@@ -113,9 +116,7 @@ class AppTextField extends StatelessWidget {
           onTap: onTap,
           textCapitalization: textCapitalization,
           autovalidateMode: autovalidateMode,
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.foreground,
-          ),
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: AppTypography.bodyMedium.copyWith(
@@ -145,9 +146,15 @@ class AppTextField extends StatelessWidget {
             isDense: true,
             border: _border(AppColors.input),
             enabledBorder: _border(AppColors.input),
-            focusedBorder: _border(AppColors.primary, width: AppBorders.widthMedium),
+            focusedBorder: _border(
+              AppColors.primary,
+              width: AppBorders.widthMedium,
+            ),
             errorBorder: _border(AppColors.destructive),
-            focusedErrorBorder: _border(AppColors.destructive, width: AppBorders.widthMedium),
+            focusedErrorBorder: _border(
+              AppColors.destructive,
+              width: AppBorders.widthMedium,
+            ),
             disabledBorder: _border(AppColors.muted),
           ),
         ),
@@ -156,7 +163,11 @@ class AppTextField extends StatelessWidget {
   }
 
   Widget? _buildPrefix() {
-    if (prefix != null) return Padding(padding: const EdgeInsets.only(left: AppSpacing.md), child: prefix);
+    if (prefix != null)
+      return Padding(
+        padding: const EdgeInsets.only(left: AppSpacing.md),
+        child: prefix,
+      );
     if (prefixIcon != null) {
       return Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
@@ -167,7 +178,11 @@ class AppTextField extends StatelessWidget {
   }
 
   Widget? _buildSuffix() {
-    if (suffix != null) return Padding(padding: const EdgeInsets.only(right: AppSpacing.md), child: suffix);
+    if (suffix != null)
+      return Padding(
+        padding: const EdgeInsets.only(right: AppSpacing.md),
+        child: suffix,
+      );
     if (suffixIcon != null) {
       return Padding(
         padding: const EdgeInsets.only(right: AppSpacing.md),
@@ -177,9 +192,11 @@ class AppTextField extends StatelessWidget {
     return null;
   }
 
-  OutlineInputBorder _border(Color color, {double width = AppBorders.widthThin}) =>
-      OutlineInputBorder(
-        borderRadius: AppBorders.borderRadiusSm,
-        borderSide: BorderSide(color: color, width: width),
-      );
+  OutlineInputBorder _border(
+    Color color, {
+    double width = AppBorders.widthThin,
+  }) => OutlineInputBorder(
+    borderRadius: AppBorders.borderRadiusSm,
+    borderSide: BorderSide(color: color, width: width),
+  );
 }

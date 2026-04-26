@@ -115,6 +115,16 @@ class AppTheme {
 
     // ─── Input ───
     inputDecorationTheme: AppInputStyles.theme,
+    dropdownMenuTheme: DropdownMenuThemeData(
+      textStyle: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(AppColors.card),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
+        ),
+      ),
+      inputDecorationTheme: AppInputStyles.theme,
+    ),
 
     // ─── Divider ───
     dividerTheme: const DividerThemeData(

@@ -17,9 +17,11 @@ class QuizletRepositoryImpl implements QuizletRepository {
   QuizletRepositoryImpl(this.remoteDatasource);
 
   @override
-  Future<Either<Failure, List<QuizletEntity>>> getQuizlets() async {
+  Future<Either<Failure, List<QuizletEntity>>> getQuizlets({
+    required String tab,
+  }) async {
     try {
-      final result = await remoteDatasource.getQuizlets();
+      final result = await remoteDatasource.getQuizlets(tab);
       return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
@@ -43,7 +45,9 @@ class QuizletRepositoryImpl implements QuizletRepository {
   }
 
   @override
-  Future<Either<Failure, void>> createQuizlet(CreateQuizletParams params) async {
+  Future<Either<Failure, void>> createQuizlet(
+    CreateQuizletParams params,
+  ) async {
     try {
       await remoteDatasource.createQuizlet(params.toJson());
       return const Right(null);
@@ -55,7 +59,9 @@ class QuizletRepositoryImpl implements QuizletRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateQuizlet(UpdateQuizletParams params) async {
+  Future<Either<Failure, void>> updateQuizlet(
+    UpdateQuizletParams params,
+  ) async {
     try {
       await remoteDatasource.updateQuizlet(params.id, params.toJson());
       return const Right(null);

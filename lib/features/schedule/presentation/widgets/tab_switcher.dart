@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -16,9 +17,9 @@ class TabSwitcher extends StatelessWidget {
   final ValueChanged<int> onTabChanged;
 
   static const _tabs = [
-    _TabData(label: 'Thời khóa biểu', icon: Icons.calendar_today),
-    _TabData(label: 'Nhiệm vụ', icon: Icons.check_box_outlined),
-    _TabData(label: 'Ghi chú', icon: Icons.sticky_note_2_outlined),
+    _TabData(label: 'Thời khóa biểu', icon: LucideIcons.calendarDays),
+    _TabData(label: 'Nhiệm vụ', icon: LucideIcons.listChecks),
+    _TabData(label: 'Ghi chú', icon: LucideIcons.stickyNote),
   ];
 
   @override
@@ -30,56 +31,83 @@ class TabSwitcher extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xs + AppSpacing.xxs),
-        child: Row(
-          children: List.generate(_tabs.length, (index) {
-            final tab = _tabs[index];
-            final isSelected = index == selectedIndex;
-
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onTabChanged(index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.sm,
-                    horizontal: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.card : Colors.transparent,
-                    borderRadius: AppBorders.borderRadiusSm,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        tab.icon,
-                        size: 16,
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.mutedForeground,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Flexible(
-                        child: Text(
-                          tab.label,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: isSelected
-                                ? AppColors.foreground
-                                : AppColors.mutedForeground,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tabWidth = constraints.maxWidth / _tabs.length;
+            return Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  left: tabWidth * selectedIndex,
+                  top: 0,
+                  bottom: 0,
+                  width: tabWidth,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: AppBorders.borderRadiusSm,
+                    ),
                   ),
                 ),
-              ),
+                Row(
+                  children: List.generate(_tabs.length, (index) {
+                    final tab = _tabs[index];
+                    final isSelected = index == selectedIndex;
+
+                    return Expanded(
+                      child: InkWell(
+                        borderRadius: AppBorders.borderRadiusSm,
+                        onTap: () => onTabChanged(index),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                            horizontal: AppSpacing.xs,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 220),
+                                child: Icon(
+                                  tab.icon,
+                                  key: ValueKey('${tab.label}-$isSelected'),
+                                  size: 16,
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.mutedForeground,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Flexible(
+                                child: AnimatedDefaultTextStyle(
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOut,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: isSelected
+                                        ? AppColors.foreground
+                                        : AppColors.mutedForeground,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                  child: Text(
+                                    tab.label,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             );
-          }),
+          },
         ),
       ),
     );

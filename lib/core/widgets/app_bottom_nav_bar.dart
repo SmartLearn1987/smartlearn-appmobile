@@ -48,36 +48,67 @@ class AppBottomNavBar extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Row(
-          children: List.generate(_items.length, (index) {
-            final item = _items[index];
-            final isSelected = currentIndex == index;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onTap(index),
-                behavior: HitTestBehavior.opaque,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                    borderRadius: AppBorders.borderRadiusFull,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        item.icon,
-                        size: 18,
-                        color: isSelected
-                            ? AppColors.primaryForeground
-                            : AppColors.mutedForeground,
-                      ),
-                    ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final itemWidth = constraints.maxWidth / _items.length;
+            return Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  left: itemWidth * currentIndex,
+                  top: 0,
+                  bottom: 0,
+                  width: itemWidth,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: AppBorders.borderRadiusFull,
+                    ),
                   ),
                 ),
-              ),
+                Row(
+                  children: List.generate(_items.length, (index) {
+                    final item = _items[index];
+                    final isSelected = currentIndex == index;
+                    return Expanded(
+                      child: InkWell(
+                        onTap: () => onTap(index),
+                        borderRadius: AppBorders.borderRadiusFull,
+                        child: Center(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 220),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: Tween<double>(
+                                    begin: 0.95,
+                                    end: 1,
+                                  ).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Icon(
+                              item.icon,
+                              key: ValueKey('${item.label}-$isSelected'),
+                              size: 18,
+                              color: isSelected
+                                  ? AppColors.primaryForeground
+                                  : AppColors.mutedForeground,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             );
-          }),
+          },
         ),
       ),
     );

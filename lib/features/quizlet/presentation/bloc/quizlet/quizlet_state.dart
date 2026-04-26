@@ -20,6 +20,7 @@ final class QuizletLoaded extends QuizletState {
   final List<QuizletEntity> filteredQuizlets;
   final ViewMode viewMode;
   final String searchQuery;
+  final bool isFetching;
 
   const QuizletLoaded({
     List<QuizletEntity>? quizlets,
@@ -27,8 +28,9 @@ final class QuizletLoaded extends QuizletState {
     List<QuizletEntity>? filteredQuizlets,
     this.viewMode = ViewMode.community,
     this.searchQuery = '',
-  })  : allQuizlets = allQuizlets ?? quizlets ?? const [],
-        filteredQuizlets = filteredQuizlets ?? quizlets ?? const [];
+    this.isFetching = false,
+  }) : allQuizlets = allQuizlets ?? quizlets ?? const [],
+       filteredQuizlets = filteredQuizlets ?? quizlets ?? const [];
 
   List<QuizletEntity> get quizlets => filteredQuizlets;
 
@@ -37,22 +39,25 @@ final class QuizletLoaded extends QuizletState {
     List<QuizletEntity>? filteredQuizlets,
     ViewMode? viewMode,
     String? searchQuery,
+    bool? isFetching,
   }) {
     return QuizletLoaded(
       allQuizlets: allQuizlets ?? this.allQuizlets,
       filteredQuizlets: filteredQuizlets ?? this.filteredQuizlets,
       viewMode: viewMode ?? this.viewMode,
       searchQuery: searchQuery ?? this.searchQuery,
+      isFetching: isFetching ?? this.isFetching,
     );
   }
 
   @override
   List<Object?> get props => [
-        allQuizlets,
-        filteredQuizlets,
-        viewMode,
-        searchQuery,
-      ];
+    allQuizlets,
+    filteredQuizlets,
+    viewMode,
+    searchQuery,
+    isFetching,
+  ];
 }
 
 final class QuizletError extends QuizletState {

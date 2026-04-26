@@ -60,18 +60,6 @@ class CardFormWidget extends StatelessWidget {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              height: 72,
-              width: double.infinity,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: const Text('Placeholder hình ảnh'),
-            ),
           ],
         ),
       ),
