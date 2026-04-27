@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class ExamEntity extends Equatable {
   final String id;
+  final String? userId;
   final String title;
   final String? description;
   final int duration;
@@ -15,6 +16,7 @@ class ExamEntity extends Equatable {
 
   const ExamEntity({
     required this.id,
+    this.userId,
     required this.title,
     this.description,
     required this.duration,
@@ -30,6 +32,7 @@ class ExamEntity extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    userId,
     title,
     description,
     duration,

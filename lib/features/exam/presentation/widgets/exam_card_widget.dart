@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_shadows.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/exam/domain/entities/exam_entity.dart';
 import 'package:smart_learn/router/route_names.dart';
+
+import '../../../../core/theme/theme.dart';
 
 class ExamCardWidget extends StatelessWidget {
   const ExamCardWidget({
@@ -25,6 +24,10 @@ class ExamCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    final isMe = authState is AuthAuthenticated
+        ? authState.user.id == exam.userId
+        : false;
     return GestureDetector(
       onTap: () => context.push(RoutePaths.examDetail(exam.id)),
       child: Container(
@@ -38,7 +41,7 @@ class ExamCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: AppSpacing.xxxl,
@@ -55,6 +58,7 @@ class ExamCardWidget extends StatelessWidget {
                 const SizedBox(width: AppSpacing.smMd),
                 Expanded(
                   child: Column(
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -65,13 +69,28 @@ class ExamCardWidget extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        exam.subjectName,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.mutedForeground,
+                      if (isMe) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xxs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.2),
+                            ),
+                            borderRadius: AppBorders.borderRadiusMd,
+                          ),
+                          child: Text(
+                            "CỦA BẠN",
+                            style: AppTypography.text2Xs.bold.withColor(
+                              AppColors.primary,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

@@ -7,6 +7,7 @@ part 'exam_model.g.dart';
 class ExamModel extends ExamEntity {
   const ExamModel({
     required super.id,
+    super.userId,
     required super.title,
     super.description,
     required super.duration,

@@ -17,6 +17,7 @@ abstract final class AppSpacing {
   static const double massive = 80;
 
   // ─── Common EdgeInsets ───
+  static const EdgeInsets paddingXs = EdgeInsets.all(xs);
   static const EdgeInsets paddingSm = EdgeInsets.all(sm);
   static const EdgeInsets paddingMd = EdgeInsets.all(md);
   static const EdgeInsets paddingLg = EdgeInsets.all(lg);
