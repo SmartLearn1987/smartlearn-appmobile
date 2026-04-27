@@ -8,6 +8,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_detail_entity.dart';
 import '../bloc/exam_play/exam_play_bloc.dart';
@@ -130,21 +131,42 @@ class _InProgressContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Câu ${state.currentQuestionIndex + 1}/$totalQuestions',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.mutedForeground,
-                    ),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      _QuestionBadge(
+                        label: 'CÂU HỎI ${state.currentQuestionIndex + 1}',
+                        backgroundColor: AppColors.primaryLight,
+                        borderColor: AppColors.primary.withValues(alpha: 0.18),
+                        textColor: AppColors.primary,
+                      ),
+                      _QuestionBadge(
+                        label: _questionTypeLabel(currentQuestion.type),
+                        icon: _questionTypeIcon(currentQuestion.type),
+                        backgroundColor: AppColors.accentLight,
+                        borderColor: AppColors.accent.withValues(alpha: 0.2),
+                        textColor: AppColors.accent,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    isOrdering
-                        ? 'Sắp xếp lại theo đúng thứ tự của câu.'
-                        : currentQuestion.content,
+                    currentQuestion.content,
                     style: AppTypography.h4.copyWith(
                       color: AppColors.foreground,
                     ),
                   ),
+                  if (isOrdering) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _QuestionBadge(
+                      label: 'Click vào từng từ để chuyển xuống ô trống bên dưới',
+                      icon: LucideIcons.alertCircle,
+                      backgroundColor: AppColors.gray100,
+                      borderColor: AppColors.gray100.withValues(alpha: 0.4),
+                      textColor: AppColors.mutedForeground,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.mdLg),
                   Expanded(
                     child: isOrdering
@@ -337,6 +359,68 @@ void _showExitDialog(BuildContext context) {
   );
 }
 
+String _questionTypeLabel(String type) => switch (type) {
+  'single' => 'MỘT ĐÁP ÁN',
+  'multiple' => 'NHIỀU ĐÁP ÁN',
+  'text' => 'TRẢ LỜI VĂN BẢN',
+  'ordering' => 'SẮP XẾP CÂU',
+  _ => 'TRẮC NGHIỆM',
+};
+
+IconData _questionTypeIcon(String type) => switch (type) {
+  'single' => LucideIcons.circle,
+  'multiple' => LucideIcons.checkSquare,
+  'text' => LucideIcons.fileText,
+  'ordering' => LucideIcons.gamepad2,
+  _ => LucideIcons.helpCircle,
+};
+
+class _QuestionBadge extends StatelessWidget {
+  const _QuestionBadge({
+    required this.label,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.textColor,
+    this.icon,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color textColor;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.smMd,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: AppBorders.borderRadiusFull,
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: AppSpacing.smMd, color: textColor),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+          Text(
+            label,
+            style: AppTypography.caption.bold
+                .withColor(textColor)
+                .copyWith(letterSpacing: 0.6),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TextQuestionView extends StatelessWidget {
   const _TextQuestionView({required this.questionId, required this.value});
 
@@ -404,7 +488,13 @@ class _OrderingQuestionView extends StatelessWidget {
           children: availableWords
               .map(
                 (word) => ActionChip(
-                  label: Text(word),
+                  backgroundColor: AppColors.primary,
+                  label: Text(
+                    word,
+                    style: AppTypography.textLg.bold.withColor(
+                      AppColors.primaryForeground,
+                    ),
+                  ),
                   onPressed: () => syncAnswer([...selectedWords, word]),
                 ),
               )
@@ -439,8 +529,18 @@ class _OrderingQuestionView extends StatelessWidget {
                       .entries
                       .map(
                         (entry) => InputChip(
-                          label: Text(entry.value),
-                          onDeleted: () {
+                          backgroundColor: AppColors.primaryLight,
+                          side: BorderSide(
+                            color: AppColors.primary.withValues(alpha: 0.4),
+                            width: AppBorders.widthMedium,
+                          ),
+                          label: Text(
+                            entry.value,
+                            style: AppTypography.textLg.bold.withColor(
+                              AppColors.primary,
+                            ),
+                          ),
+                          onPressed: () {
                             final updated = [...selectedWords]
                               ..removeAt(entry.key);
                             syncAnswer(updated);

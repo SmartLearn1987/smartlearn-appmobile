@@ -63,9 +63,7 @@ class ExamCardWidget extends StatelessWidget {
                     children: [
                       Text(
                         exam.title,
-                        style: AppTypography.labelLarge.copyWith(
-                          color: AppColors.foreground,
-                        ),
+                        style: AppTypography.textXl.bold,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -145,7 +143,7 @@ class ExamCardWidget extends StatelessWidget {
                 exam.description!.trim(),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
+                style: AppTypography.textSm.copyWith(
                   color: AppColors.mutedForeground,
                 ),
               ),
@@ -187,11 +185,11 @@ class ExamCardWidget extends StatelessWidget {
               children: [
                 _MetaItem(
                   icon: LucideIcons.clipboardList,
-                  label: '${exam.questionCount} câu hỏi',
+                  label: '${exam.questionCount} CÂU HỎI',
                 ),
                 _MetaItem(
                   icon: LucideIcons.clock,
-                  label: '${exam.duration} phút',
+                  label: '${exam.duration} PHÚT',
                 ),
                 _MetaItem(icon: LucideIcons.user, label: exam.authorName),
               ],
@@ -235,7 +233,7 @@ class _MetaItem extends StatelessWidget {
         const SizedBox(width: AppSpacing.xs),
         Text(
           label,
-          style: AppTypography.caption.copyWith(
+          style: AppTypography.textXs.semiBold.copyWith(
             color: AppColors.mutedForeground,
           ),
         ),

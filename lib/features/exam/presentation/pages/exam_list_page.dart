@@ -317,7 +317,7 @@ class _GroupedExamList extends StatelessWidget {
                   Container(
                     padding: AppSpacing.paddingSm,
                     decoration: BoxDecoration(
-                      color: AppColors.gray50,
+                      color: AppColors.gray100,
                       border: Border.all(color: AppColors.border),
                       borderRadius: AppBorders.borderRadiusSm,
                     ),

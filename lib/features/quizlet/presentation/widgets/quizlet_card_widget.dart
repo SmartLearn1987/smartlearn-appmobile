@@ -159,21 +159,23 @@ class QuizletCardWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.bookOpen,
-                      size: AppSpacing.md,
-                      color: AppColors.mutedForeground,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      '${quizlet.termCount} thuật ngữ',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.mutedForeground,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: quizlet.termCount.toString(),
+                        style: AppTypography.textXs.bold.withColor(
+                          AppColors.primary,
+                        ),
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: ' THUẬT NGỮ',
+                        style: AppTypography.textXs.semiBold.copyWith(
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Row(
                   children: [
@@ -185,7 +187,7 @@ class QuizletCardWidget extends StatelessWidget {
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       quizlet.authorName,
-                      style: AppTypography.caption.copyWith(
+                      style: AppTypography.textXs.semiBold.copyWith(
                         color: AppColors.mutedForeground,
                       ),
                       overflow: TextOverflow.ellipsis,
