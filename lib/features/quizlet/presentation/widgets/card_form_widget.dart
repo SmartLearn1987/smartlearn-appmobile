@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/features/quizlet/presentation/helpers/csv_import_helper.dart';
 
@@ -35,7 +36,7 @@ class CardFormWidget extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   onPressed: canDelete ? onDelete : null,
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(LucideIcons.trash2),
                   tooltip: 'Xóa thẻ',
                 ),
               ],

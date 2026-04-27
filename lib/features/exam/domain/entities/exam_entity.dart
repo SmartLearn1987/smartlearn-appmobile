@@ -6,6 +6,7 @@ class ExamEntity extends Equatable {
   final String? description;
   final int duration;
   final String subjectName;
+  final String? educationLevel;
   final String questionCount;
   final double? averageScore;
   final String authorName;
@@ -18,6 +19,7 @@ class ExamEntity extends Equatable {
     this.description,
     required this.duration,
     required this.subjectName,
+    this.educationLevel,
     required this.questionCount,
     this.averageScore,
     required this.authorName,
@@ -27,15 +29,16 @@ class ExamEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        duration,
-        subjectName,
-        questionCount,
-        averageScore,
-        authorName,
-        isPublic,
-        createdAt,
-      ];
+    id,
+    title,
+    description,
+    duration,
+    subjectName,
+    educationLevel,
+    questionCount,
+    averageScore,
+    authorName,
+    isPublic,
+    createdAt,
+  ];
 }

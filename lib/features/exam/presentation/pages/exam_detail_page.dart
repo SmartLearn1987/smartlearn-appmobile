@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../app/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -58,8 +59,8 @@ class _ExamDetailView extends StatelessWidget {
             curr is ExamDetailError,
         builder: (context, state) => switch (state) {
           ExamDetailLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: CircularProgressIndicator(),
+          ),
           ExamDetailLoaded(:final detail) => _LoadedContent(detail: detail),
           ExamDetailError(:final message) => _ErrorContent(message: message),
           _ => const SizedBox.shrink(),
@@ -92,7 +93,7 @@ class _LoadedContent extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.quiz_outlined,
+                  LucideIcons.clipboardList,
                   size: 20,
                   color: AppColors.mutedForeground,
                 ),
@@ -105,7 +106,7 @@ class _LoadedContent extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Icon(
-                  Icons.timer_outlined,
+                  LucideIcons.clock,
                   size: 20,
                   color: AppColors.mutedForeground,
                 ),
@@ -165,12 +166,12 @@ class _ErrorContent extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             ElevatedButton(
               onPressed: () {
-                final page =
-                    context.findAncestorWidgetOfExactType<ExamDetailPage>();
+                final page = context
+                    .findAncestorWidgetOfExactType<ExamDetailPage>();
                 if (page != null) {
                   context.read<ExamDetailBloc>().add(
-                        LoadExamDetail(examId: page.examId),
-                      );
+                    LoadExamDetail(examId: page.examId),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(

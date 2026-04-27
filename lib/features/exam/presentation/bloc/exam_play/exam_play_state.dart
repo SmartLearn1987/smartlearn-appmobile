@@ -14,7 +14,7 @@ final class ExamPlayInitial extends ExamPlayState {
 final class ExamPlayInProgress extends ExamPlayState {
   final ExamDetailEntity detail;
   final int currentQuestionIndex;
-  final Map<String, String> selectedAnswers;
+  final Map<String, dynamic> selectedAnswers;
   final int timeRemaining;
   final int totalTime;
 
@@ -28,12 +28,12 @@ final class ExamPlayInProgress extends ExamPlayState {
 
   @override
   List<Object?> get props => [
-        detail,
-        currentQuestionIndex,
-        selectedAnswers,
-        timeRemaining,
-        totalTime,
-      ];
+    detail,
+    currentQuestionIndex,
+    selectedAnswers,
+    timeRemaining,
+    totalTime,
+  ];
 }
 
 final class ExamPlaySubmitting extends ExamPlayState {
@@ -59,13 +59,13 @@ final class ExamPlayCompleted extends ExamPlayState {
 
   @override
   List<Object?> get props => [
-        correctCount,
-        totalCount,
-        scorePercent,
-        timeTaken,
-        questionResults,
-        errorMessage,
-      ];
+    correctCount,
+    totalCount,
+    scorePercent,
+    timeTaken,
+    questionResults,
+    errorMessage,
+  ];
 }
 
 final class ExamPlayError extends ExamPlayState {

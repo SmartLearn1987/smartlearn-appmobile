@@ -162,7 +162,7 @@ class QuizletCardWidget extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.style_outlined,
+                      LucideIcons.bookOpen,
                       size: AppSpacing.md,
                       color: AppColors.mutedForeground,
                     ),
@@ -178,7 +178,7 @@ class QuizletCardWidget extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.person_outline,
+                      LucideIcons.user,
                       size: AppSpacing.md,
                       color: AppColors.mutedForeground,
                     ),

@@ -19,6 +19,7 @@ import 'package:smart_learn/features/home/domain/entities/pictogram_entity.dart'
 import 'package:smart_learn/features/home/presentation/pages/profile_page.dart';
 import 'package:smart_learn/features/exam/domain/entities/exam_detail_entity.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_detail_page.dart';
+import 'package:smart_learn/features/exam/presentation/pages/exam_form_page.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_list_page.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_play_page.dart';
 import 'package:smart_learn/features/exam/presentation/pages/exam_result_page.dart';
@@ -148,8 +149,7 @@ class AppRouter {
             final extra = state.extra as Map<String, dynamic>?;
             if (extra == null) return const _RedirectToHome();
             try {
-              final questions =
-                  extra['questions'] as List<VTVQuestionEntity>;
+              final questions = extra['questions'] as List<VTVQuestionEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
               return VTVPlayScreen(
                 questions: questions,
@@ -168,8 +168,7 @@ class AppRouter {
             final extra = state.extra as Map<String, dynamic>?;
             if (extra == null) return const _RedirectToHome();
             try {
-              final questions =
-                  extra['questions'] as List<NNCQuestionEntity>;
+              final questions = extra['questions'] as List<NNCQuestionEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
               return NNCPlayScreen(
                 questions: questions,
@@ -188,8 +187,7 @@ class AppRouter {
             final extra = state.extra as Map<String, dynamic>?;
             if (extra == null) return const _RedirectToHome();
             try {
-              final questions =
-                  extra['questions'] as List<ProverbEntity>;
+              final questions = extra['questions'] as List<ProverbEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
               return CDTNPlayScreen(
                 questions: questions,
@@ -252,6 +250,21 @@ class AppRouter {
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return QuizletDetailPage(quizletId: id);
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.examCreate,
+          name: RouteNames.examCreate,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const ExamFormPage(),
+        ),
+        GoRoute(
+          path: RoutePaths.examEditTemplate,
+          name: RouteNames.examEdit,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return ExamFormPage(examId: id);
           },
         ),
         GoRoute(
@@ -335,7 +348,8 @@ class AppRouter {
                           name: RouteNames.createCurriculum,
                           builder: (context, state) {
                             final extra = state.extra as Map<String, dynamic>?;
-                            final subjectName = extra?['subjectName'] as String?;
+                            final subjectName =
+                                extra?['subjectName'] as String?;
                             return CreateCurriculumPage(
                               subjectId: state.pathParameters['subjectId']!,
                               subjectName: subjectName,
@@ -347,10 +361,12 @@ class AppRouter {
                           name: RouteNames.editCurriculum,
                           builder: (context, state) {
                             final extra = state.extra as Map<String, dynamic>?;
-                            final subjectName = extra?['subjectName'] as String?;
+                            final subjectName =
+                                extra?['subjectName'] as String?;
                             return EditCurriculumPage(
                               subjectId: state.pathParameters['subjectId']!,
-                              curriculumId: state.pathParameters['curriculumId']!,
+                              curriculumId:
+                                  state.pathParameters['curriculumId']!,
                               subjectName: subjectName,
                             );
                           },
@@ -362,8 +378,10 @@ class AppRouter {
                             final extra = state.extra as Map<String, dynamic>?;
                             return LessonManagementPage(
                               subjectId: state.pathParameters['subjectId']!,
-                              curriculumId: state.pathParameters['curriculumId']!,
-                              curriculumName: extra?['curriculumName'] as String?,
+                              curriculumId:
+                                  state.pathParameters['curriculumId']!,
+                              curriculumName:
+                                  extra?['curriculumName'] as String?,
                               publisher: extra?['publisher'] as String?,
                             );
                           },
@@ -372,11 +390,14 @@ class AppRouter {
                               path: RoutePaths.lessonFormSegment,
                               name: RouteNames.lessonForm,
                               builder: (context, state) {
-                                final extra = state.extra as Map<String, dynamic>?;
+                                final extra =
+                                    state.extra as Map<String, dynamic>?;
                                 return LessonFormPage(
                                   subjectId: state.pathParameters['subjectId']!,
-                                  curriculumId: state.pathParameters['curriculumId']!,
-                                  curriculumName: extra?['curriculumName'] as String?,
+                                  curriculumId:
+                                      state.pathParameters['curriculumId']!,
+                                  curriculumName:
+                                      extra?['curriculumName'] as String?,
                                   publisher: extra?['publisher'] as String?,
                                   lessonId: extra?['lessonId'] as String?,
                                 );
@@ -386,12 +407,15 @@ class AppRouter {
                               path: RoutePaths.lessonReviewSegment,
                               name: RouteNames.lessonReview,
                               builder: (context, state) {
-                                final extra = state.extra as Map<String, dynamic>?;
+                                final extra =
+                                    state.extra as Map<String, dynamic>?;
                                 return LessonReviewPage(
                                   subjectId: state.pathParameters['subjectId']!,
-                                  curriculumId: state.pathParameters['curriculumId']!,
+                                  curriculumId:
+                                      state.pathParameters['curriculumId']!,
                                   lessonId: state.pathParameters['lessonId']!,
-                                  curriculumName: extra?['curriculumName'] as String?,
+                                  curriculumName:
+                                      extra?['curriculumName'] as String?,
                                   publisher: extra?['publisher'] as String?,
                                 );
                               },

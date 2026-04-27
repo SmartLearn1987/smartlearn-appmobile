@@ -111,4 +111,18 @@ abstract final class AppTypography {
 
   static TextStyle get text3Xl =>
       TextStyle(fontFamily: _fontFamily, fontSize: 30, height: 1.2);
+  static TextStyle get text2Xl =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 24, height: 1.2);
+  static TextStyle get textXl =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 20, height: 1.2);
+  static TextStyle get textLg =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 18, height: 1.2);
+  static TextStyle get textBase =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 16, height: 1.2);
+  static TextStyle get textSm =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 14, height: 1.2);
+  static TextStyle get textXs =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 12, height: 1.2);
+  static TextStyle get text2Xs =>
+      TextStyle(fontFamily: _fontFamily, fontSize: 10, height: 1.2);
 }

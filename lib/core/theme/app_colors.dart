@@ -42,4 +42,5 @@ abstract final class AppColors {
   static const Color brandBrownLight = Color(0x18C08447);
   static const Color gray400 = Color(0xFF9CA3AF);
   static const Color blue600 = Color(0xFF2563EB);
+  static const Color gray50 = Color(0xFFF3F4F6);
 }

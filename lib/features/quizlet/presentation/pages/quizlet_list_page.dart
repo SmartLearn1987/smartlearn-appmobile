@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../app/di/injection.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../router/route_names.dart';
 import '../bloc/quizlet/quizlet_bloc.dart';
 import '../helpers/quizlet_filter_helper.dart';
@@ -169,23 +168,31 @@ class _LoadedView extends StatelessWidget {
                             SearchQuizlets(query),
                           ),
                           hintText: 'Tìm kiếm học phần...',
-                          prefixIcon: Icons.search,
+                          prefixIcon: LucideIcons.search,
                         ),
                       ),
                       if (isPersonal) ...[
                         const SizedBox(width: AppSpacing.sm),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            final shouldRefresh = await context.push<bool>(
-                              '/quizlet/create',
-                            );
-                            if (shouldRefresh == true && context.mounted) {
-                              context.read<QuizletBloc>().add(
-                                const RefreshQuizlets(),
+                        SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final shouldRefresh = await context.push<bool>(
+                                '/quizlet/create',
                               );
-                            }
-                          },
-                          label: const Icon(Icons.add),
+                              if (shouldRefresh == true && context.mounted) {
+                                context.read<QuizletBloc>().add(
+                                  const RefreshQuizlets(),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              shape: AppBorders.shapeSm,
+                            ),
+                            child: const Icon(LucideIcons.plus),
+                          ),
                         ),
                       ],
                     ],
@@ -240,21 +247,47 @@ class _LoadedView extends StatelessWidget {
                       ),
                       children: groupedQuizlets.entries.expand((levelEntry) {
                         final widgets = <Widget>[
-                          Padding(
+                          Container(
+                            margin: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
                             padding: const EdgeInsets.only(
                               top: AppSpacing.md,
                               bottom: AppSpacing.sm,
                             ),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  width: AppBorders.widthThin,
+                                ),
+                              ),
+                            ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.layers_outlined,
-                                  size: AppSpacing.md,
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    size: 16,
+                                    LucideIcons.layers,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 const SizedBox(width: AppSpacing.xs),
                                 Text(
                                   levelEntry.key,
-                                  style: AppTypography.labelLarge,
+                                  style: AppTypography.text2Xl.bold.withColor(
+                                    AppColors.primary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -265,13 +298,37 @@ class _LoadedView extends StatelessWidget {
                           widgets.add(
                             Padding(
                               padding: const EdgeInsets.only(
-                                bottom: AppSpacing.xs,
+                                bottom: AppSpacing.sm,
                               ),
-                              child: Text(
-                                '${subjectEntry.key} (${subjectEntry.value.length})',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.mutedForeground,
-                                ),
+                              child: Row(
+                                spacing: AppSpacing.xs,
+                                children: [
+                                  Text(
+                                    subjectEntry.key,
+                                    style: AppTypography.textLg.bold,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 1,
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: AppSpacing.paddingSm,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.gray50,
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
+                                      borderRadius: AppBorders.borderRadiusSm,
+                                    ),
+                                    child: Text(
+                                      '${subjectEntry.value.length} HỌC PHẦN',
+                                      style: AppTypography.text2Xs.bold
+                                          .withColor(AppColors.mutedForeground),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );

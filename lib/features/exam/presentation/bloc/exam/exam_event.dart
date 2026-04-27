@@ -8,9 +8,21 @@ sealed class ExamEvent extends Equatable {
 }
 
 final class LoadExams extends ExamEvent {
-  const LoadExams();
+  final String tab;
+  final String search;
+
+  const LoadExams({required this.tab, this.search = ''});
+
+  @override
+  List<Object?> get props => [tab, search];
 }
 
 final class RefreshExams extends ExamEvent {
-  const RefreshExams();
+  final String tab;
+  final String search;
+
+  const RefreshExams({required this.tab, this.search = ''});
+
+  @override
+  List<Object?> get props => [tab, search];
 }

@@ -17,14 +17,14 @@ final class StartExam extends ExamPlayEvent {
   List<Object?> get props => [detail, durationInMinutes];
 }
 
-final class SelectAnswer extends ExamPlayEvent {
+final class SetAnswer extends ExamPlayEvent {
   final String questionId;
-  final String optionId;
+  final dynamic answer;
 
-  const SelectAnswer({required this.questionId, required this.optionId});
+  const SetAnswer({required this.questionId, required this.answer});
 
   @override
-  List<Object?> get props => [questionId, optionId];
+  List<Object?> get props => [questionId, answer];
 }
 
 final class NextQuestion extends ExamPlayEvent {

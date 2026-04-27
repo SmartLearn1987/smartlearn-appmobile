@@ -11,6 +11,7 @@ class ExamModel extends ExamEntity {
     super.description,
     required super.duration,
     required super.subjectName,
+    super.educationLevel,
     required super.questionCount,
     super.averageScore,
     required super.authorName,

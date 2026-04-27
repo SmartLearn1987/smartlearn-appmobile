@@ -15,6 +15,8 @@ abstract final class RoutePaths {
   static const quizletCreate = '/quizlet/create';
   static const quizletEditTemplate = '/quizlet/edit/:id';
   static const quizzes = '/quizzes';
+  static const examCreate = '/quizzes/create';
+  static const examEditTemplate = '/quizzes/edit/:id';
   static const profile = '/profile';
   static const pictogramGame = '/pictogram-game';
   static const pictogramPlay = '/games/pictogram/play';
@@ -38,8 +40,7 @@ abstract final class RoutePaths {
   static const lessonReviewSegment = 'review/:lessonId';
 
   // ─── Path builders (for navigation calls) ───
-  static String subjectDetail(String subjectId) =>
-      '/subjects/$subjectId';
+  static String subjectDetail(String subjectId) => '/subjects/$subjectId';
 
   static String createCurriculum(String subjectId) =>
       '/subjects/$subjectId/create-curriculum';
@@ -51,6 +52,7 @@ abstract final class RoutePaths {
   static String quizletEdit(String id) => '/quizlet/edit/$id';
 
   static String examDetail(String id) => '/exams/$id';
+  static String examEdit(String id) => '/quizzes/edit/$id';
 
   static String examPlay(String id) => '/exams/$id/play';
 
@@ -66,8 +68,7 @@ abstract final class RoutePaths {
     String subjectId,
     String curriculumId,
     String lessonId,
-  ) =>
-      '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId';
+  ) => '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId';
 }
 
 abstract final class RouteNames {
@@ -86,6 +87,8 @@ abstract final class RouteNames {
   static const quizletEdit = 'quizletEdit';
   static const quizletDetail = 'quizletDetail';
   static const quizzes = 'quizzes';
+  static const examCreate = 'examCreate';
+  static const examEdit = 'examEdit';
   static const examDetail = 'examDetail';
   static const examPlay = 'examPlay';
   static const examResult = 'examResult';

@@ -13,10 +13,25 @@ abstract class ExamRemoteDatasource {
   factory ExamRemoteDatasource(Dio dio) = _ExamRemoteDatasource;
 
   @GET('/exams')
-  Future<List<ExamModel>> getExams();
+  Future<List<ExamModel>> getExams({
+    @Query('tab') String? tab,
+    @Query('search') String? search,
+  });
 
   @GET('/exams/{id}')
   Future<ExamDetailModel> getExamDetail(@Path('id') String id);
+
+  @POST('/exams')
+  Future<void> createExam(@Body() Map<String, dynamic> body);
+
+  @PUT('/exams/{id}')
+  Future<void> updateExam(
+    @Path('id') String id,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/exams/{id}')
+  Future<void> deleteExam(@Path('id') String id);
 
   @POST('/exams/{id}/results')
   Future<void> submitExamResult(

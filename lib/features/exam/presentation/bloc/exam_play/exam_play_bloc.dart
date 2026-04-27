@@ -19,7 +19,7 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
 
   ExamPlayBloc(this._submitExamResult) : super(const ExamPlayInitial()) {
     on<StartExam>(_onStartExam);
-    on<SelectAnswer>(_onSelectAnswer);
+    on<SetAnswer>(_onSetAnswer);
     on<NextQuestion>(_onNextQuestion);
     on<PreviousQuestion>(_onPreviousQuestion);
     on<TimerTick>(_onTimerTick);
@@ -37,16 +37,17 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
         totalTime: event.durationInMinutes * 60,
       ),
     );
-    _timerSubscription = Stream.periodic(const Duration(seconds: 1))
-        .listen((_) => add(const TimerTick()));
+    _timerSubscription = Stream.periodic(
+      const Duration(seconds: 1),
+    ).listen((_) => add(const TimerTick()));
   }
 
-  void _onSelectAnswer(SelectAnswer event, Emitter<ExamPlayState> emit) {
+  void _onSetAnswer(SetAnswer event, Emitter<ExamPlayState> emit) {
     final currentState = state;
     if (currentState is ExamPlayInProgress) {
       final updatedAnswers = {
         ...currentState.selectedAnswers,
-        event.questionId: event.optionId,
+        event.questionId: event.answer,
       };
       emit(
         ExamPlayInProgress(
@@ -135,19 +136,62 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
       var correctCount = 0;
 
       for (final question in detail.questions) {
-        final correctOption = question.options.firstWhere(
-          (option) => option.isCorrect,
-          orElse: () => const ExamOptionEntity(
-            id: '',
-            content: '',
-            isCorrect: false,
-            sortOrder: 0,
-          ),
-        );
+        final correctOptions = question.options
+            .where((option) => option.isCorrect)
+            .toList();
+        final selectedAnswer = selectedAnswers[question.id];
+        String? selectedOptionId;
+        List<String> selectedOptionIds = const [];
+        String? selectedTextAnswer;
+        String? correctTextAnswer;
+        String correctOptionId = '';
+        bool isCorrect = false;
 
-        final selectedOptionId = selectedAnswers[question.id];
-        final isCorrect = selectedOptionId == correctOption.id &&
-            correctOption.id.isNotEmpty;
+        switch (question.type) {
+          case 'single':
+            final correctOption = correctOptions.isNotEmpty
+                ? correctOptions.first
+                : const ExamOptionEntity(
+                    id: '',
+                    content: '',
+                    isCorrect: false,
+                    sortOrder: 0,
+                  );
+            selectedOptionId = selectedAnswer as String?;
+            correctOptionId = correctOption.id;
+            isCorrect =
+                selectedOptionId == correctOption.id &&
+                correctOption.id.isNotEmpty;
+            break;
+          case 'multiple':
+            final selectedIds = (selectedAnswer is List)
+                ? selectedAnswer.cast<String>().toSet()
+                : <String>{};
+            final correctIds = correctOptions
+                .map((option) => option.id)
+                .toSet();
+            selectedOptionIds = selectedIds.toList();
+            isCorrect =
+                selectedIds.isNotEmpty &&
+                selectedIds.length == correctIds.length &&
+                selectedIds.containsAll(correctIds);
+            break;
+          case 'text':
+          case 'ordering':
+            final expected = correctOptions.isNotEmpty
+                ? correctOptions.first.content
+                : '';
+            final actual = selectedAnswer is String ? selectedAnswer : '';
+            selectedTextAnswer = actual;
+            correctTextAnswer = expected;
+            isCorrect =
+                _normalizeTextAnswer(actual) ==
+                    _normalizeTextAnswer(expected) &&
+                actual.trim().isNotEmpty;
+            break;
+          default:
+            break;
+        }
 
         if (isCorrect) {
           correctCount++;
@@ -157,8 +201,12 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
           ExamQuestionResult(
             questionId: question.id,
             questionContent: question.content,
+            questionType: question.type,
             selectedOptionId: selectedOptionId,
-            correctOptionId: correctOption.id,
+            selectedOptionIds: selectedOptionIds,
+            selectedTextAnswer: selectedTextAnswer,
+            correctTextAnswer: correctTextAnswer,
+            correctOptionId: correctOptionId,
             isCorrect: isCorrect,
             options: question.options,
           ),
@@ -166,9 +214,11 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
       }
 
       final totalCount = detail.questions.length;
-      final scorePercent =
-          totalCount > 0 ? (correctCount / totalCount) * 100 : 0.0;
-      final timeTaken = inProgressState.totalTime - inProgressState.timeRemaining;
+      final scorePercent = totalCount > 0
+          ? (correctCount / totalCount) * 100
+          : 0.0;
+      final timeTaken =
+          inProgressState.totalTime - inProgressState.timeRemaining;
 
       final result = await _submitExamResult(
         SubmitExamResultParams(
@@ -208,3 +258,6 @@ class ExamPlayBloc extends Bloc<ExamPlayEvent, ExamPlayState> {
     return super.close();
   }
 }
+
+String _normalizeTextAnswer(String value) =>
+    value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');

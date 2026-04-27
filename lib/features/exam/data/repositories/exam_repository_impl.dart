@@ -15,9 +15,12 @@ class ExamRepositoryImpl implements ExamRepository {
   ExamRepositoryImpl(this.remoteDatasource);
 
   @override
-  Future<Either<Failure, List<ExamEntity>>> getExams() async {
+  Future<Either<Failure, List<ExamEntity>>> getExams({
+    String? tab,
+    String? search,
+  }) async {
     try {
-      final result = await remoteDatasource.getExams();
+      final result = await remoteDatasource.getExams(tab: tab, search: search);
       return Right(result);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
@@ -39,16 +42,55 @@ class ExamRepositoryImpl implements ExamRepository {
   }
 
   @override
+  Future<Either<Failure, void>> createExam(Map<String, dynamic> body) async {
+    try {
+      await remoteDatasource.createExam(body);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateExam(
+    String id,
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      await remoteDatasource.updateExam(id, body);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteExam(String id) async {
+    try {
+      await remoteDatasource.deleteExam(id);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> submitExamResult({
     required String examId,
     required double score,
     required int timeTaken,
   }) async {
     try {
-      await remoteDatasource.submitExamResult(
-        examId,
-        {'score': score, 'time_taken': timeTaken},
-      );
+      await remoteDatasource.submitExamResult(examId, {
+        'score': score,
+        'time_taken': timeTaken,
+      });
       return const Right(null);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));

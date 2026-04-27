@@ -13,7 +13,12 @@ class ExamDetailModel extends ExamDetailEntity {
   const ExamDetailModel({
     required super.id,
     required super.title,
+    super.description,
     required super.duration,
+    super.subjectId,
+    super.educationLevel,
+    super.grade,
+    super.isPublic,
     required this.questions,
   }) : super(questions: questions);
 

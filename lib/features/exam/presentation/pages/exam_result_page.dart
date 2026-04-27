@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -140,9 +141,7 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Text(
         'Không thể lưu kết quả, vui lòng thử lại',
-        style: AppTypography.bodySmall.copyWith(
-          color: AppColors.destructive,
-        ),
+        style: AppTypography.bodySmall.copyWith(color: AppColors.destructive),
       ),
     );
   }
@@ -155,43 +154,144 @@ class _QuestionResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTextual =
+        result.questionType == 'text' || result.questionType == 'ordering';
+    final isMultiple = result.questionType == 'multiple';
+    final questionTitle = result.questionType == 'ordering'
+        ? 'Sắp xếp lại theo thứ tự đúng của câu.'
+        : result.questionContent;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(color: AppColors.border, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            result.questionContent,
+            questionTitle,
             style: AppTypography.labelMedium.copyWith(
               color: AppColors.foreground,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          ...result.options.map(
-            (option) => _OptionRow(
-              content: option.content,
-              isCorrectOption: option.id == result.correctOptionId,
-              isSelectedWrong: option.id == result.selectedOptionId &&
-                  !result.isCorrect,
-            ),
-          ),
-          if (result.selectedOptionId == null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Chưa trả lời',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.mutedForeground,
+          if (isTextual)
+            _TextualResultView(result: result)
+          else ...[
+            ...result.options.map(
+              (option) => _OptionRow(
+                content: option.content,
+                isCorrectOption: option.isCorrect,
+                isSelected: isMultiple
+                    ? result.selectedOptionIds.contains(option.id)
+                    : option.id == result.selectedOptionId,
               ),
             ),
+            if (result.selectedOptionId == null &&
+                result.selectedOptionIds.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
+                  'Chưa trả lời',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+              ),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _TextualResultView extends StatelessWidget {
+  const _TextualResultView({required this.result});
+
+  final ExamQuestionResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedText = (result.selectedTextAnswer ?? '').trim();
+    final hasSelected = selectedText.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.smMd),
+          decoration: BoxDecoration(
+            color: AppColors.muted.withValues(alpha: 0.4),
+            borderRadius: AppBorders.borderRadiusSm,
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bạn đã trả lời:',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedForeground,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                hasSelected ? selectedText : 'Chưa nhập câu trả lời',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: result.isCorrect
+                      ? AppColors.success
+                      : AppColors.destructive,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!result.isCorrect) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.smMd),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.08),
+              borderRadius: AppBorders.borderRadiusSm,
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Đáp án đúng:',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  (result.correctTextAnswer ?? '').trim().isEmpty
+                      ? 'Không có đáp án mẫu'
+                      : result.correctTextAnswer!.trim(),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -200,12 +300,12 @@ class _OptionRow extends StatelessWidget {
   const _OptionRow({
     required this.content,
     required this.isCorrectOption,
-    required this.isSelectedWrong,
+    required this.isSelected,
   });
 
   final String content;
   final bool isCorrectOption;
-  final bool isSelectedWrong;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -213,14 +313,18 @@ class _OptionRow extends StatelessWidget {
     final IconData? icon;
     final Color? iconColor;
 
-    if (isCorrectOption) {
+    if (isSelected && isCorrectOption) {
       textColor = AppColors.success;
-      icon = Icons.check_circle;
+      icon = LucideIcons.checkCircle2;
       iconColor = AppColors.success;
-    } else if (isSelectedWrong) {
+    } else if (isSelected && !isCorrectOption) {
       textColor = AppColors.destructive;
-      icon = Icons.cancel;
+      icon = LucideIcons.xCircle;
       iconColor = AppColors.destructive;
+    } else if (!isSelected && isCorrectOption) {
+      textColor = AppColors.success;
+      icon = LucideIcons.arrowRight;
+      iconColor = AppColors.success;
     } else {
       textColor = AppColors.foreground;
       icon = null;
