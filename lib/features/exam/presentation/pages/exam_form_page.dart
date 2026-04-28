@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
@@ -12,6 +10,8 @@ import 'package:smart_learn/features/exam/domain/repositories/exam_repository.da
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
 import 'package:smart_learn/features/subjects/domain/usecases/get_subjects_use_case.dart';
+
+import '../../../../core/theme/theme.dart';
 
 class ExamFormPage extends StatefulWidget {
   const ExamFormPage({super.key, this.examId});
@@ -490,24 +490,38 @@ class _ExamFormPageState extends State<ExamFormPage> {
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               if (isTextual)
-                                AppTextField(
-                                  initialValue: question.options.isEmpty
-                                      ? ''
-                                      : question.options.first.content,
-                                  label: question.type == 'ordering'
-                                      ? 'Nội dung câu đúng'
-                                      : 'Đáp án đúng',
-                                  onChanged: (value) {
-                                    _updateQuestion(
-                                      index,
-                                      options: [
-                                        _OptionDraft(
-                                          content: value,
-                                          isCorrect: true,
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                Column(
+                                  children: [
+                                    AppTextField(
+                                      initialValue: question.options.isEmpty
+                                          ? ''
+                                          : question.options.first.content,
+                                      label: question.type == 'ordering'
+                                          ? 'Nội dung câu đúng'
+                                          : 'Đáp án đúng',
+                                      onChanged: (value) {
+                                        _updateQuestion(
+                                          index,
+                                          options: [
+                                            _OptionDraft(
+                                              content: value,
+                                              isCorrect: true,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                    if (question.type == 'ordering') ...[
+                                      const SizedBox(height: AppSpacing.sm),
+                                      Text(
+                                        'Hệ thống sẽ tự động tách câu này thành các từ và trộn ngẫu nhiên khi học sinh làm bài.',
+                                        style: AppTypography.text2Xs.italic
+                                            .copyWith(
+                                              color: AppColors.mutedForeground,
+                                            ),
+                                      ),
+                                    ],
+                                  ],
                                 )
                               else ...[
                                 ...question.options.asMap().entries.map((
@@ -617,8 +631,8 @@ class _QuestionDraft {
     content: '',
     type: 'single',
     options: [
-      _OptionDraft(content: 'Lựa chọn 1', isCorrect: true),
-      _OptionDraft(content: 'Lựa chọn 2'),
+      _OptionDraft(content: '', isCorrect: true),
+      _OptionDraft(content: ''),
     ],
   );
 

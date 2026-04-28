@@ -97,20 +97,26 @@ class ExamCardWidget extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: exam.isPublic
+                                ? AppColors.blue600
+                                : AppColors.secondary,
+                            width: AppBorders.widthThin,
+                          ),
                           color: exam.isPublic
-                              ? Colors.blue.withValues(alpha: 0.1)
-                              : Colors.orange.withValues(alpha: 0.15),
-                          borderRadius: AppBorders.borderRadiusFull,
+                              ? AppColors.blue600Light
+                              : AppColors.secondaryLight,
                         ),
                         child: Icon(
                           exam.isPublic ? LucideIcons.eye : LucideIcons.eyeOff,
-                          size: AppSpacing.smMd,
-                          color: exam.isPublic ? Colors.blue : Colors.orange,
+                          size: AppSpacing.mdLg,
+                          color: exam.isPublic
+                              ? AppColors.blue600
+                              : AppColors.secondary,
                         ),
                       ),
                       PopupMenuButton<String>(
