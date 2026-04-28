@@ -12,30 +12,41 @@ abstract final class AppBorders {
   static const double radiusFull = 999;
 
   // ─── BorderRadius ───
-  static const BorderRadius borderRadiusSm =
-      BorderRadius.all(Radius.circular(radiusSm));
-  static const BorderRadius borderRadiusMd =
-      BorderRadius.all(Radius.circular(radiusMd));
-  static const BorderRadius borderRadiusLg =
-      BorderRadius.all(Radius.circular(radiusLg));
-  static const BorderRadius borderRadiusXl =
-      BorderRadius.all(Radius.circular(radiusXl));
-  static const BorderRadius borderRadiusXxl =
-      BorderRadius.all(Radius.circular(radiusXxl));
-  static const BorderRadius borderRadiusFull =
-      BorderRadius.all(Radius.circular(radiusFull));
+  static const BorderRadius borderRadiusSm = BorderRadius.all(
+    Radius.circular(radiusSm),
+  );
+  static const BorderRadius borderRadiusMd = BorderRadius.all(
+    Radius.circular(radiusMd),
+  );
+  static const BorderRadius borderRadiusLg = BorderRadius.all(
+    Radius.circular(radiusLg),
+  );
+  static const BorderRadius borderRadiusXl = BorderRadius.all(
+    Radius.circular(radiusXl),
+  );
+  static const BorderRadius borderRadiusXxl = BorderRadius.all(
+    Radius.circular(radiusXxl),
+  );
+  static const BorderRadius borderRadiusFull = BorderRadius.all(
+    Radius.circular(radiusFull),
+  );
 
   // ─── RoundedRectangleBorder (for button shapes) ───
-  static const RoundedRectangleBorder shapeSm =
-      RoundedRectangleBorder(borderRadius: borderRadiusSm);
-  static const RoundedRectangleBorder shapeMd =
-      RoundedRectangleBorder(borderRadius: borderRadiusMd);
-  static const RoundedRectangleBorder shapeLg =
-      RoundedRectangleBorder(borderRadius: borderRadiusLg);
-  static const RoundedRectangleBorder shapeXl =
-      RoundedRectangleBorder(borderRadius: borderRadiusXl);
-  static const RoundedRectangleBorder shapeFull =
-      RoundedRectangleBorder(borderRadius: borderRadiusFull);
+  static const RoundedRectangleBorder shapeSm = RoundedRectangleBorder(
+    borderRadius: borderRadiusSm,
+  );
+  static const RoundedRectangleBorder shapeMd = RoundedRectangleBorder(
+    borderRadius: borderRadiusMd,
+  );
+  static const RoundedRectangleBorder shapeLg = RoundedRectangleBorder(
+    borderRadius: borderRadiusLg,
+  );
+  static const RoundedRectangleBorder shapeXl = RoundedRectangleBorder(
+    borderRadius: borderRadiusXl,
+  );
+  static const RoundedRectangleBorder shapeFull = RoundedRectangleBorder(
+    borderRadius: borderRadiusFull,
+  );
 
   // ─── Border Widths ───
   static const double widthThin = 1;

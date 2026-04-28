@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_question_result.dart';
 import '../utils/time_formatter.dart';
@@ -17,6 +14,7 @@ class ExamResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final examTitle = (resultData['examTitle'] as String?)?.trim();
     final correctCount = resultData['correctCount'] as int;
     final totalCount = resultData['totalCount'] as int;
     final scorePercent = resultData['scorePercent'] as double;
@@ -26,60 +24,188 @@ class ExamResultPage extends StatelessWidget {
     final errorMessage = resultData['errorMessage'] as String?;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Kết quả',
-          style: AppTypography.h4.copyWith(color: AppColors.foreground),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.mdLg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ─── Header Section ───
-            _HeaderSection(
-              correctCount: correctCount,
-              totalCount: totalCount,
-              scorePercent: scorePercent,
-              timeTaken: timeTaken,
-            ),
-            const SizedBox(height: AppSpacing.mdLg),
-
-            // ─── Error Banner ───
-            if (errorMessage != null) ...[
-              _ErrorBanner(),
-              const SizedBox(height: AppSpacing.mdLg),
-            ],
-
-            // ─── Question Results List ───
-            ...questionResults.map(
-              (result) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: _QuestionResultCard(result: result),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // ─── Bottom Button ───
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => context.go(RoutePaths.quizzes),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.primaryForeground,
-                  textStyle: AppTypography.buttonLarge,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.smMd,
-                  ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: DefaultTabController(
+          length: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.mdLg,
+                  AppSpacing.mdLg,
+                  AppSpacing.mdLg,
+                  AppSpacing.sm,
                 ),
-                child: const Text('Quay về danh sách'),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: AppBorders.borderRadiusXl,
+                      ),
+                      child: Icon(
+                        LucideIcons.trophy,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.mdLg),
+                    Text(
+                      'Kết quả bài làm',
+                      style: AppTypography.h1.copyWith(
+                        color: AppColors.foreground,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.mdLg),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Bạn đã hoàn thành bài thi ',
+                            style: AppTypography.textLg.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                          ),
+                          TextSpan(
+                            text:
+                                '"${(examTitle?.isNotEmpty ?? false) ? examTitle : 'Bài trắc nghiệm'}"',
+                            style: AppTypography.textLg.bold.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                          ),
+                          TextSpan(
+                            text:
+                                '. Hãy cùng xem lại chi tiết bài làm dưới đây nhé!',
+                            style: AppTypography.textLg.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: AppColors.mutedForeground,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.mdLg),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.muted.withValues(alpha: 0.45),
+                        borderRadius: AppBorders.borderRadiusFull,
+                        border: Border.all(
+                          color: AppColors.border.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      child: TabBar(
+                        dividerColor: Colors.transparent,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                          color: AppColors.card,
+                          borderRadius: AppBorders.borderRadiusFull,
+                        ),
+                        labelColor: AppColors.foreground,
+                        unselectedLabelColor: AppColors.mutedForeground,
+                        labelStyle: AppTypography.buttonMedium,
+                        tabs: const [
+                          Tab(text: 'Thông tin chung'),
+                          Tab(text: 'Chi tiết câu hỏi'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _HeaderSection(
+                            correctCount: correctCount,
+                            totalCount: totalCount,
+                            scorePercent: scorePercent,
+                            timeTaken: timeTaken,
+                          ),
+                          const SizedBox(height: AppSpacing.mdLg),
+                          if (errorMessage != null) ...[
+                            _ErrorBanner(),
+                            const SizedBox(height: AppSpacing.mdLg),
+                          ],
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () => context.go(RoutePaths.quizzes),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.primaryForeground,
+                                textStyle: AppTypography.buttonLarge,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.smMd,
+                                ),
+                              ),
+                              child: const Text('Quay về danh sách'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                        AppSpacing.mdLg,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ...questionResults.asMap().entries.map(
+                            (entry) => Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.sm,
+                              ),
+                              child: _QuestionResultCard(
+                                questionNumber: entry.key + 1,
+                                result: entry.value,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () => context.go(RoutePaths.quizzes),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.primaryForeground,
+                                textStyle: AppTypography.buttonLarge,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.smMd,
+                                ),
+                              ),
+                              child: const Text('Quay về danh sách'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -101,30 +227,83 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scoreText = '${scorePercent.round()}%';
+    final answerText = '$correctCount/$totalCount';
+    final timeText = formatTime(timeTaken);
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '$correctCount/$totalCount',
-          style: AppTypography.text3Xl.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w700,
-          ),
+        _StatCard(
+          title: 'ĐIỂM SỐ',
+          value: scoreText,
+          valueColor: AppColors.primary,
+          borderColor: AppColors.primary.withValues(alpha: 0.22),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          '${scorePercent.toStringAsFixed(1)}% đúng',
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.mutedForeground,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Thời gian: ${formatTime(timeTaken)}',
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.mutedForeground,
-          ),
-        ),
+        const SizedBox(height: AppSpacing.md),
+        _StatCard(title: 'CÂU TRẢ LỜI', value: answerText),
+        const SizedBox(height: AppSpacing.md),
+        _StatCard(title: 'THỜI GIAN', value: timeText),
       ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.title,
+    required this.value,
+    this.valueColor = AppColors.foreground,
+    this.borderColor,
+  });
+
+  final String title;
+  final String value;
+  final Color valueColor;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.mdLg,
+        vertical: AppSpacing.lg,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: AppBorders.borderRadiusXl,
+        border: Border.all(
+          color: borderColor ?? AppColors.border.withValues(alpha: 0.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF111827).withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedForeground,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          Text(
+            value,
+            style: AppTypography.text3Xl.copyWith(
+              color: valueColor,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -148,8 +327,12 @@ class _ErrorBanner extends StatelessWidget {
 }
 
 class _QuestionResultCard extends StatelessWidget {
-  const _QuestionResultCard({required this.result});
+  const _QuestionResultCard({
+    required this.questionNumber,
+    required this.result,
+  });
 
+  final int questionNumber;
   final ExamQuestionResult result;
 
   @override
@@ -160,28 +343,78 @@ class _QuestionResultCard extends StatelessWidget {
     final questionTitle = result.questionType == 'ordering'
         ? 'Sắp xếp lại theo thứ tự đúng của câu.'
         : result.questionContent;
+    final isCorrect = result.isCorrect;
+    final borderColor = isCorrect
+        ? AppColors.success.withValues(alpha: 0.28)
+        : AppColors.destructive.withValues(alpha: 0.2);
+    final badgeBg = isCorrect
+        ? AppColors.success.withValues(alpha: 0.12)
+        : AppColors.destructive.withValues(alpha: 0.08);
+    final badgeFg = isCorrect ? AppColors.success : AppColors.destructive;
+    final statusText = isCorrect ? 'CHÍNH XÁC' : 'CẦN XEM LẠI';
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.mdLg),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusMd,
+        borderRadius: AppBorders.borderRadiusXl,
         border: Border.all(
-          color: AppColors.border,
+          color: borderColor,
           width: AppBorders.widthThin,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF111827).withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$questionNumber',
+                  style: AppTypography.textLg.bold.copyWith(color: badgeFg),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  borderRadius: AppBorders.borderRadiusFull,
+                ),
+                child: Text(
+                  statusText,
+                  style: AppTypography.caption.bold.copyWith(
+                    color: badgeFg,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             questionTitle,
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.foreground,
-            ),
+            style: AppTypography.h4.bold.copyWith(color: AppColors.foreground),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           if (isTextual)
             _TextualResultView(result: result)
           else ...[

@@ -4,10 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../app/di/injection.dart';
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_detail_entity.dart';
@@ -48,6 +44,7 @@ class _ExamPlayView extends StatelessWidget {
             context.go(
               RoutePaths.examResult(detail.id),
               extra: {
+                'examTitle': detail.title,
                 'correctCount': state.correctCount,
                 'totalCount': state.totalCount,
                 'scorePercent': state.scorePercent,
@@ -83,7 +80,6 @@ class _InProgressContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final questions = state.detail.questions;
     final currentQuestion = questions[state.currentQuestionIndex];
-    final answeredCount = state.selectedAnswers.length;
     final totalQuestions = questions.length;
     final isLastQuestion = state.currentQuestionIndex == totalQuestions - 1;
     final isFirstQuestion = state.currentQuestionIndex == 0;
@@ -101,178 +97,282 @@ class _InProgressContent extends StatelessWidget {
         : const _OrderingWords(selected: [], available: []);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.chevronLeft),
           onPressed: () => _showExitDialog(context),
         ),
-        title: Text(
-          formatTime(state.timeRemaining),
-          style: AppTypography.h4.copyWith(
-            color: state.timeRemaining < 60
-                ? AppColors.destructive
-                : AppColors.foreground,
+        title: Padding(
+          padding: const EdgeInsets.only(right: kToolbarHeight),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(LucideIcons.shieldCheck, color: AppColors.primary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.detail.title,
+                      style: AppTypography.textBase.bold,
+                    ),
+                    Text(
+                      'Làm bài thi trắc nghiệm',
+
+                      style: AppTypography.text2Xs.semiBold.withColor(
+                        AppColors.mutedForeground,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         centerTitle: true,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LinearProgressIndicator(
-            value: totalQuestions > 0 ? answeredCount / totalQuestions : 0,
-            backgroundColor: AppColors.muted,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.mdLg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.xs,
-                    children: [
-                      _QuestionBadge(
-                        label: 'CÂU HỎI ${state.currentQuestionIndex + 1}',
-                        backgroundColor: AppColors.primaryLight,
-                        borderColor: AppColors.primary.withValues(alpha: 0.18),
-                        textColor: AppColors.primary,
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.mdLg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.mdLg,
+                  vertical: AppSpacing.sm,
+                ),
+                width: double.infinity,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.clock,
+                            size: 16,
+                            color: AppColors.slate400,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: formatTime(
+                                    state.timeRemaining,
+                                  ).split(':')[0],
+                                  style: AppTypography.text2Xl.bold.copyWith(
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                                const WidgetSpan(
+                                  child: SizedBox(width: AppSpacing.xs),
+                                ),
+                                TextSpan(
+                                  text: ':',
+                                  style: AppTypography.text2Xl.bold.copyWith(
+                                    color: AppColors.slate400,
+                                  ),
+                                ),
+                                const WidgetSpan(
+                                  child: SizedBox(width: AppSpacing.xs),
+                                ),
+                                TextSpan(
+                                  text: formatTime(
+                                    state.timeRemaining,
+                                  ).split(':')[1],
+                                  style: AppTypography.text2Xl.bold.copyWith(
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      _QuestionBadge(
-                        label: _questionTypeLabel(currentQuestion.type),
-                        icon: _questionTypeIcon(currentQuestion.type),
-                        backgroundColor: AppColors.accentLight,
-                        borderColor: AppColors.accent.withValues(alpha: 0.2),
-                        textColor: AppColors.accent,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    currentQuestion.content,
-                    style: AppTypography.h4.copyWith(
-                      color: AppColors.foreground,
                     ),
-                  ),
-                  if (isOrdering) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    _QuestionBadge(
-                      label: 'Click vào từng từ để chuyển xuống ô trống bên dưới',
-                      icon: LucideIcons.alertCircle,
-                      backgroundColor: AppColors.gray100,
-                      borderColor: AppColors.gray100.withValues(alpha: 0.4),
-                      textColor: AppColors.mutedForeground,
+                    ElevatedButton.icon(
+                      icon: const Icon(LucideIcons.send),
+                      onPressed: () =>
+                          context.read<ExamPlayBloc>().add(const SubmitExam()),
+                      label: const Text('Nộp bài'),
                     ),
                   ],
-                  const SizedBox(height: AppSpacing.mdLg),
-                  Expanded(
-                    child: isOrdering
-                        ? _OrderingQuestionView(
-                            questionId: currentQuestion.id,
-                            selectedWords: orderingWords.selected,
-                            availableWords: orderingWords.available,
-                          )
-                        : isText
-                        ? _TextQuestionView(
-                            questionId: currentQuestion.id,
-                            value: selectedAnswer is String
-                                ? selectedAnswer
-                                : '',
-                          )
-                        : ListView.separated(
-                            itemCount: currentQuestion.options.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: AppSpacing.sm),
-                            itemBuilder: (context, index) {
-                              final option = currentQuestion.options[index];
-                              final isSelected = isMultiple
-                                  ? (selectedAnswer is List &&
-                                        selectedAnswer.contains(option.id))
-                                  : selectedAnswer == option.id;
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.mdLg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          _QuestionBadge(
+                            label: 'CÂU HỎI ${state.currentQuestionIndex + 1}',
+                            backgroundColor: AppColors.primaryLight,
+                            borderColor: AppColors.primary.withValues(
+                              alpha: 0.18,
+                            ),
+                            textColor: AppColors.primary,
+                          ),
+                          _QuestionBadge(
+                            label: _questionTypeLabel(currentQuestion.type),
+                            icon: _questionTypeIcon(currentQuestion.type),
+                            backgroundColor: AppColors.accentLight,
+                            borderColor: AppColors.accent.withValues(
+                              alpha: 0.2,
+                            ),
+                            textColor: AppColors.accent,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        currentQuestion.content,
+                        style: AppTypography.h4.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                      ),
+                      if (isOrdering) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        _QuestionBadge(
+                          label:
+                              'Click vào từng từ để chuyển xuống ô trống bên dưới',
+                          icon: LucideIcons.alertCircle,
+                          backgroundColor: AppColors.gray100,
+                          borderColor: AppColors.gray100.withValues(alpha: 0.4),
+                          textColor: AppColors.mutedForeground,
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.mdLg),
+                      Expanded(
+                        child: isOrdering
+                            ? _OrderingQuestionView(
+                                questionId: currentQuestion.id,
+                                selectedWords: orderingWords.selected,
+                                availableWords: orderingWords.available,
+                              )
+                            : isText
+                            ? _TextQuestionView(
+                                questionId: currentQuestion.id,
+                                value: selectedAnswer is String
+                                    ? selectedAnswer
+                                    : '',
+                              )
+                            : ListView.separated(
+                                itemCount: currentQuestion.options.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: AppSpacing.sm),
+                                itemBuilder: (context, index) {
+                                  final option = currentQuestion.options[index];
+                                  final isSelected = isMultiple
+                                      ? (selectedAnswer is List &&
+                                            selectedAnswer.contains(option.id))
+                                      : selectedAnswer == option.id;
 
-                              return GestureDetector(
-                                onTap: () {
-                                  final bloc = context.read<ExamPlayBloc>();
-                                  if (isMultiple) {
-                                    final current = (selectedAnswer is List)
-                                        ? selectedAnswer.cast<String>()
-                                        : <String>[];
-                                    final updated = current.contains(option.id)
-                                        ? current
-                                              .where((id) => id != option.id)
-                                              .toList()
-                                        : [...current, option.id];
-                                    bloc.add(
-                                      SetAnswer(
-                                        questionId: currentQuestion.id,
-                                        answer: updated,
+                                  return GestureDetector(
+                                    onTap: () {
+                                      final bloc = context.read<ExamPlayBloc>();
+                                      if (isMultiple) {
+                                        final current = (selectedAnswer is List)
+                                            ? selectedAnswer.cast<String>()
+                                            : <String>[];
+                                        final updated =
+                                            current.contains(option.id)
+                                            ? current
+                                                  .where(
+                                                    (id) => id != option.id,
+                                                  )
+                                                  .toList()
+                                            : [...current, option.id];
+                                        bloc.add(
+                                          SetAnswer(
+                                            questionId: currentQuestion.id,
+                                            answer: updated,
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      bloc.add(
+                                        SetAnswer(
+                                          questionId: currentQuestion.id,
+                                          answer: option.id,
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: AppSpacing.paddingCard,
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? AppColors.primaryLight
+                                            : AppColors.card,
+                                        borderRadius: AppBorders.borderRadiusMd,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : AppColors.border,
+                                          width: isSelected
+                                              ? AppBorders.widthMedium
+                                              : AppBorders.widthThin,
+                                        ),
                                       ),
-                                    );
-                                    return;
-                                  }
-                                  bloc.add(
-                                    SetAnswer(
-                                      questionId: currentQuestion.id,
-                                      answer: option.id,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isMultiple
+                                                ? (isSelected
+                                                      ? LucideIcons.checkSquare
+                                                      : LucideIcons.square)
+                                                : (isSelected
+                                                      ? LucideIcons.checkCircle2
+                                                      : LucideIcons.circle),
+                                            color: isSelected
+                                                ? AppColors.primary
+                                                : AppColors.mutedForeground,
+                                          ),
+                                          const SizedBox(width: AppSpacing.sm),
+                                          Expanded(
+                                            child: Text(
+                                              option.content,
+                                              style: AppTypography.bodyMedium
+                                                  .copyWith(
+                                                    color: AppColors.foreground,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: AppSpacing.paddingCard,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? AppColors.primaryLight
-                                        : AppColors.card,
-                                    borderRadius: AppBorders.borderRadiusMd,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                          : AppColors.border,
-                                      width: isSelected
-                                          ? AppBorders.widthMedium
-                                          : AppBorders.widthThin,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        isMultiple
-                                            ? (isSelected
-                                                  ? LucideIcons.checkSquare
-                                                  : LucideIcons.square)
-                                            : (isSelected
-                                                  ? LucideIcons.checkCircle2
-                                                  : LucideIcons.circle),
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : AppColors.mutedForeground,
-                                      ),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      Expanded(
-                                        child: Text(
-                                          option.content,
-                                          style: AppTypography.bodyMedium
-                                              .copyWith(
-                                                color: AppColors.foreground,
-                                              ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                              ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -302,10 +402,29 @@ class _InProgressContent extends StatelessWidget {
                       vertical: AppSpacing.smMd,
                     ),
                   ),
-                  child: const Text('Câu trước'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(LucideIcons.chevronLeft),
+                      const Text('Câu trước'),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                  child: Text(
+                    '${state.currentQuestionIndex + 1} / $totalQuestions',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.textSm.bold.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -323,7 +442,13 @@ class _InProgressContent extends StatelessWidget {
                       vertical: AppSpacing.smMd,
                     ),
                   ),
-                  child: Text(isLastQuestion ? 'Nộp bài' : 'Câu tiếp'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(isLastQuestion ? 'Nộp bài' : 'Câu tiếp'),
+                      Icon(LucideIcons.chevronRight),
+                    ],
+                  ),
                 ),
               ),
             ],

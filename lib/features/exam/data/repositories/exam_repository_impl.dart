@@ -89,6 +89,9 @@ class ExamRepositoryImpl implements ExamRepository {
     try {
       await remoteDatasource.submitExamResult(examId, {
         'score': score,
+        // Backend used by web expects camelCase: timeTaken.
+        // Keep snake_case for backward compatibility if server parsing changes.
+        'timeTaken': timeTaken,
         'time_taken': timeTaken,
       });
       return const Right(null);

@@ -169,8 +169,8 @@ class ExamCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
-                      'Điểm TB: ${exam.averageScore!.round()}%',
-                      style: AppTypography.caption.copyWith(
+                      'ĐIỂM TRUNG BÌNH: ${exam.averageScore}%',
+                      style: AppTypography.caption.bold.copyWith(
                         color: const Color(0xFF92400E),
                         fontWeight: FontWeight.w700,
                       ),
