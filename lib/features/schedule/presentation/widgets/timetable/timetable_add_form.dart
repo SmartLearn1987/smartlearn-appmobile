@@ -5,11 +5,10 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../domain/entities/timetable_entry_entity.dart';
+import '../../../../../core/widgets/app_dropdown_field.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../cubit/timetable/timetable_cubit.dart';
-import '../shared/color_picker_widget.dart';
 import 'timetable_day_section.dart';
-import 'timetable_entry_card.dart';
 
 class TimetableAddForm extends StatefulWidget {
   const TimetableAddForm({super.key});
@@ -19,12 +18,12 @@ class TimetableAddForm extends StatefulWidget {
 }
 
 class _TimetableAddFormState extends State<TimetableAddForm> {
-  int _selectedDay = 2;
+  final _formKey = GlobalKey<FormState>();
+  String _selectedDay = dayOrder.first;
   final _subjectController = TextEditingController();
   TimeOfDay _startTime = const TimeOfDay(hour: 7, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 8, minute: 30);
   final _roomController = TextEditingController();
-  int _selectedColor = 0;
 
   @override
   void dispose() {
@@ -38,10 +37,7 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-    );
+    final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked != null && mounted) {
       setState(() {
         if (isStart) {
@@ -54,28 +50,15 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
   }
 
   void _submit() {
-    final subject = _subjectController.text.trim();
-    if (subject.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập tên môn học'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    final entry = TimetableEntryEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      day: _selectedDay,
-      subject: subject,
-      startTime: _formatTime(_startTime),
-      endTime: _formatTime(_endTime),
-      room: _roomController.text.trim(),
-      color: _selectedColor,
-    );
-
-    context.read<TimetableCubit>().addEntry(entry);
+    context.read<TimetableCubit>().addEntry(
+          day: _selectedDay,
+          subject: _subjectController.text.trim(),
+          startTime: _formatTime(_startTime),
+          endTime: _formatTime(_endTime),
+          room: _roomController.text.trim(),
+        );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -95,127 +78,107 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
       ),
       child: Padding(
         padding: AppSpacing.paddingMd,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Thêm môn học mới',
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Day dropdown
-            DropdownMenu<int>(
-              initialSelection: _selectedDay,
-              label: const Text('Thứ'),
-              expandedInsets: EdgeInsets.zero,
-              dropdownMenuEntries: dayNames.entries
-                  .map(
-                    (e) => DropdownMenuEntry(
-                      value: e.key,
-                      label: e.value,
-                    ),
-                  )
-                  .toList(),
-              onSelected: (value) {
-                if (value != null) setState(() => _selectedDay = value);
-              },
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Subject input
-            TextField(
-              controller: _subjectController,
-              decoration: const InputDecoration(
-                labelText: 'Môn học *',
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Thêm môn học mới',
+                style: AppTypography.h4.copyWith(color: AppColors.foreground),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Day dropdown
+              AppDropdownField<String>(
+                label: 'Thứ trong tuần',
+                value: _selectedDay,
+                items: dayOrder
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) setState(() => _selectedDay = v);
+                },
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Subject
+              AppTextField(
+                controller: _subjectController,
+                label: 'Môn học',
                 hintText: 'VD: Toán, Văn, Anh...',
-                border: OutlineInputBorder(),
-                isDense: true,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vui lòng nhập tên môn học'
+                    : null,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Time pickers row
-            Row(
-              children: [
-                Expanded(
-                  child: _TimePicker(
-                    label: 'Bắt đầu',
-                    time: _formatTime(_startTime),
-                    onTap: () => _pickTime(isStart: true),
+              const SizedBox(height: AppSpacing.smMd),
+              // Time pickers
+              Row(
+                children: [
+                  Expanded(
+                    child: TimePickerField(
+                      label: 'Bắt đầu',
+                      time: _formatTime(_startTime),
+                      onTap: () => _pickTime(isStart: true),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _TimePicker(
-                    label: 'Kết thúc',
-                    time: _formatTime(_endTime),
-                    onTap: () => _pickTime(isStart: false),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: TimePickerField(
+                      label: 'Kết thúc',
+                      time: _formatTime(_endTime),
+                      onTap: () => _pickTime(isStart: false),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Room input
-            TextField(
-              controller: _roomController,
-              decoration: const InputDecoration(
-                labelText: 'Phòng học',
+                ],
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Room (optional)
+              AppTextField(
+                controller: _roomController,
+                label: 'Phòng học',
                 hintText: 'VD: P.101, Online...',
-                border: OutlineInputBorder(),
-                isDense: true,
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Color picker
-            Text(
-              'Màu sắc',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.mutedForeground,
+              const SizedBox(height: AppSpacing.md),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Hủy'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Thêm'),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            ColorPickerWidget(
-              colors: timetableEntryColors,
-              selectedIndex: _selectedColor,
-              onChanged: (index) => setState(() => _selectedColor = index),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: const Text('Hủy'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.primaryForeground,
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: const Text('Thêm'),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _TimePicker extends StatelessWidget {
-  const _TimePicker({
+class TimePickerField extends StatelessWidget {
+  const TimePickerField({
     required this.label,
     required this.time,
     required this.onTap,
+    super.key,
   });
 
   final String label;
@@ -224,16 +187,32 @@ class _TimePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: AppTypography.labelMedium.copyWith(
+            color: AppColors.foreground,
+          ),
         ),
-        child: Text(time, style: AppTypography.bodyMedium),
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: AppBorders.borderRadiusSm,
+              border: Border.all(color: AppColors.input),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(time, style: AppTypography.bodyMedium),
+          ),
+        ),
+      ],
     );
   }
 }

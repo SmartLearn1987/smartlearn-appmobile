@@ -68,8 +68,11 @@ class TimetableTab extends StatelessWidget {
             : null;
         final entries = currentGroup?.entries ?? [];
         final groupedByDay = groupEntriesByDay(entries);
-        // Sort day keys so they appear in order 2..8
-        final sortedDays = groupedByDay.keys.toList()..sort();
+        // Sort day keys by the canonical day order
+        final sortedDays = groupedByDay.keys.toList()
+          ..sort(
+            (a, b) => dayOrder.indexOf(a).compareTo(dayOrder.indexOf(b)),
+          );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,19 +93,27 @@ class TimetableTab extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppSpacing.smMd),
-            // Add button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _showAddModal(context),
-                icon: const Icon(LucideIcons.plus, size: 16),
-                label: const Text('Thêm môn học'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: AppBorders.shapeSm,
+            // Add + Refresh buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showAddModal(context),
+                    icon: const Icon(LucideIcons.plus, size: 16),
+                    label: const Text('Thêm môn học'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: AppBorders.shapeSm,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: AppSpacing.sm),
+                _RefreshButton(
+                  isLoading: state.status == TimetableStatus.loading,
+                  onPressed: () => cubit.loadGroups(),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.smMd),
             // Content
@@ -164,6 +175,71 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RefreshButton extends StatefulWidget {
+  const _RefreshButton({required this.isLoading, required this.onPressed});
+
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  State<_RefreshButton> createState() => _RefreshButtonState();
+}
+
+class _RefreshButtonState extends State<_RefreshButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_RefreshButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: widget.isLoading ? null : widget.onPressed,
+      tooltip: 'Làm mới',
+      style: IconButton.styleFrom(
+        side: const BorderSide(color: AppColors.border),
+        shape: RoundedRectangleBorder(
+          borderRadius: AppBorders.borderRadiusSm,
+        ),
+      ),
+      icon: RotationTransition(
+        turns: _controller,
+        child: Icon(
+          LucideIcons.refreshCw,
+          size: 16,
+          color: widget.isLoading
+              ? AppColors.mutedForeground
+              : AppColors.foreground,
+        ),
       ),
     );
   }

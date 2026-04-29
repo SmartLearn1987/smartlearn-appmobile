@@ -144,10 +144,16 @@ import '../../features/quizlet/presentation/bloc/quizlet_detail/quizlet_detail_b
     as _i518;
 import '../../features/schedule/data/datasources/schedule_local_datasource.dart'
     as _i219;
+import '../../features/schedule/data/datasources/schedule_remote_datasource.dart'
+    as _i115;
 import '../../features/schedule/data/repositories/schedule_local_repository_impl.dart'
     as _i502;
+import '../../features/schedule/data/repositories/schedule_repository_impl.dart'
+    as _i688;
 import '../../features/schedule/domain/repositories/schedule_local_repository.dart'
     as _i500;
+import '../../features/schedule/domain/repositories/schedule_repository.dart'
+    as _i736;
 import '../../features/schedule/presentation/cubit/notes/notes_cubit.dart'
     as _i919;
 import '../../features/schedule/presentation/cubit/tasks/tasks_cubit.dart'
@@ -247,17 +253,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i237.QuizletRemoteDatasource>(
       () => _i237.QuizletRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i115.ScheduleRemoteDatasource>(
+      () => _i115.ScheduleRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i574.SubjectsRemoteDatasource>(
       () => _i574.SubjectsRemoteDatasource(gh<_i361.Dio>()),
-    );
-    gh.factory<_i919.NotesCubit>(
-      () => _i919.NotesCubit(gh<_i500.ScheduleLocalRepository>()),
-    );
-    gh.factory<_i543.TasksCubit>(
-      () => _i543.TasksCubit(gh<_i500.ScheduleLocalRepository>()),
-    );
-    gh.factory<_i596.TimetableCubit>(
-      () => _i596.TimetableCubit(gh<_i500.ScheduleLocalRepository>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -267,6 +267,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i413.ExamRepository>(
       () => _i362.ExamRepositoryImpl(gh<_i977.ExamRemoteDatasource>()),
+    );
+    gh.lazySingleton<_i736.ScheduleRepository>(
+      () => _i688.ScheduleRepositoryImpl(gh<_i115.ScheduleRemoteDatasource>()),
+    );
+    gh.factory<_i919.NotesCubit>(
+      () => _i919.NotesCubit(gh<_i736.ScheduleRepository>()),
+    );
+    gh.factory<_i543.TasksCubit>(
+      () => _i543.TasksCubit(gh<_i736.ScheduleRepository>()),
+    );
+    gh.factory<_i596.TimetableCubit>(
+      () => _i596.TimetableCubit(gh<_i736.ScheduleRepository>()),
     );
     gh.factory<_i788.ChangePasswordUseCase>(
       () => _i788.ChangePasswordUseCase(gh<_i787.AuthRepository>()),

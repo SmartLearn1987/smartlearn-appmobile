@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../../core/theme/app_borders.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/theme/theme.dart';
 import '../../../domain/entities/note_item_entity.dart';
-import 'note_item_card.dart';
 
 class NoteDetailModal extends StatelessWidget {
   const NoteDetailModal({required this.note, super.key});
@@ -22,49 +19,50 @@ class NoteDetailModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorIndex = note.color % noteColorsLight.length;
-    final bgColor = noteColorsLight[colorIndex];
-    final borderColor = noteColorsDark[colorIndex];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppBorders.radiusLg),
-        ),
-        border: Border.all(color: borderColor, width: AppBorders.widthThin),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.md,
-          left: AppSpacing.md,
-          right: AppSpacing.md,
-          top: AppSpacing.md,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.yellow50,
+          borderRadius: AppBorders.borderRadiusLg,
+          border: Border.all(
+            color: AppColors.border,
+            width: AppBorders.widthThick,
+          ),
         ),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: borderColor.withValues(alpha: 0.3),
-                  borderRadius: AppBorders.borderRadiusFull,
-                ),
-                child: const SizedBox(width: 40, height: 4),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Title with sticky note icon
+            // Header row: icon + title + close button
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(LucideIcons.stickyNote, size: 20, color: borderColor),
+                Icon(
+                  LucideIcons.stickyNote,
+                  size: 20,
+                  color: AppColors.foreground,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     note.title.isNotEmpty ? note.title : 'Chi tiết ghi chú',
-                    style: AppTypography.h4.copyWith(color: borderColor),
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.foreground,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    LucideIcons.x,
+                    size: 18,
+                    color: AppColors.foreground.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -74,34 +72,34 @@ class NoteDetailModal extends StatelessWidget {
             if (note.content.isNotEmpty)
               ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                  maxHeight: MediaQuery.of(context).size.height * 0.45,
                 ),
                 child: SingleChildScrollView(
                   child: Text(
                     note.content,
                     style: AppTypography.bodyMedium.copyWith(
-                      color: borderColor.withValues(alpha: 0.85),
+                      color: AppColors.foreground.withValues(alpha: 0.85),
                     ),
                   ),
                 ),
               ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             // Footer
-            Divider(color: borderColor.withValues(alpha: 0.2)),
-            const SizedBox(height: AppSpacing.sm),
+            Divider(color: AppColors.border.withValues(alpha: 0.2)),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Smart Learn Notes',
                   style: AppTypography.caption.copyWith(
-                    color: borderColor.withValues(alpha: 0.6),
+                    color: AppColors.foreground.withValues(alpha: 0.6),
                   ),
                 ),
                 Text(
                   _formatDateTime(note.updatedAt),
                   style: AppTypography.caption.copyWith(
-                    color: borderColor.withValues(alpha: 0.6),
+                    color: AppColors.foreground.withValues(alpha: 0.6),
                   ),
                 ),
               ],

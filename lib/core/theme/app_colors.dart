@@ -46,4 +46,5 @@ abstract final class AppColors {
   static const Color slate50 = Color(0xFFF8FAFC);
   static const Color slate100 = Color(0xFFF1F5F9);
   static const Color slate400 = Color(0xFF9CA3AF);
+  static const Color yellow50 = Color(0xFFFEFCE8);
 }

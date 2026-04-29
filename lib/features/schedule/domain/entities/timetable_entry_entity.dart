@@ -2,12 +2,11 @@ import 'package:equatable/equatable.dart';
 
 class TimetableEntryEntity extends Equatable {
   final String id;
-  final int day;
+  final String day;
   final String subject;
   final String startTime;
   final String endTime;
-  final String room;
-  final int color;
+  final String? room;
 
   const TimetableEntryEntity({
     required this.id,
@@ -15,8 +14,7 @@ class TimetableEntryEntity extends Equatable {
     required this.subject,
     required this.startTime,
     required this.endTime,
-    required this.room,
-    required this.color,
+    this.room,
   });
 
   @override
@@ -27,6 +25,5 @@ class TimetableEntryEntity extends Equatable {
         startTime,
         endTime,
         room,
-        color,
       ];
 }

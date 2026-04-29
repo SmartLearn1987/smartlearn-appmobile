@@ -5,7 +5,7 @@ import 'timetable_entry_model.dart';
 
 part 'timetable_group_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class TimetableGroupModel extends TimetableGroupEntity {
   @override
   final List<TimetableEntryModel> entries;

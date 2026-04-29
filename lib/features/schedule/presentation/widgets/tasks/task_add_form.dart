@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../domain/entities/task_item_entity.dart';
+import '../../../../../core/widgets/app_dropdown_field.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../cubit/tasks/tasks_cubit.dart';
 
-const _priorities = <String, String>{
-  'high': 'Cao',
-  'medium': 'Trung bình',
-  'low': 'Thấp',
-};
+const _priorityItems = <DropdownMenuItem<String>>[
+  DropdownMenuItem(value: 'high', child: Text('Cao')),
+  DropdownMenuItem(value: 'medium', child: Text('Trung bình')),
+  DropdownMenuItem(value: 'low', child: Text('Thấp')),
+];
 
 class TaskAddForm extends StatefulWidget {
   const TaskAddForm({super.key});
@@ -22,6 +24,7 @@ class TaskAddForm extends StatefulWidget {
 }
 
 class _TaskAddFormState extends State<TaskAddForm> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime? _dueDate;
@@ -53,28 +56,14 @@ class _TaskAddFormState extends State<TaskAddForm> {
   }
 
   void _submit() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập tiêu đề nhiệm vụ'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    final task = TaskItemEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title,
-      description: _descriptionController.text.trim(),
-      dueDate: _dueDate,
-      completed: false,
-      priority: _priority,
-      createdAt: DateTime.now(),
-    );
-
-    context.read<TasksCubit>().addTask(task);
+    context.read<TasksCubit>().addTask(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          dueDate: _dueDate,
+          priority: _priority,
+        );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -94,102 +83,145 @@ class _TaskAddFormState extends State<TaskAddForm> {
       ),
       child: Padding(
         padding: AppSpacing.paddingMd,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nhiệm vụ mới',
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Title
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                hintText: 'Tiêu đề nhiệm vụ *',
-                border: OutlineInputBorder(),
-                isDense: true,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Nhiệm vụ mới',
+                style: AppTypography.h4.copyWith(color: AppColors.foreground),
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Description
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Mô tả chi tiết',
-                border: OutlineInputBorder(),
-                isDense: true,
+              const SizedBox(height: AppSpacing.md),
+              // Title (required)
+              AppTextField(
+                controller: _titleController,
+                label: 'Tiêu đề',
+                hintText: 'Tiêu đề nhiệm vụ',
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vui lòng nhập tiêu đề nhiệm vụ'
+                    : null,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                textInputAction: TextInputAction.next,
               ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Description (optional)
+              AppTextField(
+                controller: _descriptionController,
+                label: 'Mô tả',
+                hintText: 'Mô tả chi tiết (tùy chọn)',
+                maxLines: 3,
+                textInputAction: TextInputAction.newline,
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Due date picker
+              DueDateField(
+                dueDate: _dueDate,
+                formatDate: _formatDate,
+                onTap: _pickDate,
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Priority dropdown
+              AppDropdownField<String>(
+                label: 'Độ ưu tiên',
+                value: _priority,
+                items: _priorityItems,
+                onChanged: (v) {
+                  if (v != null) setState(() => _priority = v);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Hủy'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Thêm'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared due-date picker field used by both add and edit forms.
+class DueDateField extends StatelessWidget {
+  const DueDateField({
+    required this.dueDate,
+    required this.formatDate,
+    required this.onTap,
+    super.key,
+  });
+
+  final DateTime? dueDate;
+  final String Function(DateTime) formatDate;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Hạn chót',
+          style: AppTypography.labelMedium.copyWith(
+            color: AppColors.foreground,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: AppBorders.borderRadiusSm,
+              border: Border.all(color: AppColors.input),
             ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Due date picker
-            GestureDetector(
-              onTap: _pickDate,
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Hạn chót',
-                  border: OutlineInputBorder(),
-                  isDense: true,
+            child: Row(
+              children: [
+                Icon(
+                  LucideIcons.calendar,
+                  size: 18,
+                  color: AppColors.mutedForeground,
                 ),
-                child: Text(
-                  _dueDate != null ? _formatDate(_dueDate!) : 'Chọn ngày',
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  dueDate != null ? formatDate(dueDate!) : 'Chọn ngày',
                   style: AppTypography.bodyMedium.copyWith(
-                    color: _dueDate != null
+                    color: dueDate != null
                         ? AppColors.foreground
                         : AppColors.mutedForeground,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Priority dropdown
-            DropdownMenu<String>(
-              initialSelection: _priority,
-              label: const Text('Độ ưu tiên'),
-              expandedInsets: EdgeInsets.zero,
-              dropdownMenuEntries: _priorities.entries
-                  .map(
-                    (e) => DropdownMenuEntry(
-                      value: e.key,
-                      label: e.value,
-                    ),
-                  )
-                  .toList(),
-              onSelected: (value) {
-                if (value != null) setState(() => _priority = value);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: const Text('Hủy'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.primaryForeground,
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: const Text('Thêm'),
-                  ),
-                ),
               ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

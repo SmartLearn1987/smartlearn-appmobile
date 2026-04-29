@@ -5,10 +5,8 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../domain/entities/note_item_entity.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../cubit/notes/notes_cubit.dart';
-import '../shared/color_picker_widget.dart';
-import 'note_item_card.dart';
 
 class NoteAddForm extends StatefulWidget {
   const NoteAddForm({super.key});
@@ -18,9 +16,9 @@ class NoteAddForm extends StatefulWidget {
 }
 
 class _NoteAddFormState extends State<NoteAddForm> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  int _selectedColor = 0;
 
   @override
   void dispose() {
@@ -29,29 +27,22 @@ class _NoteAddFormState extends State<NoteAddForm> {
     super.dispose();
   }
 
-  void _submit() {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-
-    if (title.isEmpty && content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập tiêu đề hoặc nội dung'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
+  /// At least one of title or content must be non-empty.
+  String? _validateContent(String? value) {
+    if (_titleController.text.trim().isEmpty &&
+        (value == null || value.trim().isEmpty)) {
+      return 'Vui lòng nhập tiêu đề hoặc nội dung';
     }
+    return null;
+  }
 
-    final note = NoteItemEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title,
-      content: content,
-      color: _selectedColor,
-      updatedAt: DateTime.now(),
-    );
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
 
-    context.read<NotesCubit>().addNote(note);
+    context.read<NotesCubit>().addNote(
+          title: _titleController.text.trim(),
+          content: _contentController.text.trim(),
+        );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -71,76 +62,65 @@ class _NoteAddFormState extends State<NoteAddForm> {
       ),
       child: Padding(
         padding: AppSpacing.paddingMd,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Ghi chú mới',
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Color picker
-            Text(
-              'Màu sắc',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.mutedForeground,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ghi chú mới',
+                style: AppTypography.h4.copyWith(color: AppColors.foreground),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            ColorPickerWidget(
-              colors: noteColorsLight,
-              selectedIndex: _selectedColor,
-              onChanged: (index) => setState(() => _selectedColor = index),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Title input
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
+              const SizedBox(height: AppSpacing.smMd),
+              // Title (optional, but at least one field required)
+              AppTextField(
+                controller: _titleController,
+                label: 'Tiêu đề',
                 hintText: 'Tiêu đề ghi chú',
-                border: OutlineInputBorder(),
-                isDense: true,
+                textInputAction: TextInputAction.next,
+                // Revalidate content when title changes so the error clears
+                onChanged: (_) => _formKey.currentState?.validate(),
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Content input
-            TextField(
-              controller: _contentController,
-              maxLines: 5,
-              decoration: const InputDecoration(
+              const SizedBox(height: AppSpacing.smMd),
+              // Content
+              AppTextField(
+                controller: _contentController,
+                label: 'Nội dung',
                 hintText: 'Nội dung ghi chú...',
-                border: OutlineInputBorder(),
-                isDense: true,
+                maxLines: 5,
+                validator: _validateContent,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                textInputAction: TextInputAction.newline,
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      shape: AppBorders.shapeSm,
+              const SizedBox(height: AppSpacing.md),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Hủy'),
                     ),
-                    child: const Text('Hủy'),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.primaryForeground,
-                      shape: AppBorders.shapeSm,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Lưu'),
                     ),
-                    child: const Text('Lưu'),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

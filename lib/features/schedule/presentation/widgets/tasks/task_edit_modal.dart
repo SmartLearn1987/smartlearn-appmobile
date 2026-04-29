@@ -5,14 +5,17 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_dropdown_field.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../../domain/entities/task_item_entity.dart';
 import '../../cubit/tasks/tasks_cubit.dart';
+import 'task_add_form.dart';
 
-const _priorities = <String, String>{
-  'high': 'Cao',
-  'medium': 'Trung bình',
-  'low': 'Thấp',
-};
+const _priorityItems = <DropdownMenuItem<String>>[
+  DropdownMenuItem(value: 'high', child: Text('Cao')),
+  DropdownMenuItem(value: 'medium', child: Text('Trung bình')),
+  DropdownMenuItem(value: 'low', child: Text('Thấp')),
+];
 
 class TaskEditModal extends StatefulWidget {
   const TaskEditModal({required this.task, super.key});
@@ -24,6 +27,7 @@ class TaskEditModal extends StatefulWidget {
 }
 
 class _TaskEditModalState extends State<TaskEditModal> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late DateTime? _dueDate;
@@ -65,20 +69,11 @@ class _TaskEditModalState extends State<TaskEditModal> {
   }
 
   void _save() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập tiêu đề nhiệm vụ'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final updated = TaskItemEntity(
       id: widget.task.id,
-      title: title,
+      title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       dueDate: _dueDate,
       completed: widget.task.completed,
@@ -106,115 +101,98 @@ class _TaskEditModalState extends State<TaskEditModal> {
         top: AppSpacing.md,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.mutedForeground,
-                  borderRadius: AppBorders.borderRadiusFull,
-                ),
-                child: const SizedBox(width: 40, height: 4),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Sửa nhiệm vụ',
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Title
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                hintText: 'Tiêu đề nhiệm vụ *',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Description
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Mô tả chi tiết',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Due date picker
-            GestureDetector(
-              onTap: _pickDate,
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Hạn chót',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-                child: Text(
-                  _dueDate != null ? _formatDate(_dueDate!) : 'Chọn ngày',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: _dueDate != null
-                        ? AppColors.foreground
-                        : AppColors.mutedForeground,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
+              Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.mutedForeground,
+                    borderRadius: AppBorders.borderRadiusFull,
                   ),
+                  child: const SizedBox(width: 40, height: 4),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Priority dropdown
-            DropdownMenu<String>(
-              initialSelection: _priority,
-              label: const Text('Độ ưu tiên'),
-              expandedInsets: EdgeInsets.zero,
-              dropdownMenuEntries: _priorities.entries
-                  .map(
-                    (e) => DropdownMenuEntry(
-                      value: e.key,
-                      label: e.value,
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Sửa nhiệm vụ',
+                style: AppTypography.h4.copyWith(color: AppColors.foreground),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Title (required)
+              AppTextField(
+                controller: _titleController,
+                label: 'Tiêu đề',
+                hintText: 'Tiêu đề nhiệm vụ',
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vui lòng nhập tiêu đề nhiệm vụ'
+                    : null,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Description (optional)
+              AppTextField(
+                controller: _descriptionController,
+                label: 'Mô tả',
+                hintText: 'Mô tả chi tiết (tùy chọn)',
+                maxLines: 3,
+                textInputAction: TextInputAction.newline,
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Due date picker
+              DueDateField(
+                dueDate: _dueDate,
+                formatDate: _formatDate,
+                onTap: _pickDate,
+              ),
+              const SizedBox(height: AppSpacing.smMd),
+              // Priority dropdown
+              AppDropdownField<String>(
+                label: 'Độ ưu tiên',
+                value: _priority,
+                items: _priorityItems,
+                onChanged: (v) {
+                  if (v != null) setState(() => _priority = v);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        context.read<TasksCubit>().setEditingTask(null);
+                        Navigator.of(context).pop();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Hủy'),
                     ),
-                  )
-                  .toList(),
-              onSelected: (value) {
-                if (value != null) setState(() => _priority = value);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      context.read<TasksCubit>().setEditingTask(null);
-                      Navigator.of(context).pop();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: AppBorders.shapeSm,
-                    ),
-                    child: const Text('Hủy'),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _save,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.primaryForeground,
-                      shape: AppBorders.shapeSm,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Lưu thay đổi'),
                     ),
-                    child: const Text('Lưu thay đổi'),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
         ),
       ),
     );

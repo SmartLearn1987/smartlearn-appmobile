@@ -30,9 +30,7 @@ class NotesTab extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(modalContext).viewInsets.bottom,
           ),
-          child: const SingleChildScrollView(
-            child: NoteAddForm(),
-          ),
+          child: const SingleChildScrollView(child: NoteAddForm()),
         ),
       ),
     );
@@ -42,17 +40,13 @@ class NotesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<NotesCubit, NotesState>(
       listenWhen: (prev, curr) =>
-          (curr.viewingNote != null &&
-              prev.viewingNote != curr.viewingNote) ||
-          (curr.editingNote != null &&
-              prev.editingNote != curr.editingNote),
+          (curr.viewingNote != null && prev.viewingNote != curr.viewingNote) ||
+          (curr.editingNote != null && prev.editingNote != curr.editingNote),
       listener: (context, state) {
-        // View modal
+        // View dialog
         if (state.viewingNote != null) {
-          showModalBottomSheet<void>(
+          showDialog<void>(
             context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
             builder: (_) => NoteDetailModal(note: state.viewingNote!),
           ).whenComplete(() {
             if (context.mounted) {
@@ -93,9 +87,7 @@ class NotesTab extends StatelessWidget {
               children: [
                 Text(
                   'Ghi chú',
-                  style: AppTypography.h4.copyWith(
-                    color: AppColors.foreground,
-                  ),
+                  style: AppTypography.h4.copyWith(color: AppColors.foreground),
                 ),
                 if (state.notes.isNotEmpty) ...[
                   const SizedBox(width: AppSpacing.sm),
@@ -129,6 +121,11 @@ class NotesTab extends StatelessWidget {
                     shape: AppBorders.shapeSm,
                   ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                _RefreshButton(
+                  isLoading: state.status == NotesStatus.loading,
+                  onPressed: () => cubit.loadNotes(),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.smMd),
@@ -139,11 +136,11 @@ class NotesTab extends StatelessWidget {
                   : GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: AppSpacing.sm,
-                        mainAxisSpacing: AppSpacing.sm,
-                        childAspectRatio: 0.75,
-                      ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: AppSpacing.sm,
+                            mainAxisSpacing: AppSpacing.sm,
+                            childAspectRatio: 0.75,
+                          ),
                       itemCount: state.notes.length,
                       itemBuilder: (context, index) {
                         final note = state.notes[index];
@@ -198,6 +195,69 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RefreshButton extends StatefulWidget {
+  const _RefreshButton({required this.isLoading, required this.onPressed});
+
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  State<_RefreshButton> createState() => _RefreshButtonState();
+}
+
+class _RefreshButtonState extends State<_RefreshButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_RefreshButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: widget.isLoading ? null : widget.onPressed,
+      tooltip: 'Làm mới',
+      style: IconButton.styleFrom(
+        side: const BorderSide(color: AppColors.border),
+        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
+      ),
+      icon: RotationTransition(
+        turns: _controller,
+        child: Icon(
+          LucideIcons.refreshCw,
+          size: 16,
+          color: widget.isLoading
+              ? AppColors.mutedForeground
+              : AppColors.foreground,
+        ),
       ),
     );
   }

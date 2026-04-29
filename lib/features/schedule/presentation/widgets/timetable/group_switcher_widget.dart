@@ -45,7 +45,7 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
                   child: GestureDetector(
                     onTap: () =>
                         context.read<TimetableCubit>().selectGroup(index),
-                    onLongPress: () => _showDeleteDialog(context, index),
+                    onLongPress: () => _showDeleteDialog(context, group.id),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: isSelected ? AppColors.primary : AppColors.card,
@@ -170,9 +170,9 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, int index) {
+  void _showDeleteDialog(BuildContext context, String groupId) {
     final cubit = context.read<TimetableCubit>();
-    final group = cubit.state.groups[index];
+    final group = cubit.state.groups.firstWhere((g) => g.id == groupId);
 
     showDialog<void>(
       context: context,
@@ -196,7 +196,7 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
                 );
                 return;
               }
-              cubit.deleteGroup(index);
+              cubit.deleteGroup(groupId);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Đã xóa nhóm thời khóa biểu'),

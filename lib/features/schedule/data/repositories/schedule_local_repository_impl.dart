@@ -47,7 +47,6 @@ class ScheduleLocalRepositoryImpl implements ScheduleLocalRepository {
                       startTime: e.startTime,
                       endTime: e.endTime,
                       room: e.room,
-                      color: e.color,
                     ),
                   )
                   .toList(),
@@ -117,7 +116,6 @@ class ScheduleLocalRepositoryImpl implements ScheduleLocalRepository {
               id: n.id,
               title: n.title,
               content: n.content,
-              color: n.color,
               updatedAt: n.updatedAt,
             ),
           )

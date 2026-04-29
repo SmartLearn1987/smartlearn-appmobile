@@ -4,7 +4,7 @@ import '../../domain/entities/timetable_entry_entity.dart';
 
 part 'timetable_entry_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class TimetableEntryModel extends TimetableEntryEntity {
   const TimetableEntryModel({
     required super.id,
@@ -12,8 +12,7 @@ class TimetableEntryModel extends TimetableEntryEntity {
     required super.subject,
     required super.startTime,
     required super.endTime,
-    required super.room,
-    required super.color,
+    super.room,
   });
 
   factory TimetableEntryModel.fromJson(Map<String, dynamic> json) =>

@@ -1,42 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
-import '../../../../../core/theme/app_borders.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/entities/note_item_entity.dart';
-
-/// 12 note colors — light (background) and dark (border/text).
-const noteColorsLight = <Color>[
-  Color(0xFFFEF9C3),
-  Color(0xFFDBEAFE),
-  Color(0xFFDCFCE7),
-  Color(0xFFFCE7F3),
-  Color(0xFFEDE9FE),
-  Color(0xFFFFEDD5),
-  Color(0xFFCA8A04),
-  Color(0xFF2563EB),
-  Color(0xFF16A34A),
-  Color(0xFFDB2777),
-  Color(0xFF7C3AED),
-  Color(0xFFEA580C),
-];
-
-const noteColorsDark = <Color>[
-  Color(0xFFCA8A04),
-  Color(0xFF2563EB),
-  Color(0xFF16A34A),
-  Color(0xFFDB2777),
-  Color(0xFF7C3AED),
-  Color(0xFFEA580C),
-  Color(0xFF854D0E),
-  Color(0xFF1E40AF),
-  Color(0xFF166534),
-  Color(0xFF9D174D),
-  Color(0xFF5B21B6),
-  Color(0xFF9A3412),
-];
 
 class NoteItemCard extends StatelessWidget {
   const NoteItemCard({
@@ -54,18 +20,17 @@ class NoteItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorIndex = note.color % noteColorsLight.length;
-    final bgColor = noteColorsLight[colorIndex];
-    final borderColor = noteColorsDark[colorIndex];
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: AppColors.yellow50,
         borderRadius: AppBorders.borderRadiusLg,
-        border: Border.all(color: borderColor, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThick,
+        ),
       ),
       child: Padding(
-        padding: AppSpacing.paddingSm,
+        padding: AppSpacing.paddingMd,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,13 +38,11 @@ class NoteItemCard extends StatelessWidget {
             if (note.title.isNotEmpty)
               Text(
                 note.title,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.labelMedium.copyWith(
-                  color: borderColor,
-                ),
+                style: AppTypography.labelMedium.bold,
               ),
-            if (note.title.isNotEmpty) const SizedBox(height: AppSpacing.xs),
+            if (note.title.isNotEmpty) const Divider(height: AppSpacing.md),
             // Content preview
             if (note.content.isNotEmpty)
               Expanded(
@@ -87,35 +50,34 @@ class NoteItemCard extends StatelessWidget {
                   note.content,
                   maxLines: 6,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: borderColor.withValues(alpha: 0.85),
-                  ),
+                  style: AppTypography.bodySmall,
                 ),
               ),
             const SizedBox(height: AppSpacing.sm),
             // Updated date
-            Text(
-              _formatDate(note.updatedAt),
-              style: AppTypography.caption.copyWith(
-                color: borderColor.withValues(alpha: 0.6),
-                fontSize: 10,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
+
             // Action buttons
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Expanded(
+                  child: Text(
+                    _formatDate(note.updatedAt),
+                    style: AppTypography.textXs.withColor(
+                      AppColors.mutedForeground,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
                 _ActionButton(
                   icon: LucideIcons.eye,
                   onTap: onView,
-                  color: borderColor,
+                  color: AppColors.foreground,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 _ActionButton(
                   icon: LucideIcons.pencil,
                   onTap: onEdit,
-                  color: borderColor,
+                  color: AppColors.foreground,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 _ActionButton(

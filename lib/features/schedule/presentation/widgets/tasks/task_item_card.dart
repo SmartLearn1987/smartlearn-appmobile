@@ -137,10 +137,10 @@ class TaskItemCard extends StatelessWidget {
                       ],
                     ),
                     // Description
-                    if (task.description.isNotEmpty) ...[
+                    if (task.description?.isNotEmpty ?? false) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        task.description,
+                        task.description!,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.bodySmall.copyWith(

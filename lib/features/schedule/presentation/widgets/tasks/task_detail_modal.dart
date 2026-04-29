@@ -31,32 +31,39 @@ class TaskDetailModal extends StatelessWidget {
     final priority =
         _priorityConfig[task.priority] ?? _priorityConfig['medium']!;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: AppSpacing.md,
-        right: AppSpacing.md,
-        top: AppSpacing.md,
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
       ),
+      shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusLg),
       child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.mutedForeground,
-                  borderRadius: AppBorders.borderRadiusFull,
+            // Header: title + close button
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    task.title,
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.foreground,
+                    ),
+                  ),
                 ),
-                child: const SizedBox(width: 40, height: 4),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Title
-            Text(
-              task.title,
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    LucideIcons.x,
+                    size: 18,
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.sm),
             // Priority + Status badges
@@ -107,7 +114,7 @@ class TaskDetailModal extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             // Description
-            if (task.description.isNotEmpty) ...[
+            if (task.description?.isNotEmpty ?? false) ...[
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: AppColors.muted,
@@ -118,7 +125,7 @@ class TaskDetailModal extends StatelessWidget {
                   child: Padding(
                     padding: AppSpacing.paddingSm,
                     child: Text(
-                      task.description,
+                      task.description!,
                       style: AppTypography.bodyMedium.copyWith(
                         color: AppColors.foreground,
                       ),

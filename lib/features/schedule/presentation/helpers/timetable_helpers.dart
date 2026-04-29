@@ -2,12 +2,12 @@ import '../../domain/entities/timetable_entry_entity.dart';
 
 /// Groups timetable entries by their [day] field.
 ///
-/// Returns a map where keys are day values and values are lists of entries
+/// Returns a map where keys are day strings and values are lists of entries
 /// for that day. Only days with at least one entry appear as keys.
-Map<int, List<TimetableEntryEntity>> groupEntriesByDay(
+Map<String, List<TimetableEntryEntity>> groupEntriesByDay(
   List<TimetableEntryEntity> entries,
 ) {
-  final map = <int, List<TimetableEntryEntity>>{};
+  final map = <String, List<TimetableEntryEntity>>{};
   for (final entry in entries) {
     map.putIfAbsent(entry.day, () => []).add(entry);
   }

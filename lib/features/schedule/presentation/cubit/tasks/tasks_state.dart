@@ -1,6 +1,6 @@
 part of 'tasks_cubit.dart';
 
-enum TasksStatus { initial, loaded, error }
+enum TasksStatus { initial, loading, loaded, error }
 
 class TasksState extends Equatable {
   final List<TaskItemEntity> tasks;

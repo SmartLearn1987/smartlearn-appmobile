@@ -4,12 +4,12 @@ import '../../domain/entities/task_item_entity.dart';
 
 part 'task_item_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class TaskItemModel extends TaskItemEntity {
   const TaskItemModel({
     required super.id,
     required super.title,
-    required super.description,
+    super.description,
     super.dueDate,
     required super.completed,
     required super.priority,

@@ -4,19 +4,20 @@ import 'package:injectable/injectable.dart';
 
 import '../../../domain/entities/timetable_entry_entity.dart';
 import '../../../domain/entities/timetable_group_entity.dart';
-import '../../../domain/repositories/schedule_local_repository.dart';
+import '../../../domain/repositories/schedule_repository.dart';
 import '../../../domain/validators/schedule_validators.dart';
 
 part 'timetable_state.dart';
 
 @injectable
 class TimetableCubit extends Cubit<TimetableState> {
-  final ScheduleLocalRepository _repository;
+  final ScheduleRepository _repository;
 
   TimetableCubit(this._repository) : super(const TimetableState());
 
-  void loadGroups() {
-    final result = _repository.getTimetableGroups();
+  Future<void> loadGroups() async {
+    emit(state.copyWith(status: TimetableStatus.loading));
+    final result = await _repository.getTimetableGroups();
     result.fold(
       (failure) => emit(
         state.copyWith(
@@ -24,32 +25,13 @@ class TimetableCubit extends Cubit<TimetableState> {
           errorMessage: failure.message,
         ),
       ),
-      (groups) {
-        if (groups.isEmpty) {
-          final defaultGroup = TimetableGroupEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: 'Lịch học chính',
-            entries: const [],
-          );
-          final newGroups = [defaultGroup];
-          emit(
-            state.copyWith(
-              groups: newGroups,
-              selectedGroupIndex: 0,
-              status: TimetableStatus.loaded,
-            ),
-          );
-          _saveGroups();
-        } else {
-          emit(
-            state.copyWith(
-              groups: groups,
-              selectedGroupIndex: 0,
-              status: TimetableStatus.loaded,
-            ),
-          );
-        }
-      },
+      (groups) => emit(
+        state.copyWith(
+          groups: groups,
+          selectedGroupIndex: 0,
+          status: TimetableStatus.loaded,
+        ),
+      ),
     );
   }
 
@@ -59,7 +41,7 @@ class TimetableCubit extends Cubit<TimetableState> {
     }
   }
 
-  void addGroup(String name) {
+  Future<void> addGroup(String name) async {
     if (name.trim().isEmpty) {
       emit(
         state.copyWith(
@@ -70,24 +52,29 @@ class TimetableCubit extends Cubit<TimetableState> {
       return;
     }
 
-    final newGroup = TimetableGroupEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name.trim(),
-      entries: const [],
-    );
-    final updatedGroups = [...state.groups, newGroup];
-    emit(
-      state.copyWith(
-        groups: updatedGroups,
-        selectedGroupIndex: updatedGroups.length - 1,
-        isAddingGroup: false,
-        status: TimetableStatus.loaded,
+    final result = await _repository.createTimetableGroup(name.trim());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TimetableStatus.error,
+          errorMessage: failure.message,
+        ),
       ),
+      (newGroup) {
+        final updatedGroups = [...state.groups, newGroup];
+        emit(
+          state.copyWith(
+            groups: updatedGroups,
+            selectedGroupIndex: updatedGroups.length - 1,
+            isAddingGroup: false,
+            status: TimetableStatus.loaded,
+          ),
+        );
+      },
     );
-    _saveGroups();
   }
 
-  void deleteGroup(int index) {
+  Future<void> deleteGroup(String groupId) async {
     if (state.groups.length <= 1) {
       emit(
         state.copyWith(
@@ -98,88 +85,156 @@ class TimetableCubit extends Cubit<TimetableState> {
       return;
     }
 
-    final updatedGroups = [...state.groups]..removeAt(index);
-    final newSelectedIndex = state.selectedGroupIndex >= updatedGroups.length
-        ? 0
-        : state.selectedGroupIndex;
-    emit(
-      state.copyWith(
-        groups: updatedGroups,
-        selectedGroupIndex: newSelectedIndex,
-        status: TimetableStatus.loaded,
+    final result = await _repository.deleteTimetableGroup(groupId);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TimetableStatus.error,
+          errorMessage: failure.message,
+        ),
       ),
+      (_) {
+        final updatedGroups =
+            state.groups.where((g) => g.id != groupId).toList();
+        final newSelectedIndex =
+            state.selectedGroupIndex >= updatedGroups.length
+                ? 0
+                : state.selectedGroupIndex;
+        emit(
+          state.copyWith(
+            groups: updatedGroups,
+            selectedGroupIndex: newSelectedIndex,
+            status: TimetableStatus.loaded,
+          ),
+        );
+      },
     );
-    _saveGroups();
   }
 
-  void addEntry(TimetableEntryEntity entry) {
-    final error = validateSubjectName(entry.subject);
+  Future<void> addEntry({
+    required String day,
+    required String subject,
+    required String startTime,
+    required String endTime,
+    required String room,
+  }) async {
+    final error = validateSubjectName(subject);
     if (error != null) {
       emit(state.copyWith(status: TimetableStatus.error, errorMessage: error));
       return;
     }
 
     final currentGroup = state.groups[state.selectedGroupIndex];
-    final updatedEntries = [...currentGroup.entries, entry];
-    final updatedGroup = TimetableGroupEntity(
-      id: currentGroup.id,
-      name: currentGroup.name,
-      entries: updatedEntries,
+    final result = await _repository.createTimetableEntry(
+      groupId: currentGroup.id,
+      day: day,
+      subject: subject,
+      startTime: startTime,
+      endTime: endTime,
+      room: room,
     );
-    final updatedGroups = [...state.groups];
-    updatedGroups[state.selectedGroupIndex] = updatedGroup;
-    emit(
-      state.copyWith(
-        groups: updatedGroups,
-        isAddingEntry: false,
-        status: TimetableStatus.loaded,
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TimetableStatus.error,
+          errorMessage: failure.message,
+        ),
       ),
+      (newEntry) {
+        final updatedEntries = [...currentGroup.entries, newEntry];
+        final updatedGroup = TimetableGroupEntity(
+          id: currentGroup.id,
+          name: currentGroup.name,
+          entries: updatedEntries,
+        );
+        final updatedGroups = [...state.groups];
+        updatedGroups[state.selectedGroupIndex] = updatedGroup;
+        emit(
+          state.copyWith(
+            groups: updatedGroups,
+            isAddingEntry: false,
+            status: TimetableStatus.loaded,
+          ),
+        );
+      },
     );
-    _saveGroups();
   }
 
-  void editEntry(TimetableEntryEntity entry) {
+  Future<void> editEntry(TimetableEntryEntity entry) async {
     final error = validateSubjectName(entry.subject);
     if (error != null) {
       emit(state.copyWith(status: TimetableStatus.error, errorMessage: error));
       return;
     }
 
-    final currentGroup = state.groups[state.selectedGroupIndex];
-    final updatedEntries = currentGroup.entries
-        .map((e) => e.id == entry.id ? entry : e)
-        .toList();
-    final updatedGroup = TimetableGroupEntity(
-      id: currentGroup.id,
-      name: currentGroup.name,
-      entries: updatedEntries,
+    final result = await _repository.updateTimetableEntry(
+      entryId: entry.id,
+      day: entry.day,
+      subject: entry.subject,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      room: entry.room ?? '',
     );
-    final updatedGroups = [...state.groups];
-    updatedGroups[state.selectedGroupIndex] = updatedGroup;
-    emit(
-      state.copyWith(
-        groups: updatedGroups,
-        editingEntry: null,
-        status: TimetableStatus.loaded,
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TimetableStatus.error,
+          errorMessage: failure.message,
+        ),
       ),
+      (updatedEntry) {
+        final currentGroup = state.groups[state.selectedGroupIndex];
+        final updatedEntries = currentGroup.entries
+            .map((e) => e.id == updatedEntry.id ? updatedEntry : e)
+            .toList();
+        final updatedGroup = TimetableGroupEntity(
+          id: currentGroup.id,
+          name: currentGroup.name,
+          entries: updatedEntries,
+        );
+        final updatedGroups = [...state.groups];
+        updatedGroups[state.selectedGroupIndex] = updatedGroup;
+        emit(
+          state.copyWith(
+            groups: updatedGroups,
+            editingEntry: null,
+            status: TimetableStatus.loaded,
+          ),
+        );
+      },
     );
-    _saveGroups();
   }
 
-  void deleteEntry(String entryId) {
-    final currentGroup = state.groups[state.selectedGroupIndex];
-    final updatedEntries = currentGroup.entries
-        .where((e) => e.id != entryId)
-        .toList();
-    final updatedGroup = TimetableGroupEntity(
-      id: currentGroup.id,
-      name: currentGroup.name,
-      entries: updatedEntries,
+  Future<void> deleteEntry(String entryId) async {
+    final result = await _repository.deleteTimetableEntry(entryId);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TimetableStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) {
+        final currentGroup = state.groups[state.selectedGroupIndex];
+        final updatedEntries =
+            currentGroup.entries.where((e) => e.id != entryId).toList();
+        final updatedGroup = TimetableGroupEntity(
+          id: currentGroup.id,
+          name: currentGroup.name,
+          entries: updatedEntries,
+        );
+        final updatedGroups = [...state.groups];
+        updatedGroups[state.selectedGroupIndex] = updatedGroup;
+        emit(
+          state.copyWith(
+            groups: updatedGroups,
+            status: TimetableStatus.loaded,
+          ),
+        );
+      },
     );
-    final updatedGroups = [...state.groups];
-    updatedGroups[state.selectedGroupIndex] = updatedGroup;
-    emit(state.copyWith(groups: updatedGroups, status: TimetableStatus.loaded));
-    _saveGroups();
   }
 
   void toggleAddForm() {
@@ -191,14 +246,9 @@ class TimetableCubit extends Cubit<TimetableState> {
   }
 
   void setEditingEntry(TimetableEntryEntity? entry) {
-    // Reset to null first so re-selecting the same entry still triggers the listener.
     if (entry != null && state.editingEntry != null) {
       emit(state.copyWith(editingEntry: null));
     }
     emit(state.copyWith(editingEntry: entry));
-  }
-
-  Future<void> _saveGroups() async {
-    await _repository.saveTimetableGroups(state.groups);
   }
 }

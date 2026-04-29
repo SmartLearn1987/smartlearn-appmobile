@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class TaskItemEntity extends Equatable {
   final String id;
   final String title;
-  final String description;
+  final String? description;
   final DateTime? dueDate;
   final bool completed;
   final String priority;
@@ -12,7 +12,7 @@ class TaskItemEntity extends Equatable {
   const TaskItemEntity({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
     this.dueDate,
     required this.completed,
     required this.priority,

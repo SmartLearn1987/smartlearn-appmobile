@@ -1,6 +1,6 @@
 part of 'notes_cubit.dart';
 
-enum NotesStatus { initial, loaded, error }
+enum NotesStatus { initial, loading, loaded, error }
 
 const _sentinel = Object();
 

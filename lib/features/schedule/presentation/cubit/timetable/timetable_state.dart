@@ -2,7 +2,7 @@ part of 'timetable_cubit.dart';
 
 const _sentinel = Object();
 
-enum TimetableStatus { initial, loaded, error }
+enum TimetableStatus { initial, loading, loaded, error }
 
 class TimetableState extends Equatable {
   final List<TimetableGroupEntity> groups;

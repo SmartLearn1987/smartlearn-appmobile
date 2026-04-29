@@ -3,19 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../domain/entities/note_item_entity.dart';
-import '../../../domain/repositories/schedule_local_repository.dart';
+import '../../../domain/repositories/schedule_repository.dart';
 import '../../../domain/validators/schedule_validators.dart';
 
 part 'notes_state.dart';
 
 @injectable
 class NotesCubit extends Cubit<NotesState> {
-  final ScheduleLocalRepository _repository;
+  final ScheduleRepository _repository;
 
   NotesCubit(this._repository) : super(const NotesState());
 
-  void loadNotes() {
-    final result = _repository.getNotes();
+  Future<void> loadNotes() async {
+    emit(state.copyWith(status: NotesStatus.loading));
+    final result = await _repository.getNotes();
     result.fold(
       (failure) => emit(
         state.copyWith(
@@ -32,63 +33,92 @@ class NotesCubit extends Cubit<NotesState> {
     );
   }
 
-  void addNote(NoteItemEntity note) {
-    final error = validateNoteContent(note.title, note.content);
+  Future<void> addNote({
+    required String title,
+    required String content,
+  }) async {
+    final error = validateNoteContent(title, content);
     if (error != null) {
-      emit(
-        state.copyWith(
-          status: NotesStatus.error,
-          errorMessage: error,
-        ),
-      );
+      emit(state.copyWith(status: NotesStatus.error, errorMessage: error));
       return;
     }
 
-    final updatedNotes = [note, ...state.notes];
-    emit(
-      state.copyWith(
-        notes: updatedNotes,
-        isAddingNote: false,
-        status: NotesStatus.loaded,
-      ),
+    final result = await _repository.createNote(
+      title: title,
+      content: content,
     );
-    _saveNotes();
-  }
 
-  void editNote(NoteItemEntity note) {
-    final error = validateNoteContent(note.title, note.content);
-    if (error != null) {
-      emit(
+    result.fold(
+      (failure) => emit(
         state.copyWith(
           status: NotesStatus.error,
-          errorMessage: error,
+          errorMessage: failure.message,
         ),
-      );
+      ),
+      (newNote) {
+        emit(
+          state.copyWith(
+            notes: [newNote, ...state.notes],
+            isAddingNote: false,
+            status: NotesStatus.loaded,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> editNote(NoteItemEntity note) async {
+    final error = validateNoteContent(note.title, note.content);
+    if (error != null) {
+      emit(state.copyWith(status: NotesStatus.error, errorMessage: error));
       return;
     }
 
-    final updatedNotes =
-        state.notes.map((n) => n.id == note.id ? note : n).toList();
-    emit(
-      state.copyWith(
-        notes: updatedNotes,
-        editingNote: null,
-        status: NotesStatus.loaded,
-      ),
+    final result = await _repository.updateNote(
+      noteId: note.id,
+      title: note.title,
+      content: note.content,
     );
-    _saveNotes();
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (updatedNote) {
+        final updatedNotes =
+            state.notes.map((n) => n.id == updatedNote.id ? updatedNote : n).toList();
+        emit(
+          state.copyWith(
+            notes: updatedNotes,
+            editingNote: null,
+            status: NotesStatus.loaded,
+          ),
+        );
+      },
+    );
   }
 
-  void deleteNote(String noteId) {
-    final updatedNotes =
-        state.notes.where((n) => n.id != noteId).toList();
-    emit(
-      state.copyWith(
-        notes: updatedNotes,
-        status: NotesStatus.loaded,
+  Future<void> deleteNote(String noteId) async {
+    final result = await _repository.deleteNote(noteId);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: failure.message,
+        ),
       ),
+      (_) {
+        emit(
+          state.copyWith(
+            notes: state.notes.where((n) => n.id != noteId).toList(),
+            status: NotesStatus.loaded,
+          ),
+        );
+      },
     );
-    _saveNotes();
   }
 
   void toggleAddForm() {
@@ -96,7 +126,6 @@ class NotesCubit extends Cubit<NotesState> {
   }
 
   void setEditingNote(NoteItemEntity? note) {
-    // Reset to null first so re-selecting the same note still triggers the listener.
     if (note != null && state.editingNote != null) {
       emit(state.copyWith(editingNote: null));
     }
@@ -104,14 +133,9 @@ class NotesCubit extends Cubit<NotesState> {
   }
 
   void setViewingNote(NoteItemEntity? note) {
-    // Reset to null first so re-selecting the same note still triggers the listener.
     if (note != null && state.viewingNote != null) {
       emit(state.copyWith(viewingNote: null));
     }
     emit(state.copyWith(viewingNote: note));
-  }
-
-  Future<void> _saveNotes() async {
-    await _repository.saveNotes(state.notes);
   }
 }

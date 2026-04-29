@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/entities/timetable_entry_entity.dart';
 
-/// 7 predefined timetable entry colors.
+/// 7 predefined timetable entry colors (used by cycling through subject hash).
 const timetableEntryColors = <Color>[
   Color(0xFF3B82F6),
   Color(0xFF10B981),
@@ -17,6 +17,14 @@ const timetableEntryColors = <Color>[
   Color(0xFF06B6D4),
   Color(0xFFEAB308),
 ];
+
+/// Derives a stable color for a subject name by hashing it.
+Color _colorForSubject(String subject) {
+  final index =
+      subject.codeUnits.fold(0, (sum, c) => sum + c) %
+      timetableEntryColors.length;
+  return timetableEntryColors[index];
+}
 
 class TimetableEntryCard extends StatelessWidget {
   const TimetableEntryCard({
@@ -32,7 +40,7 @@ class TimetableEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entryColor = timetableEntryColors[entry.color % timetableEntryColors.length];
+    final entryColor = _colorForSubject(entry.subject);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -53,7 +61,12 @@ class TimetableEntryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: _SubjectBadge(subject: entry.subject, color: entryColor)),
+                Expanded(
+                  child: _SubjectBadge(
+                    subject: entry.subject,
+                    color: entryColor,
+                  ),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 _ActionButton(
                   icon: LucideIcons.pencil,
@@ -71,7 +84,11 @@ class TimetableEntryCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Icon(LucideIcons.clock, size: 14, color: AppColors.mutedForeground),
+                Icon(
+                  LucideIcons.clock,
+                  size: 14,
+                  color: AppColors.mutedForeground,
+                ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   '${entry.startTime} - ${entry.endTime}',
@@ -81,14 +98,18 @@ class TimetableEntryCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (entry.room.isNotEmpty) ...[
+            if (entry.room?.isNotEmpty ?? false) ...[
               const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
-                  Icon(LucideIcons.bookOpen, size: 14, color: AppColors.mutedForeground),
+                  Icon(
+                    LucideIcons.bookOpen,
+                    size: 14,
+                    color: AppColors.mutedForeground,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    entry.room,
+                    entry.room!,
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.mutedForeground,
                     ),

@@ -4,13 +4,12 @@ import '../../domain/entities/note_item_entity.dart';
 
 part 'note_item_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class NoteItemModel extends NoteItemEntity {
   const NoteItemModel({
     required super.id,
     required super.title,
     required super.content,
-    required super.color,
     required super.updatedAt,
   });
 

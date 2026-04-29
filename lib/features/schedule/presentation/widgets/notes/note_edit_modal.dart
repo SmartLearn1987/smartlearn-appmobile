@@ -5,10 +5,9 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../../domain/entities/note_item_entity.dart';
 import '../../cubit/notes/notes_cubit.dart';
-import '../shared/color_picker_widget.dart';
-import 'note_item_card.dart';
 
 class NoteEditModal extends StatefulWidget {
   const NoteEditModal({required this.note, super.key});
@@ -20,16 +19,15 @@ class NoteEditModal extends StatefulWidget {
 }
 
 class _NoteEditModalState extends State<NoteEditModal> {
+  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
-  late int _selectedColor;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note.title);
     _contentController = TextEditingController(text: widget.note.content);
-    _selectedColor = widget.note.color;
   }
 
   @override
@@ -39,25 +37,22 @@ class _NoteEditModalState extends State<NoteEditModal> {
     super.dispose();
   }
 
-  void _save() {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-
-    if (title.isEmpty && content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập tiêu đề hoặc nội dung'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
+  /// At least one of title or content must be non-empty.
+  String? _validateContent(String? value) {
+    if (_titleController.text.trim().isEmpty &&
+        (value == null || value.trim().isEmpty)) {
+      return 'Vui lòng nhập tiêu đề hoặc nội dung';
     }
+    return null;
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
 
     final updated = NoteItemEntity(
       id: widget.note.id,
-      title: title,
-      content: content,
-      color: _selectedColor,
+      title: _titleController.text.trim(),
+      content: _contentController.text.trim(),
       updatedAt: DateTime.now(),
     );
 
@@ -81,92 +76,81 @@ class _NoteEditModalState extends State<NoteEditModal> {
         top: AppSpacing.md,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Drag handle
-            Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.mutedForeground,
-                  borderRadius: AppBorders.borderRadiusFull,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
+              Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.mutedForeground,
+                    borderRadius: AppBorders.borderRadiusFull,
+                  ),
+                  child: const SizedBox(width: 40, height: 4),
                 ),
-                child: const SizedBox(width: 40, height: 4),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Sửa ghi chú',
-              style: AppTypography.h4.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Color picker
-            Text(
-              'Màu sắc',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.mutedForeground,
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Sửa ghi chú',
+                style: AppTypography.h4.copyWith(color: AppColors.foreground),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            ColorPickerWidget(
-              colors: noteColorsLight,
-              selectedIndex: _selectedColor,
-              onChanged: (index) => setState(() => _selectedColor = index),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Title input
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
+              const SizedBox(height: AppSpacing.smMd),
+              // Title (optional, but at least one field required)
+              AppTextField(
+                controller: _titleController,
+                label: 'Tiêu đề',
                 hintText: 'Tiêu đề ghi chú',
-                border: OutlineInputBorder(),
-                isDense: true,
+                textInputAction: TextInputAction.next,
+                // Revalidate content when title changes so the error clears
+                onChanged: (_) => _formKey.currentState?.validate(),
               ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-            // Content input
-            TextField(
-              controller: _contentController,
-              maxLines: 5,
-              decoration: const InputDecoration(
+              const SizedBox(height: AppSpacing.smMd),
+              // Content
+              AppTextField(
+                controller: _contentController,
+                label: 'Nội dung',
                 hintText: 'Nội dung ghi chú...',
-                border: OutlineInputBorder(),
-                isDense: true,
+                maxLines: 5,
+                validator: _validateContent,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                textInputAction: TextInputAction.newline,
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      context.read<NotesCubit>().setEditingNote(null);
-                      Navigator.of(context).pop();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: AppBorders.shapeSm,
+              const SizedBox(height: AppSpacing.md),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        context.read<NotesCubit>().setEditingNote(null);
+                        Navigator.of(context).pop();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Hủy'),
                     ),
-                    child: const Text('Hủy'),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _save,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.primaryForeground,
-                      shape: AppBorders.shapeSm,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                      ),
+                      child: const Text('Lưu thay đổi'),
                     ),
-                    child: const Text('Lưu thay đổi'),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
         ),
       ),
     );
