@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_learn/app/di/injection.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_nnc_questions.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/game_selection_sheet.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/game_selection_title.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 class NNCSelectionModal extends StatefulWidget {
@@ -17,177 +18,72 @@ class NNCSelectionModal extends StatefulWidget {
 }
 
 class _NNCSelectionModalState extends State<NNCSelectionModal> {
-  static const _levels = [
-    (label: 'Dễ', value: 'easy'),
-    (label: 'Trung bình', value: 'medium'),
-    (label: 'Khó', value: 'hard'),
-    (label: 'Cực khó', value: 'extreme'),
-  ];
-
   static const _questionCounts = [10, 20, 30];
   static const _timeMinutes = [5, 10, 15];
 
-  int _selectedLevel = 1; // "Trung bình"
+  int _selectedLevel = 1;
   int _selectedCount = 10;
   int _selectedTime = 5;
   bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppBorders.radiusXxl),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.mdLg,
-        AppSpacing.sm,
-        AppSpacing.mdLg,
-        AppSpacing.xl,
-      ),
+    return GameSelectionSheet(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: AppBorders.borderRadiusFull,
-              ),
-            ),
-          ),
-          Text(
-            'Nhanh như chớp',
-            style: AppTypography.h4.copyWith(color: AppColors.foreground),
+          GameSelectionTitle(
+            title: 'Nhanh như chớp',
+            subtitle: 'Cấu hình lượt chơi của bạn',
+            color: AppColors.primary,
           ),
           const SizedBox(height: AppSpacing.mdLg),
-          _buildSectionTitle('Cấp độ'),
+          const GameSectionTitle('Cấp độ'),
           const SizedBox(height: AppSpacing.sm),
-          _buildLevelChips(),
+          LevelChipRow(
+            selectedIndex: _selectedLevel,
+            onSelected: (i) => setState(() => _selectedLevel = i),
+          ),
           const SizedBox(height: AppSpacing.md),
-          _buildSectionTitle('Số câu hỏi'),
-          const SizedBox(height: AppSpacing.sm),
-          _buildCountChips(),
-          const SizedBox(height: AppSpacing.md),
-          _buildSectionTitle('Thời gian (phút)'),
-          const SizedBox(height: AppSpacing.sm),
-          _buildTimeChips(),
-          const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _onPlay,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                shape: AppBorders.shapeMd,
-                textStyle: AppTypography.buttonLarge,
+          Row(
+            children: [
+              Expanded(
+                child: AppDropdownField<int>(
+                  label: 'Số câu hỏi',
+                  value: _selectedCount,
+                  items: _questionCounts
+                      .map(
+                        (v) =>
+                            DropdownMenuItem(value: v, child: Text('$v câu')),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedCount = v);
+                  },
+                ),
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Chơi ngay'),
-            ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppDropdownField<int>(
+                  label: 'Thời gian (phút)',
+                  value: _selectedTime,
+                  items: _timeMinutes
+                      .map(
+                        (v) =>
+                            DropdownMenuItem(value: v, child: Text('$v phút')),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedTime = v);
+                  },
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+          const SizedBox(height: AppSpacing.lg),
+          GameModalFooter(isLoading: _isLoading, onPlay: _onPlay),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTypography.labelMedium.copyWith(
-        color: AppColors.foreground,
-      ),
-    );
-  }
-
-  Widget _buildLevelChips() {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: List.generate(_levels.length, (index) {
-        final isSelected = _selectedLevel == index;
-        return _buildChip(
-          label: _levels[index].label,
-          isSelected: isSelected,
-          onTap: () => setState(() => _selectedLevel = index),
-        );
-      }),
-    );
-  }
-
-  Widget _buildCountChips() {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: _questionCounts.map((count) {
-        final isSelected = _selectedCount == count;
-        return _buildChip(
-          label: '$count',
-          isSelected: isSelected,
-          onTap: () => setState(() => _selectedCount = count),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildTimeChips() {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: _timeMinutes.map((time) {
-        final isSelected = _selectedTime == time;
-        return _buildChip(
-          label: '$time',
-          isSelected: isSelected,
-          onTap: () => setState(() => _selectedTime = time),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.background,
-          borderRadius: AppBorders.borderRadiusSm,
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? Colors.white : AppColors.foreground,
-          ),
-        ),
       ),
     );
   }
@@ -197,30 +93,24 @@ class _NNCSelectionModalState extends State<NNCSelectionModal> {
 
     final useCase = getIt<GetNNCQuestionsUseCase>();
     final result = await useCase(
-      NNCParams(
-        level: _levels[_selectedLevel].value,
-        limit: _selectedCount,
-      ),
+      NNCParams(level: levelValueAt(_selectedLevel), limit: _selectedCount),
     );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    result.fold(
-      (failure) {
-        AppToast.error(context, failure.message);
-      },
-      (questions) {
-        if (questions.isEmpty) {
-          AppToast.error(context, 'Không có câu hỏi nào cho cấp độ này');
-          return;
-        }
-        Navigator.of(context).pop();
-        context.go(RoutePaths.nncPlay, extra: {
-          'questions': questions,
-          'timeInMinutes': _selectedTime,
-        });
-      },
-    );
+    result.fold((failure) => AppToast.error(context, failure.message), (
+      questions,
+    ) {
+      if (questions.isEmpty) {
+        AppToast.error(context, 'Không có câu hỏi nào cho cấp độ này');
+        return;
+      }
+      Navigator.of(context).pop();
+      context.go(
+        RoutePaths.nncPlay,
+        extra: {'questions': questions, 'timeInMinutes': _selectedTime},
+      );
+    });
   }
 }

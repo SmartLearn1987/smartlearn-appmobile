@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
@@ -10,7 +10,11 @@ import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/entities/learning_category_entity.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_learning_categories.dart';
 import 'package:smart_learn/features/home/domain/usecases/get_learning_questions.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/game_selection_sheet.dart';
+import 'package:smart_learn/features/home/presentation/widgets/games/game_selection_title.dart';
 import 'package:smart_learn/router/route_names.dart';
+
+import '../../../../../core/theme/theme.dart';
 
 class HCBCategorySelectionModal extends StatefulWidget {
   const HCBCategorySelectionModal({super.key});
@@ -58,78 +62,26 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppBorders.radiusXxl),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.mdLg,
-        AppSpacing.sm,
-        AppSpacing.mdLg,
-        AppSpacing.xl,
-      ),
+    return GameSelectionSheet(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: AppBorders.borderRadiusFull,
-              ),
-            ),
-          ),
-          Text(
-            'Học cùng bé',
-            style: AppTypography.h4.copyWith(color: AppColors.foreground),
+          GameSelectionTitle(
+            icon: LucideIcons.bookOpen,
+            title: 'Học cùng bé',
+            subtitle: 'Chọn một chủ đề để bắt đầu bài học',
+            color: AppColors.primary,
           ),
           const SizedBox(height: AppSpacing.mdLg),
-          _buildSectionTitle('Chọn chủ đề'),
-          const SizedBox(height: AppSpacing.sm),
           _buildCategoryList(),
           const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed:
-                  _selectedIndex == null || _isPlayLoading ? null : _onPlay,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                shape: AppBorders.shapeMd,
-                textStyle: AppTypography.buttonLarge,
-              ),
-              child: _isPlayLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Chơi ngay'),
-            ),
+          GameModalFooter(
+            isLoading: _isPlayLoading,
+            onPlay: _onPlay,
+            playEnabled: _selectedIndex != null,
           ),
-          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTypography.labelMedium.copyWith(
-        color: AppColors.foreground,
       ),
     );
   }
@@ -139,7 +91,7 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
         child: Center(
-          child: CircularProgressIndicator(color: AppColors.accent),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
@@ -158,7 +110,13 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
       );
     }
 
-    if (_categories!.isEmpty) {
+    // Filter out categories with no items
+    final visible = _categories!.asMap().entries.where((e) {
+      final count = int.tryParse(e.value.itemCount ?? '0') ?? 0;
+      return count > 0;
+    }).toList();
+
+    if (visible.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
         child: Center(
@@ -172,48 +130,23 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
       );
     }
 
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: List.generate(_categories!.length, (index) {
-        final category = _categories![index];
+    return Column(
+      children: visible.map((entry) {
+        final index = entry.key;
+        final category = entry.value;
         final isSelected = _selectedIndex == index;
-        return _buildChip(
-          label: '${category.name} (${category.itemCount})',
-          isSelected: isSelected,
-          onTap: () => setState(() => _selectedIndex = index),
-        );
-      }),
-    );
-  }
+        final count = category.itemCount ?? '0';
 
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.background,
-          borderRadius: AppBorders.borderRadiusSm,
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.border,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: _CategoryCard(
+            name: category.name,
+            itemCount: count,
+            isSelected: isSelected,
+            onTap: () => setState(() => _selectedIndex = index),
           ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? Colors.white : AppColors.foreground,
-          ),
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 
@@ -221,7 +154,6 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
     if (_selectedIndex == null || _categories == null) return;
 
     final category = _categories![_selectedIndex!];
-
     setState(() => _isPlayLoading = true);
 
     final useCase = getIt<GetLearningQuestionsUseCase>();
@@ -230,24 +162,112 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
     if (!mounted) return;
     setState(() => _isPlayLoading = false);
 
-    result.fold(
-      (failure) {
-        AppToast.error(context, failure.message);
-      },
-      (questions) {
-        if (questions.isEmpty) {
-          AppToast.info(context, 'Không có câu hỏi nào cho chủ đề này');
-          return;
-        }
-        Navigator.of(context).pop();
-        context.pushNamed(
-          RouteNames.hcbPlay,
-          extra: {
-            'questions': questions,
-            'generalQuestion': category.generalQuestion,
-          },
-        );
-      },
+    result.fold((failure) => AppToast.error(context, failure.message), (
+      questions,
+    ) {
+      if (questions.isEmpty) {
+        AppToast.info(context, 'Không có câu hỏi nào cho chủ đề này');
+        return;
+      }
+      Navigator.of(context).pop();
+      context.pushNamed(
+        RouteNames.hcbPlay,
+        extra: {
+          'questions': questions,
+          'generalQuestion': category.generalQuestion,
+        },
+      );
+    });
+  }
+}
+
+// ─── Category card ────────────────────────────────────────────────────────────
+
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
+    required this.name,
+    required this.itemCount,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String name;
+  final String itemCount;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = isSelected
+        ? AppColors.primary.withValues(alpha: 0.1)
+        : Colors.transparent;
+    final borderColor = isSelected
+        ? AppColors.primary.withValues(alpha: 0.5)
+        : AppColors.border;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smMd,
+          vertical: AppSpacing.smMd,
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: AppBorders.borderRadiusLg,
+          border: Border.all(color: borderColor, width: 2),
+        ),
+        child: Row(
+          children: [
+            // Icon circle
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.border,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                LucideIcons.layoutGrid,
+                size: 20,
+                color: isSelected ? Colors.white : const Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.smMd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: AppTypography.textSm.bold.copyWith(
+                      color: AppColors.foreground,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$itemCount HÌNH ẢNH',
+                    style: AppTypography.text2Xs.bold.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Selection dot
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? AppColors.primary : Colors.transparent,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
