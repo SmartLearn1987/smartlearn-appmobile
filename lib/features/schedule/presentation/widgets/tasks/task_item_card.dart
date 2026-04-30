@@ -1,11 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/entities/task_item_entity.dart';
+
+class _PriorityStyle {
+  final String label;
+  final Color bg;
+  final Color text;
+  final Color border;
+
+  _PriorityStyle({
+    required this.label,
+    required this.bg,
+    required this.text,
+    required this.border,
+  });
+}
+
+final Map<String, _PriorityStyle> _priorityConfig = {
+  "high": _PriorityStyle(
+    label: "Cao",
+    bg: const Color(0xFFFEE2E2), // red-100
+    text: const Color(0xFFB91C1C), // red-700
+    border: const Color(0xFFFECACA), // red-200
+  ),
+  "medium": _PriorityStyle(
+    label: "Trung bình",
+    bg: const Color(0xFFFEF9C3), // yellow-100
+    text: const Color(0xFFA16207), // yellow-700
+    border: const Color(0xFFFEF08A), // yellow-200
+  ),
+  "low": _PriorityStyle(
+    label: "Thấp",
+    bg: const Color(0xFFDCFCE7), // green-100
+    text: const Color(0xFF15803D), // green-700
+    border: const Color(0xFFBBF7D0), // green-200
+  ),
+};
 
 /// Day-of-week abbreviations (DateTime.weekday: 1=Mon … 7=Sun).
 const _dayAbbreviations = <int, String>{
@@ -27,12 +63,6 @@ const _dayColors = <int, Color>{
   5: Color(0xFFEC4899),
   6: Color(0xFF06B6D4),
   7: Color(0xFFF43F5E),
-};
-
-const _priorityConfig = <String, ({String label, Color color})>{
-  'high': (label: 'Cao', color: Color(0xFFEF4444)),
-  'medium': (label: 'Trung bình', color: Color(0xFFEAB308)),
-  'low': (label: 'Thấp', color: Color(0xFF10B981)),
 };
 
 class TaskItemCard extends StatelessWidget {
@@ -62,133 +92,121 @@ class TaskItemCard extends StatelessWidget {
 
     return Opacity(
       opacity: opacity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: AppBorders.borderRadiusLg,
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Padding(
-          padding: AppSpacing.paddingSm,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Checkbox
-              GestureDetector(
-                onTap: onToggle,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.xs,
-                    right: AppSpacing.sm,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: task.completed
-                          ? AppColors.primary
-                          : Colors.transparent,
-                      border: Border.all(
+      child: GestureDetector(
+        onTap: onView,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: AppBorders.borderRadiusLg,
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Padding(
+            padding: AppSpacing.paddingSm,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Checkbox
+                GestureDetector(
+                  onTap: onToggle,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: AppSpacing.xs,
+                      right: AppSpacing.sm,
+                    ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: task.completed
                             ? AppColors.primary
-                            : AppColors.mutedForeground,
-                        width: 2,
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: task.completed
+                              ? AppColors.primary
+                              : AppColors.mutedForeground,
+                          width: 2,
+                        ),
                       ),
-                    ),
-                    child: SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: task.completed
-                          ? const Icon(
-                              Icons.check,
-                              size: 14,
-                              color: Colors.white,
-                            )
-                          : null,
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: task.completed
+                            ? const Icon(
+                                Icons.check,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // Date badge
-              if (task.dueDate != null) ...[
-                _DateBadge(dueDate: task.dueDate!, isOverdue: _isOverdue),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title + priority
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            task.title,
-                            style: AppTypography.labelMedium.copyWith(
-                              color: AppColors.foreground,
-                              decoration: task.completed
-                                  ? TextDecoration.lineThrough
-                                  : null,
+                // Date badge
+                if (task.dueDate != null) ...[
+                  _DateBadge(dueDate: task.dueDate!, isOverdue: _isOverdue),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title + priority
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              task.title,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: AppColors.foreground,
+                                decoration: task.completed
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        _PriorityBadge(priority: task.priority),
-                      ],
-                    ),
-                    // Description
-                    if (task.description?.isNotEmpty ?? false) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        task.description!,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.mutedForeground,
-                        ),
+                          const SizedBox(width: AppSpacing.xs),
+                          _PriorityBadge(priority: task.priority),
+                        ],
                       ),
-                    ],
-                    const SizedBox(height: AppSpacing.sm),
-                    // Created date + actions
-                    Row(
-                      children: [
-                        Icon(
-                          LucideIcons.clock,
-                          size: 12,
-                          color: AppColors.mutedForeground,
-                        ),
-                        const SizedBox(width: AppSpacing.xxs),
+                      // Description
+                      if (task.description?.isNotEmpty ?? false) ...[
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
-                          _formatDate(task.createdAt),
-                          style: AppTypography.caption.copyWith(
+                          task.description!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
                             color: AppColors.mutedForeground,
-                            fontSize: 11,
                           ),
                         ),
-                        const Spacer(),
-                        _ActionButton(
-                          icon: LucideIcons.eye,
-                          onTap: onView,
-                          color: AppColors.mutedForeground,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        _ActionButton(
-                          icon: LucideIcons.pencil,
-                          onTap: onEdit,
-                          color: AppColors.mutedForeground,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        _ActionButton(
-                          icon: LucideIcons.trash2,
-                          onTap: onDelete,
-                          color: AppColors.destructive,
-                        ),
                       ],
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.sm),
+                      // Created date + more menu
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.clock,
+                            size: 12,
+                            color: AppColors.mutedForeground,
+                          ),
+                          const SizedBox(width: AppSpacing.xxs),
+                          Text(
+                            _formatDate(task.createdAt),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.mutedForeground,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const Spacer(),
+                          _MoreButton(onEdit: onEdit, onDelete: onDelete),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -196,9 +214,7 @@ class TaskItemCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final d = date.day.toString().padLeft(2, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    return '$d/$m/${date.year}';
+    return DateFormat('dd/MM/yyyy').format(date.toLocal());
   }
 }
 
@@ -276,13 +292,13 @@ class _PriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = _priorityConfig[priority] ??
-        _priorityConfig['medium']!;
+    final config = _priorityConfig[priority] ?? _priorityConfig['medium']!;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: config.color.withValues(alpha: 0.15),
+        color: config.bg,
         borderRadius: AppBorders.borderRadiusFull,
+        border: Border.all(color: config.border),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -292,7 +308,7 @@ class _PriorityBadge extends StatelessWidget {
         child: Text(
           config.label,
           style: AppTypography.caption.copyWith(
-            color: config.color,
+            color: config.text,
             fontSize: 10,
           ),
         ),
@@ -301,24 +317,71 @@ class _PriorityBadge extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.onTap,
-    required this.color,
-  });
+enum _TaskAction { edit, delete }
 
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color color;
+class _MoreButton extends StatelessWidget {
+  const _MoreButton({required this.onEdit, required this.onDelete});
+
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Icon(icon, size: 14, color: color),
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton<_TaskAction>(
+        onSelected: (action) =>
+            action == _TaskAction.edit ? onEdit() : onDelete(),
+        padding: EdgeInsets.zero,
+        iconSize: 15,
+        icon: const Icon(
+          LucideIcons.moreVertical,
+          color: AppColors.mutedForeground,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            value: _TaskAction.edit,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.pencil, size: 14, color: AppColors.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Sửa',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.foreground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: _TaskAction.delete,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  LucideIcons.trash2,
+                  size: 14,
+                  color: AppColors.destructive,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Xóa',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.destructive,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

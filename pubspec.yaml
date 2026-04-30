@@ -53,6 +53,7 @@ dependencies:
   collection: ^1.19.1
   cached_network_image: ^3.4.1
   toastification: ^2.3.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

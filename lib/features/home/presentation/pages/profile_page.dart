@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
@@ -251,7 +252,7 @@ class _ProfileView extends StatelessWidget {
           _buildInfoRow(
             'Ngày hết hạn',
             user.planEndDate != null
-                ? _formatDate(user.planEndDate!)
+                ? DateFormat('dd/MM/yyyy').format(user.planEndDate!.toLocal())
                 : 'Không giới hạn',
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -283,10 +284,6 @@ class _ProfileView extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   void _showLogoutDialog(BuildContext context) {

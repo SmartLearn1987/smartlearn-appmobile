@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -64,9 +65,7 @@ class _TaskEditModalState extends State<TaskEditModal> {
   }
 
   String _formatDate(DateTime date) {
-    final d = date.day.toString().padLeft(2, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    return '$d/$m/${date.year}';
+    return DateFormat('dd/MM/yyyy').format(date.toLocal());
   }
 
   void _save() {

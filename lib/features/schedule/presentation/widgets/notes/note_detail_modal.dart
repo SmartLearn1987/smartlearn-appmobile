@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/theme/theme.dart';
 import '../../../domain/entities/note_item_entity.dart';
@@ -8,14 +9,6 @@ class NoteDetailModal extends StatelessWidget {
   const NoteDetailModal({required this.note, super.key});
 
   final NoteItemEntity note;
-
-  String _formatDateTime(DateTime date) {
-    final d = date.day.toString().padLeft(2, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final h = date.hour.toString().padLeft(2, '0');
-    final min = date.minute.toString().padLeft(2, '0');
-    return '$d/$m/${date.year} $h:$min';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +90,9 @@ class NoteDetailModal extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatDateTime(note.updatedAt),
+                  DateFormat(
+                    'dd/MM/yyyy HH:mm',
+                  ).format(note.updatedAt.toLocal()),
                   style: AppTypography.caption.copyWith(
                     color: AppColors.foreground.withValues(alpha: 0.6),
                   ),
