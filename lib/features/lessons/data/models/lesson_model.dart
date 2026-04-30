@@ -34,11 +34,11 @@ class LessonModel extends LessonEntity {
     this.flashcards,
     required super.sortOrder,
   }) : super(
-          content: content,
-          vocabulary: vocabulary,
-          quiz: quiz,
-          flashcards: flashcards,
-        );
+         content: content,
+         vocabulary: vocabulary,
+         quiz: quiz,
+         flashcards: flashcards,
+       );
 
   factory LessonModel.fromJson(Map<String, dynamic> json) =>
       _$LessonModelFromJson(json);

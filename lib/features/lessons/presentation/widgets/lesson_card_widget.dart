@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/lesson_entity.dart';
 
 /// Displays a lesson card with index, title, and description.
@@ -38,12 +34,16 @@ class LessonCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      padding: const EdgeInsets.all(AppSpacing.smMd),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: isCompleted
+            ? AppColors.emerald50.withValues(alpha: 0.3)
+            : AppColors.card,
         borderRadius: AppBorders.borderRadiusLg,
         border: Border.all(
-          color: AppColors.border,
+          color: isCompleted
+              ? AppColors.primary.withValues(alpha: 0.3)
+              : AppColors.border,
           width: AppBorders.widthThin,
         ),
         boxShadow: AppShadows.card,
@@ -51,10 +51,40 @@ class LessonCardWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTopRow(),
+          _buildInfo(),
           if (!isReviewMode) ...[
             const Divider(height: AppSpacing.mdLg),
             _buildManageActions(),
+          ],
+          if (isReviewMode) ...[
+            const SizedBox(height: AppSpacing.md),
+            GestureDetector(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  0,
+                  AppSpacing.xs,
+                  AppSpacing.xs,  
+                  AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      isCompleted ? 'ÔN TẬP LẠI' : 'HỌC NGAY',
+                      style: AppTypography.textXs.bold.withColor(
+                        AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    const Icon(
+                      LucideIcons.arrowRight,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -67,25 +97,39 @@ class LessonCardWidget extends StatelessWidget {
     return card;
   }
 
-  Widget _buildTopRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: _buildInfo()),
-        if (isReviewMode && isCompleted) ...[
-          const SizedBox(width: AppSpacing.sm),
-          _buildCompletionBadge(),
-        ],
-      ],
-    );
-  }
-
   Widget _buildInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        if (isReviewMode)
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    (index + 1).toString(),
+                    style: AppTypography.textBase.bold.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              if (isReviewMode && isCompleted) ...[
+                const Spacer(),
+                _buildCompletionBadge(),
+              ],
+            ],
+          ),
+        const SizedBox(height: AppSpacing.sm),
         Text(
-          "${index + 1}. ${lesson.title}",
+          isReviewMode ? lesson.title : "${index + 1}. ${lesson.title}",
           style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -107,27 +151,26 @@ class LessonCardWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: AppColors.emerald100,
         borderRadius: AppBorders.borderRadiusSm,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Icon(
-            LucideIcons.checkCircle,
-            size: 14,
+            LucideIcons.checkCircle2,
+            size: 12,
             color: AppColors.primary,
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
             'Đã học',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.textXs.bold.withColor(AppColors.primary),
           ),
         ],
       ),

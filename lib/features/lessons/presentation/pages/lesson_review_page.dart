@@ -8,6 +8,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_segmented_tabs.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../router/route_names.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -159,7 +160,11 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
           const SizedBox(height: AppSpacing.md),
           _buildProgressToggle(),
           const SizedBox(height: AppSpacing.md),
-          _buildTabSwitcher(),
+          AppSegmentedTabs(
+            tabs: _tabLabels,
+            selectedIndex: _selectedTabIndex,
+            onTap: (index) => setState(() => _selectedTabIndex = index),
+          ),
           const SizedBox(height: AppSpacing.md),
           _buildTabContent(state),
         ],
@@ -230,27 +235,6 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
         lessonId: widget.lessonId,
         studentId: studentId,
         completed: newCompleted,
-      ),
-    );
-  }
-
-  Widget _buildTabSwitcher() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.muted,
-        borderRadius: AppBorders.borderRadiusSm,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      child: Row(
-        children: List.generate(_tabLabels.length, (index) {
-          return Expanded(
-            child: _TabButton(
-              label: _tabLabels[index],
-              isSelected: _selectedTabIndex == index,
-              onTap: () => setState(() => _selectedTabIndex = index),
-            ),
-          );
-        }),
       ),
     );
   }
@@ -535,48 +519,4 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
   }
 }
 
-class _TabButton extends StatelessWidget {
-  const _TabButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
 
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.card : Colors.transparent,
-          borderRadius: AppBorders.borderRadiusSm,
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(
-              color: isSelected
-                  ? AppColors.foreground
-                  : AppColors.mutedForeground,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

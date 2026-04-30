@@ -182,19 +182,24 @@ class _LessonFormViewState extends State<_LessonFormView> {
 
       _contentBlocks = List.of(lesson.content);
 
-      _quizQuestions = lesson.quiz?.map((q) => <String, dynamic>{
-                'question': q.question,
-                'options': List<String>.from(q.options),
-                'correctIndex': q.correctIndex,
-                'explanation': q.explanation ?? '',
-              })
-          .toList() ?? [];
+      _quizQuestions =
+          lesson.quiz
+              ?.map(
+                (q) => <String, dynamic>{
+                  'question': q.question,
+                  'options': List<String>.from(q.options),
+                  'correctIndex': q.correctIndex,
+                  'explanation': q.explanation ?? '',
+                },
+              )
+              .toList() ??
+          [];
 
-      _flashcards = lesson.flashcards?.map((f) => <String, String>{
-                'front': f.front,
-                'back': f.back,
-              })
-          .toList() ?? [];
+      _flashcards =
+          lesson.flashcards
+              ?.map((f) => <String, String>{'front': f.front, 'back': f.back})
+              .toList() ??
+          [];
     });
   }
 
@@ -251,10 +256,7 @@ class _LessonFormViewState extends State<_LessonFormView> {
       context.pop(true);
     } else if (state is LessonSaveFailure) {
       setState(() => _isSaving = false);
-      AppToast.error(
-        context,
-        'Không thể lưu bài học. Vui lòng thử lại.',
-      );
+      AppToast.error(context, 'Không thể lưu bài học. Vui lòng thử lại.');
     }
   }
 
@@ -408,13 +410,13 @@ class _LessonFormViewState extends State<_LessonFormView> {
           child: OutlinedButton(
             onPressed: _isSaving ? null : () => context.pop(),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.mutedForeground,
+              foregroundColor: AppColors.destructive,
               textStyle: AppTypography.buttonMedium,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
               shape: RoundedRectangleBorder(
                 borderRadius: AppBorders.borderRadiusSm,
               ),
-              side: const BorderSide(color: AppColors.border),
+              side: const BorderSide(color: AppColors.destructive),
             ),
             child: const Text('Hủy'),
           ),
@@ -515,39 +517,46 @@ class _LessonFormViewState extends State<_LessonFormView> {
 
     // Build quiz/flashcards data map for the updateQuizFlashcards endpoint.
     final quizFlashcardsData = <String, dynamic>{
-      'quiz_questions': quizQuestions
-          .map((q) => <String, dynamic>{
-                'question': q['question'] as String? ?? '',
-                'options': (q['options'] as List<dynamic>?)
-                        ?.cast<String>()
-                        .toList() ??
-                    <String>[],
-                'correct_index': q['correctIndex'] as int? ?? 0,
-                'explanation': q['explanation'] as String? ?? '',
-              })
+      'quiz': quizQuestions
+          .map(
+            (q) => <String, dynamic>{
+              'question': q['question'] as String? ?? '',
+              'options':
+                  (q['options'] as List<dynamic>?)?.cast<String>().toList() ??
+                  <String>[],
+              'correctIndex': q['correctIndex'] as int? ?? 0,
+              'explanation': q['explanation'] as String? ?? '',
+            },
+          )
           .toList(),
       'flashcards': flashcards
-          .map((f) => <String, dynamic>{
-                'front': f['front'] ?? '',
-                'back': f['back'] ?? '',
-              })
+          .map(
+            (f) => <String, dynamic>{
+              'front': f['front'] ?? '',
+              'back': f['back'] ?? '',
+            },
+          )
           .toList(),
     };
 
     final bloc = context.read<LessonsListBloc>();
 
     if (_isEditMode) {
-      bloc.add(LessonUpdateRequested(
-        lessonId: widget.lessonId!,
-        lessonData: lessonData,
-        quizFlashcardsData: quizFlashcardsData,
-      ));
+      bloc.add(
+        LessonUpdateRequested(
+          lessonId: widget.lessonId!,
+          lessonData: lessonData,
+          quizFlashcardsData: quizFlashcardsData,
+        ),
+      );
     } else {
-      bloc.add(LessonCreateRequested(
-        lessonData: lessonData,
-        quizFlashcardsData: quizFlashcardsData,
-        images: pendingImages,
-      ));
+      bloc.add(
+        LessonCreateRequested(
+          lessonData: lessonData,
+          quizFlashcardsData: quizFlashcardsData,
+          images: pendingImages,
+        ),
+      );
     }
   }
 }

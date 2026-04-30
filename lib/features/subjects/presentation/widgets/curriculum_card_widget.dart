@@ -218,6 +218,7 @@ class CurriculumCardWidget extends StatelessWidget {
           icon: LucideIcons.trash2,
           onPressed: onDelete,
           hoverColor: AppColors.destructive,
+          borderColor: AppColors.destructive,
         ),
       ],
     );
@@ -229,11 +230,13 @@ class _IconActionButton extends StatelessWidget {
     required this.icon,
     this.onPressed,
     this.hoverColor,
+    this.borderColor,
   });
 
   final IconData icon;
   final VoidCallback? onPressed;
   final Color? hoverColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -247,8 +250,8 @@ class _IconActionButton extends StatelessWidget {
           foregroundColor: hoverColor ?? AppColors.mutedForeground,
           shape: RoundedRectangleBorder(
             borderRadius: AppBorders.borderRadiusSm,
-            side: const BorderSide(
-              color: AppColors.border,
+            side: BorderSide(
+              color: borderColor ?? AppColors.border,
               width: AppBorders.widthThin,
             ),
           ),

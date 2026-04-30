@@ -41,6 +41,7 @@ abstract final class AppColors {
   static const Color blue600Light = Color(0x182563EB);
   static const Color brandBrownLight = Color(0x18C08447);
   static const Color gray400 = Color(0xFF9CA3AF);
+  static const Color blue50 = Color(0xFFEFF6FF);
   static const Color blue600 = Color(0xFF2563EB);
   static const Color gray100 = Color(0xFFF3F4F6);
   static const Color slate50 = Color(0xFFF8FAFC);
@@ -50,4 +51,6 @@ abstract final class AppColors {
   static const Color yellow600 = Color(0xFFD97706);
   static const Color purple100 = Color(0xFFF3E8FF);
   static const Color purple600 = Color(0xFF9333EA);
+  static const Color emerald50 = Color(0xFFECFDF5);
+  static const Color emerald100 = Color(0xFFD1FAE5);
 }

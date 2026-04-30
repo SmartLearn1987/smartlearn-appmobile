@@ -13,12 +13,11 @@ class EditableQuizQuestion {
     List<TextEditingController>? optionControllers,
     this.correctIndex = 0,
     TextEditingController? explanationController,
-  })  : questionController =
-            questionController ?? TextEditingController(),
-        optionControllers = optionControllers ??
-            List.generate(4, (_) => TextEditingController()),
-        explanationController =
-            explanationController ?? TextEditingController();
+  }) : questionController = questionController ?? TextEditingController(),
+       optionControllers =
+           optionControllers ??
+           List.generate(4, (_) => TextEditingController()),
+       explanationController = explanationController ?? TextEditingController();
 
   final TextEditingController questionController;
   final List<TextEditingController> optionControllers;
@@ -72,8 +71,9 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
       final options = (q['options'] as List<dynamic>?)?.cast<String>() ?? [];
       _questions.add(
         EditableQuizQuestion(
-          questionController:
-              TextEditingController(text: q['question'] as String? ?? ''),
+          questionController: TextEditingController(
+            text: q['question'] as String? ?? '',
+          ),
           optionControllers: List.generate(
             4,
             (i) => TextEditingController(
@@ -81,8 +81,9 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
             ),
           ),
           correctIndex: (q['correctIndex'] as int?) ?? 0,
-          explanationController:
-              TextEditingController(text: q['explanation'] as String? ?? ''),
+          explanationController: TextEditingController(
+            text: q['explanation'] as String? ?? '',
+          ),
         ),
       );
     }
@@ -139,8 +140,8 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
           _buildEmptyState()
         else
           ..._questions.asMap().entries.map(
-                (entry) => _buildQuestionCard(entry.key, entry.value),
-              ),
+            (entry) => _buildQuestionCard(entry.key, entry.value),
+          ),
         const SizedBox(height: AppSpacing.smMd),
         _buildAddButton(),
       ],
@@ -261,10 +262,8 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: _buildTextField(
-                              controller:
-                                  question.optionControllers[optIndex],
-                              hintText:
-                                  'Đáp án ${_optionLabels[optIndex]}',
+                              controller: question.optionControllers[optIndex],
+                              hintText: 'Đáp án ${_optionLabels[optIndex]}',
                             ),
                           ),
                         ],
@@ -310,13 +309,13 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: AppColors.quizLight,
+              color: AppColors.primaryLight,
               borderRadius: AppBorders.borderRadiusSm,
             ),
             child: Text(
               'Câu ${index + 1}',
               style: AppTypography.labelSmall.copyWith(
-                color: AppColors.quiz,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -362,8 +361,10 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
         isDense: true,
         border: _inputBorder(AppColors.input),
         enabledBorder: _inputBorder(AppColors.input),
-        focusedBorder:
-            _inputBorder(AppColors.primary, width: AppBorders.widthMedium),
+        focusedBorder: _inputBorder(
+          AppColors.primary,
+          width: AppBorders.widthMedium,
+        ),
       ),
     );
   }
@@ -391,8 +392,10 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
     );
   }
 
-  OutlineInputBorder _inputBorder(Color color,
-      {double width = AppBorders.widthThin}) {
+  OutlineInputBorder _inputBorder(
+    Color color, {
+    double width = AppBorders.widthThin,
+  }) {
     return OutlineInputBorder(
       borderRadius: AppBorders.borderRadiusSm,
       borderSide: BorderSide(color: color, width: width),

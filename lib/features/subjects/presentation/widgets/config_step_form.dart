@@ -376,13 +376,13 @@ class _ConfigStepFormState extends State<ConfigStepForm> {
             onPressed:
                 widget.onCancel ?? () => Navigator.of(context).maybePop(),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.mutedForeground,
+              foregroundColor: AppColors.destructive,
               textStyle: AppTypography.buttonMedium,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
               shape: RoundedRectangleBorder(
                 borderRadius: AppBorders.borderRadiusSm,
               ),
-              side: const BorderSide(color: AppColors.border),
+              side: const BorderSide(color: AppColors.destructive),
             ),
             child: const Text('Hủy'),
           ),

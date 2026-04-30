@@ -7,10 +7,9 @@ part 'quiz_question_model.g.dart';
 class QuizQuestionModel extends QuizQuestion {
   const QuizQuestionModel({
     required super.id,
-    required super.lessonId,
     required super.question,
     required super.options,
-    required super.correctIndex,
+    @JsonKey(name: 'correctIndex') required super.correctIndex,
     super.explanation,
   });
 

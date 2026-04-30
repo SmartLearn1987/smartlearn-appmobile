@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/quiz_question.dart';
 
 /// Widget chạy trắc nghiệm: hiển thị từng câu hỏi một với các lựa chọn,
 /// phản hồi đúng/sai, giải thích, và tổng kết cuối cùng.
 class QuizRunnerWidget extends StatefulWidget {
-  const QuizRunnerWidget({
-    super.key,
-    required this.questions,
-  });
+  const QuizRunnerWidget({super.key, required this.questions});
 
   final List<QuizQuestion> questions;
 
@@ -24,9 +18,12 @@ class QuizRunnerWidget extends StatefulWidget {
 class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
   int _currentIndex = 0;
   int? _selectedOptionIndex;
-  bool _hasAnswered = false;
+  bool _isChecked = false;
   int _correctCount = 0;
   bool _quizCompleted = false;
+  // Tracks which question indices have already been counted as correct,
+  // preventing double-counting if _checkAnswer is called more than once.
+  final Set<int> _countedCorrect = {};
 
   QuizQuestion get _currentQuestion => widget.questions[_currentIndex];
   int get _totalQuestions => widget.questions.length;
@@ -34,14 +31,26 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
   static const _optionLabels = ['A', 'B', 'C', 'D'];
 
   void _selectOption(int index) {
-    if (_hasAnswered) return;
+    if (_isChecked) return;
+    setState(() => _selectedOptionIndex = index);
+  }
 
+  void _checkAnswer() {
+    if (_selectedOptionIndex == null || _isChecked) return;
     setState(() {
-      _selectedOptionIndex = index;
-      _hasAnswered = true;
-      if (index == _currentQuestion.correctIndex) {
+      _isChecked = true;
+      final isCorrect = _selectedOptionIndex == _currentQuestion.correctIndex;
+      if (isCorrect && !_countedCorrect.contains(_currentIndex)) {
         _correctCount++;
+        _countedCorrect.add(_currentIndex);
       }
+    });
+  }
+
+  void _retryQuestion() {
+    setState(() {
+      _selectedOptionIndex = null;
+      _isChecked = false;
     });
   }
 
@@ -50,12 +59,10 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
       setState(() {
         _currentIndex++;
         _selectedOptionIndex = null;
-        _hasAnswered = false;
+        _isChecked = false;
       });
     } else {
-      setState(() {
-        _quizCompleted = true;
-      });
+      setState(() => _quizCompleted = true);
     }
   }
 
@@ -63,8 +70,9 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
     setState(() {
       _currentIndex = 0;
       _selectedOptionIndex = null;
-      _hasAnswered = false;
+      _isChecked = false;
       _correctCount = 0;
+      _countedCorrect.clear();
       _quizCompleted = false;
     });
   }
@@ -78,52 +86,62 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
   }
 
   Widget _buildQuestionView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Question counter
-        _buildQuestionCounter(),
-        const SizedBox(height: AppSpacing.md),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Question counter
+            _buildQuestionCounter(),
+            const SizedBox(height: AppSpacing.md),
 
-        // Question text
-        _buildQuestionText(),
-        const SizedBox(height: AppSpacing.md),
+            // Question text
+            _buildQuestionText(),
+            const SizedBox(height: AppSpacing.md),
 
-        // Options
-        ..._buildOptions(),
+            // Options
+            ..._buildOptions(),
 
-        // Explanation (shown after answering)
-        if (_hasAnswered && _currentQuestion.explanation != null &&
-            _currentQuestion.explanation!.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          _buildExplanation(),
-        ],
+            // Explanation (shown after checking)
+            if (_isChecked &&
+                _currentQuestion.explanation != null &&
+                _currentQuestion.explanation!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              _buildExplanation(),
+            ],
 
-        // Next button (shown after answering)
-        if (_hasAnswered) ...[
-          const SizedBox(height: AppSpacing.md),
-          _buildNextButton(),
-        ],
-      ],
+            // Action button
+            if (_selectedOptionIndex != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _buildActionButton(),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildQuestionCounter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.smMd,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.quizLight,
-        borderRadius: AppBorders.borderRadiusFull,
-      ),
-      child: Text(
-        'Câu ${_currentIndex + 1}/$_totalQuestions',
-        style: AppTypography.labelSmall.copyWith(
-          color: AppColors.quiz,
+    return Row(
+      spacing: AppSpacing.sm,
+      children: [
+        Expanded(
+          child: LinearProgressIndicator(
+            minHeight: 12,
+            value: _currentIndex + 1 / _totalQuestions,
+            color: AppColors.primary,
+            borderRadius: AppBorders.borderRadiusFull,
+            backgroundColor: AppColors.gray100,
+          ),
         ),
-      ),
+        Text(
+          '${_currentIndex + 1} / $_totalQuestions',
+          style: AppTypography.labelSmall.bold.copyWith(
+            color: AppColors.mutedForeground,
+          ),
+        ),
+      ],
     );
   }
 
@@ -149,7 +167,7 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
           text: options[index],
           isSelected: _selectedOptionIndex == index,
           isCorrect: index == _currentQuestion.correctIndex,
-          hasAnswered: _hasAnswered,
+          hasAnswered: _isChecked,
           onTap: () => _selectOption(index),
         ),
       );
@@ -171,11 +189,7 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            LucideIcons.lightbulb,
-            size: 18,
-            color: AppColors.accent,
-          ),
+          const Icon(LucideIcons.lightbulb, size: 18, color: AppColors.accent),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -190,23 +204,78 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
     );
   }
 
-  Widget _buildNextButton() {
+  Widget _buildActionButton() {
+    // Not checked yet — show "Kiểm tra"
+    if (!_isChecked) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: _checkAnswer,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.primaryForeground,
+            textStyle: AppTypography.buttonMedium,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppBorders.borderRadiusSm,
+            ),
+          ),
+          icon: const Icon(LucideIcons.check, size: 18),
+          label: const Text('Kiểm tra đáp án'),
+        ),
+      );
+    }
+
+    final isCorrect = _selectedOptionIndex == _currentQuestion.correctIndex;
     final isLastQuestion = _currentIndex >= _totalQuestions - 1;
 
+    // Correct — show "Câu tiếp theo" or "Xem kết quả"
+    if (isCorrect) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: _goToNextQuestion,
+          label: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: AppSpacing.xs,
+            children: [
+              Text(isLastQuestion ? 'Xem kết quả' : 'Tiếp tục'),
+              Icon(LucideIcons.arrowRight, size: 18),
+            ],
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.success,
+            foregroundColor: AppColors.successForeground,
+            textStyle: AppTypography.buttonMedium,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppBorders.borderRadiusSm,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Wrong — show "Thử lại"
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _goToNextQuestion,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.quiz,
-          foregroundColor: AppColors.quizForeground,
+      child: OutlinedButton.icon(
+        onPressed: _retryQuestion,
+        icon: const Icon(LucideIcons.refreshCw, size: 18),
+        label: const Text('Thử lại'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.destructive,
+          backgroundColor: AppColors.destructiveForeground,
+          side: BorderSide(
+            color: AppColors.destructive,
+            width: AppBorders.widthThin,
+          ),
           textStyle: AppTypography.buttonMedium,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
           shape: RoundedRectangleBorder(
             borderRadius: AppBorders.borderRadiusSm,
           ),
         ),
-        child: Text(isLastQuestion ? 'Xem kết quả' : 'Câu tiếp theo'),
       ),
     );
   }
@@ -230,50 +299,115 @@ class _QuizRunnerWidgetState extends State<QuizRunnerWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isGood ? LucideIcons.trophy : LucideIcons.target,
-              size: 56,
-              color: isGood ? AppColors.secondary : AppColors.quiz,
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: isGood
+                    ? AppColors.success.withValues(alpha: 0.08)
+                    : AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: AppBorders.borderRadiusFull,
+              ),
+              child: Center(
+                child: Text(
+                  isGood ? "🎉" : "🎯",
+                  style: TextStyle(fontSize: 48),
+                ),
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Hoàn thành!',
-              style: AppTypography.h3.copyWith(
+              'Hoàn thành bài tập!'.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: AppTypography.text2Xl.bold.copyWith(
                 color: AppColors.foreground,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Bạn đã trả lời đúng $_correctCount/$_totalQuestions câu',
+              'Bạn đã nỗ lực rất tuyệt vời rồi.',
               style: AppTypography.bodyLarge.copyWith(
                 color: AppColors.mutedForeground,
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              '$percentage%',
-              style: AppTypography.h2.copyWith(
-                color: isGood ? AppColors.success : AppColors.quiz,
-                fontWeight: FontWeight.w700,
-              ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              spacing: AppSpacing.mdLg,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 100,
+                  width: 120,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.emerald50,
+                    borderRadius: AppBorders.borderRadiusXl,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: AppSpacing.sm,
+                    children: [
+                      Text(
+                        'Chính xác'.toUpperCase(),
+                        style: AppTypography.textXs.bold.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      Text(
+                        '$_correctCount/$_totalQuestions',
+                        style: AppTypography.text3Xl.bold.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 100,
+                  width: 120,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.blue50,
+                    borderRadius: AppBorders.borderRadiusXl,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: AppSpacing.sm,
+                    children: [
+                      Text(
+                        'Tỉ lệ'.toUpperCase(),
+                        style: AppTypography.textXs.copyWith(
+                          color: AppColors.blue600,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        '$percentage%',
+                        style: AppTypography.text3Xl.copyWith(
+                          color: AppColors.blue600,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _restartQuiz,
-                icon: const Icon(LucideIcons.refreshCw, size: 18),
-                label: const Text('Làm lại'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.quiz,
-                  foregroundColor: AppColors.quizForeground,
-                  textStyle: AppTypography.buttonMedium,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.smMd,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppBorders.borderRadiusSm,
-                  ),
+            OutlinedButton.icon(
+              onPressed: _restartQuiz,
+              icon: const Icon(LucideIcons.rotateCcw, size: 18),
+              label: const Text('Làm lại từ đầu'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.gray100,
+                foregroundColor: AppColors.foreground,
+                textStyle: AppTypography.buttonMedium,
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.smMd,
+                  horizontal: AppSpacing.xl,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppBorders.borderRadiusSm,
                 ),
               ),
             ),
@@ -364,7 +498,7 @@ class _OptionTile extends StatelessWidget {
 
   Color get _backgroundColor {
     if (!hasAnswered) {
-      return isSelected ? AppColors.quizLight : AppColors.card;
+      return isSelected ? AppColors.primaryLight : AppColors.card;
     }
     if (isCorrect) return AppColors.success.withValues(alpha: 0.08);
     if (isSelected) return AppColors.destructive.withValues(alpha: 0.08);
@@ -373,7 +507,7 @@ class _OptionTile extends StatelessWidget {
 
   Color get _borderColor {
     if (!hasAnswered) {
-      return isSelected ? AppColors.quiz : AppColors.border;
+      return isSelected ? AppColors.primary : AppColors.border;
     }
     if (isCorrect) return AppColors.success;
     if (isSelected) return AppColors.destructive;
@@ -382,7 +516,7 @@ class _OptionTile extends StatelessWidget {
 
   Color get _labelBackgroundColor {
     if (!hasAnswered) {
-      return isSelected ? AppColors.quiz : AppColors.muted;
+      return isSelected ? AppColors.primary : AppColors.muted;
     }
     if (isCorrect) return AppColors.success;
     if (isSelected) return AppColors.destructive;
@@ -391,7 +525,7 @@ class _OptionTile extends StatelessWidget {
 
   Color get _labelTextColor {
     if (!hasAnswered) {
-      return isSelected ? AppColors.quizForeground : AppColors.foreground;
+      return isSelected ? AppColors.primaryForeground : AppColors.foreground;
     }
     if (isCorrect) return AppColors.successForeground;
     if (isSelected) return AppColors.destructiveForeground;

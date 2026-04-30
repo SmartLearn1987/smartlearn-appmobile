@@ -48,15 +48,19 @@ class App extends StatelessWidget {
                 data: MediaQuery.of(
                   context,
                 ).copyWith(textScaler: TextScaler.noScaling),
-                child: BlocListener<AuthBloc, AuthState>(
-                  listenWhen: (prev, curr) =>
-                      curr is AuthUnauthenticated && curr.message != null,
-                  listener: (context, state) {
-                    if (state is AuthUnauthenticated && state.message != null) {
-                      AppToast.error(context, state.message!);
-                    }
-                  },
-                  child: child ?? const SizedBox.shrink(),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  child: BlocListener<AuthBloc, AuthState>(
+                    listenWhen: (prev, curr) =>
+                        curr is AuthUnauthenticated && curr.message != null,
+                    listener: (context, state) {
+                      if (state is AuthUnauthenticated && state.message != null) {
+                        AppToast.error(context, state.message!);
+                      }
+                    },
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               );
             },

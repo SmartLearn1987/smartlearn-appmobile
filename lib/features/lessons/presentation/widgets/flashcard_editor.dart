@@ -220,12 +220,14 @@ class FlashcardEditorState extends State<FlashcardEditor> {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: AppColors.accentLight,
+              color: AppColors.primaryLight,
               borderRadius: AppBorders.borderRadiusSm,
             ),
             child: Text(
               'Thẻ ${index + 1}',
-              style: AppTypography.labelSmall.copyWith(color: AppColors.accent),
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.primary,
+              ),
             ),
           ),
           const Spacer(),
