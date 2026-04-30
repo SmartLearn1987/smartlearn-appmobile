@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
+import 'package:smart_learn/core/constants/visibility.dart';
 import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
@@ -9,7 +11,6 @@ import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/exam/domain/repositories/exam_repository.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
-import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
 import 'package:smart_learn/features/subjects/domain/usecases/get_subjects_use_case.dart';
 
 import '../../../../core/theme/theme.dart';
@@ -342,11 +343,11 @@ class _ExamFormPageState extends State<ExamFormPage> {
                     AppDropdownField<bool>(
                       value: _isPublic,
                       label: 'Chế độ hiển thị',
-                      items: const [
-                        DropdownMenuItem(value: true, child: Text('Công khai')),
+                      items: [
+                        DropdownMenuItem(value: VisibilityMode.public.value, child: Text(VisibilityMode.public.displayLabel)),
                         DropdownMenuItem(
-                          value: false,
-                          child: Text('Không công khai'),
+                          value: VisibilityMode.private.value,
+                          child: Text(VisibilityMode.private.displayLabel),
                         ),
                       ],
                       onChanged: (value) {
@@ -377,7 +378,7 @@ class _ExamFormPageState extends State<ExamFormPage> {
                           .map(
                             (level) => DropdownMenuItem<String>(
                               value: level.label,
-                              child: Text(level.label),
+                              child: Text(level.displayLabel),
                             ),
                           )
                           .toList(),

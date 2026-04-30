@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_cached_image.dart';
-import '../../domain/entities/education_level.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
 class PreviewStepContent extends StatelessWidget {
@@ -58,14 +58,14 @@ class PreviewStepContent extends StatelessWidget {
                 fit: BoxFit.cover,
               )
             : state.existingImageUrl != null
-                ? AppCachedImage(
-                    imageUrl: state.existingImageUrl!,
-                    width: 96,
-                    height: 96,
-                    borderRadius: AppBorders.borderRadiusLg,
-                    errorWidget: _buildFallbackIcon(),
-                  )
-                : _buildFallbackIcon(),
+            ? AppCachedImage(
+                imageUrl: state.existingImageUrl!,
+                width: 96,
+                height: 96,
+                borderRadius: AppBorders.borderRadiusLg,
+                errorWidget: _buildFallbackIcon(),
+              )
+            : _buildFallbackIcon(),
       ),
     );
   }
@@ -117,8 +117,9 @@ class PreviewStepContent extends StatelessWidget {
   Widget _buildBadges(CurriculumFormState state) {
     final level = EducationLevel.fromApiValue(state.educationLevel);
     final levelLabel = level?.displayLabel ?? 'Chưa phân loại';
-    final gradeLabel =
-        state.grade.trim().isEmpty ? 'Chưa chọn lớp' : 'Lớp ${state.grade}';
+    final gradeLabel = state.grade.trim().isEmpty
+        ? 'Chưa chọn lớp'
+        : 'Lớp ${state.grade}';
     final visibilityLabel = state.isPublic ? '🌍 Công khai' : '🔒 Cá nhân';
 
     return Wrap(
@@ -145,9 +146,7 @@ class PreviewStepContent extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: AppTypography.caption.copyWith(
-          color: AppColors.foreground,
-        ),
+        style: AppTypography.caption.copyWith(color: AppColors.foreground),
       ),
     );
   }
@@ -155,8 +154,7 @@ class PreviewStepContent extends StatelessWidget {
   Widget _buildInfoRows(CurriculumFormState state) {
     return Column(
       children: [
-        if (subjectName != null)
-          _infoRow('Môn học', subjectName!),
+        if (subjectName != null) _infoRow('Môn học', subjectName!),
         _infoRow('Số bài học dự kiến', '${state.lessonCount}'),
       ],
     );
@@ -191,9 +189,9 @@ class PreviewStepContent extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => context
-                .read<CurriculumFormBloc>()
-                .add(const CurriculumFormStepChanged(step: 0)),
+            onPressed: () => context.read<CurriculumFormBloc>().add(
+              const CurriculumFormStepChanged(step: 0),
+            ),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.mutedForeground,
               textStyle: AppTypography.buttonMedium,
@@ -203,18 +201,17 @@ class PreviewStepContent extends StatelessWidget {
               ),
               side: const BorderSide(color: AppColors.border),
             ),
-            child: const Text('← Quay lại sửa'),
+            child: const Text('← Quay lại'),
           ),
         ),
         const SizedBox(width: AppSpacing.smMd),
         Expanded(
-          flex: 2,
           child: ElevatedButton(
             onPressed: state.isSubmitting
                 ? null
-                : () => context
-                    .read<CurriculumFormBloc>()
-                    .add(CurriculumFormSubmitted(subjectId: subjectId)),
+                : () => context.read<CurriculumFormBloc>().add(
+                    CurriculumFormSubmitted(subjectId: subjectId),
+                  ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.primaryForeground,
@@ -233,7 +230,7 @@ class PreviewStepContent extends StatelessWidget {
                       color: AppColors.primaryForeground,
                     ),
                   )
-                : const Text('Xác nhận & Lưu giáo trình'),
+                : const Text('Xác nhận & Lưu'),
           ),
         ),
       ],

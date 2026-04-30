@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_shadows.dart';
@@ -11,7 +12,6 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 class RegisterFormCard extends StatefulWidget {
@@ -206,7 +206,7 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
               .map(
                 (level) => DropdownMenuItem(
                   value: level,
-                  child: Text(level.label),
+                  child: Text(level.displayLabel),
                 ),
               )
               .toList(),

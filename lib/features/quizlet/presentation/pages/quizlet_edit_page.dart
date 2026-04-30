@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
+import 'package:smart_learn/core/constants/visibility.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
@@ -13,7 +15,6 @@ import 'package:smart_learn/features/quizlet/domain/usecases/delete_quizlet_use_
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/csv_import_dialog.dart';
-import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
 
 class QuizletEditPage extends StatelessWidget {
   final String quizletId;
@@ -94,14 +95,14 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                     AppDropdownField<bool>(
                       value: state.isPublic,
                       label: 'Chế độ hiển thị',
-                      items: const [
+                      items: [
                         DropdownMenuItem(
-                          value: true,
-                          child: Text('Công khai (Tất cả User đều thấy)'),
+                          value: VisibilityMode.public.value,
+                          child: Text(VisibilityMode.public.displayLabel),
                         ),
                         DropdownMenuItem(
-                          value: false,
-                          child: Text('Không công khai (Chỉ mình tôi)'),
+                          value: VisibilityMode.private.value,
+                          child: Text(VisibilityMode.private.displayLabel),
                         ),
                       ],
                       onChanged: (value) => value != null
@@ -131,7 +132,7 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                           .map(
                             (level) => DropdownMenuItem<String>(
                               value: level.label,
-                              child: Text(level.label),
+                              child: Text(level.displayLabel),
                             ),
                           )
                           .toList(),

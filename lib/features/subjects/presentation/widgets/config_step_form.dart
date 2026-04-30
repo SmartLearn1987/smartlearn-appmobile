@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
+import 'package:smart_learn/core/constants/visibility.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 
 import '../../../../core/theme/app_borders.dart';
@@ -13,7 +15,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../domain/entities/education_level.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
 class ConfigStepForm extends StatefulWidget {
@@ -100,14 +101,14 @@ class _ConfigStepFormState extends State<ConfigStepForm> {
           initialValue: state.isPublic,
           decoration: _dropdownDecoration(),
           style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
-          items: const [
+          items: [
             DropdownMenuItem(
-              value: false,
-              child: Text('🔒 Không công khai (Cá nhân)'),
+              value: VisibilityMode.private.value,
+              child: Text(VisibilityMode.private.displayLabel),
             ),
             DropdownMenuItem(
-              value: true,
-              child: Text('🌍 Công khai (Mọi người)'),
+              value: VisibilityMode.public.value,
+              child: Text(VisibilityMode.public.displayLabel),
             ),
           ],
           onChanged: (value) {

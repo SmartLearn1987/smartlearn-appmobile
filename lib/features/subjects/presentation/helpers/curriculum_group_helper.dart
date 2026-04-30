@@ -1,5 +1,5 @@
 import '../../domain/entities/curriculum_entity.dart';
-import '../../domain/entities/education_level.dart';
+import 'package:smart_learn/core/constants/education_level.dart';
 
 const _unknownLabel = 'Chưa phân loại';
 
