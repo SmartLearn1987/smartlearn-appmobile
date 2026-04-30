@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/widgets/app_dropdown_field.dart';
 import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/timetable_entry_entity.dart';
 import '../../cubit/timetable/timetable_cubit.dart';
 import 'timetable_add_form.dart';
@@ -56,7 +57,11 @@ class _TimetableEditModalState extends State<TimetableEditModal> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(context: context, initialTime: initial);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      initialEntryMode: TimePickerEntryMode.input,
+    );
     if (picked != null && mounted) {
       setState(() {
         if (isStart) {
@@ -82,12 +87,7 @@ class _TimetableEditModalState extends State<TimetableEditModal> {
 
     context.read<TimetableCubit>().editEntry(updated);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã cập nhật môn học'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    AppToast.success(context, 'Đã cập nhật môn học');
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/text_style_extensions.dart';
 
 class HomeHeroSection extends StatelessWidget {
   const HomeHeroSection({super.key});
@@ -10,7 +11,12 @@ class HomeHeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.xl,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -19,17 +25,17 @@ class HomeHeroSection extends StatelessWidget {
             size: 40,
             color: AppColors.brandBrown,
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Smart Learn',
             textAlign: TextAlign.center,
-            style: AppTypography.h1.copyWith(color: AppColors.primary),
+            style: AppTypography.h2.bold.withColor(AppColors.primary),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Nền tảng học tập thông minh thông qua ghi chú,trắc nghiệm và flashcard, kèm theo học qua game sinh động',
+            'Nền tảng học tập thông minh thông qua ghi chú, \ntrắc nghiệm và flashcard, kèm theo học qua game sinh động',
             textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium.copyWith(
+            style: AppTypography.textXs.copyWith(
               color: AppColors.mutedForeground,
             ),
           ),

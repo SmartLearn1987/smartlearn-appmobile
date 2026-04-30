@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../app/di/injection.dart';
@@ -81,15 +82,11 @@ class _QuizletListView extends StatelessWidget {
             final message = state.message == 'Không thể xóa'
                 ? 'Không thể xóa học phần'
                 : state.message;
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppToast.error(context, message);
             return;
           }
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Đã xóa học phần')));
+          AppToast.success(context, 'Đã xóa học phần');
         },
         builder: (context, state) => switch (state) {
           QuizletLoading() => const Center(child: CircularProgressIndicator()),

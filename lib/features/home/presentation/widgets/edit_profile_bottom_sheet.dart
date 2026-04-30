@@ -9,6 +9,7 @@ import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/widgets/app_cached_image.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/domain/usecases/upload_file_usecase.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
@@ -88,9 +89,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     result.fold(
       (failure) {
         setState(() => _isUploading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload thất bại: ${failure.message}')),
-        );
+        AppToast.error(context, 'Upload thất bại: ${failure.message}');
       },
       (url) {
         setState(() {
@@ -122,9 +121,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
           if (state is ProfileUpdateSuccess) {
             Navigator.of(context).pop();
           } else if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            AppToast.error(context, state.message);
           }
         },
         child: Padding(

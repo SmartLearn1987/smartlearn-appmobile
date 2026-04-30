@@ -6,6 +6,7 @@ import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/exam/domain/repositories/exam_repository.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
 import 'package:smart_learn/features/subjects/domain/entities/education_level.dart';
@@ -79,9 +80,7 @@ class _ExamFormPageState extends State<ExamFormPage> {
     if (!mounted) return;
     result.fold(
       (failure) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message)));
+        AppToast.error(context, failure.message);
         context.pop(false);
       },
       (detail) {
@@ -233,15 +232,11 @@ class _ExamFormPageState extends State<ExamFormPage> {
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() != true) return;
     if (_selectedSubjectId == null || _selectedSubjectId!.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Vui lòng chọn môn học')));
+      AppToast.error(context, 'Vui lòng chọn môn học');
       return;
     }
     if (_questions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng thêm ít nhất một câu hỏi')),
-      );
+      AppToast.error(context, 'Vui lòng thêm ít nhất một câu hỏi');
       return;
     }
 
@@ -256,20 +251,12 @@ class _ExamFormPageState extends State<ExamFormPage> {
     setState(() => _isSaving = false);
     result.fold(
       (failure) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message)));
+        AppToast.error(context, failure.message);
       },
       (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.isEdit
-                  ? 'Đã cập nhật bài thi'
-                  : 'Đã tạo bài thi thành công',
-            ),
-          ),
-        );
+        AppToast.success(context, widget.isEdit
+            ? 'Đã cập nhật bài thi'
+            : 'Đã tạo bài thi thành công');
         context.pop(true);
       },
     );
@@ -301,13 +288,9 @@ class _ExamFormPageState extends State<ExamFormPage> {
     if (!mounted) return;
     setState(() => _isSaving = false);
     result.fold(
-      (failure) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) => AppToast.error(context, failure.message),
       (_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Đã xóa bài thi')));
+        AppToast.success(context, 'Đã xóa bài thi');
         context.pop(true);
       },
     );

@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../cubit/timetable/timetable_cubit.dart';
 
 class GroupSwitcherWidget extends StatefulWidget {
@@ -129,22 +130,12 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
                 final cubit = context.read<TimetableCubit>();
                 final name = _nameController.text;
                 if (name.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Vui lòng nhập tên loại'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
+                  AppToast.error(context, 'Vui lòng nhập tên loại');
                   return;
                 }
                 cubit.addGroup(name);
                 _nameController.clear();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đã thêm loại thời khóa biểu mới'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                AppToast.success(context, 'Đã thêm loại thời khóa biểu mới');
               },
               child: const Icon(
                 Icons.check,
@@ -188,21 +179,11 @@ class _GroupSwitcherWidgetState extends State<GroupSwitcherWidget> {
             onPressed: () {
               Navigator.of(dialogContext).pop();
               if (cubit.state.groups.length <= 1) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Không thể xóa nhóm cuối cùng'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                AppToast.error(context, 'Không thể xóa nhóm cuối cùng');
                 return;
               }
               cubit.deleteGroup(groupId);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã xóa nhóm thời khóa biểu'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
+              AppToast.success(context, 'Đã xóa nhóm thời khóa biểu');
             },
             child: Text('Xóa', style: TextStyle(color: AppColors.destructive)),
           ),

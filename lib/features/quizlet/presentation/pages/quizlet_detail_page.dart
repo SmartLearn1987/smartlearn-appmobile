@@ -11,6 +11,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/quizlet_term_entity.dart';
 import '../bloc/quizlet_detail/quizlet_detail_bloc.dart';
 import '../widgets/flashcard_widget.dart';
@@ -69,7 +70,9 @@ class _QuizletDetailView extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
             QuizletDetailLoaded() => _LoadedContent(state: state),
-            QuizletDetailError(:final message) => _ErrorContent(message: message),
+            QuizletDetailError(:final message) => _ErrorContent(
+              message: message,
+            ),
             _ => const SizedBox.shrink(),
           },
         ),
@@ -233,18 +236,11 @@ class _LoadedContentState extends State<_LoadedContent> {
     final isCorrect =
         _answerController.text.trim().toLowerCase() ==
         expected.trim().toLowerCase();
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(isCorrect ? 'Chính xác' : 'Chưa chính xác'),
-          backgroundColor: isCorrect
-              ? AppColors.success
-              : AppColors.destructive,
-        ),
-      );
+    if (isCorrect) {
+      AppToast.success(context, 'Chính xác');
+    } else {
+      AppToast.error(context, 'Chưa chính xác');
+    }
   }
 
   @override

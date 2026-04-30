@@ -8,6 +8,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_segmented_tabs.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../router/route_names.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -185,44 +186,39 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
   }
 
   Widget _buildTabSwitcher() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.muted,
-        borderRadius: AppBorders.borderRadiusSm,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      child: Row(
-        children: [
-          Expanded(
-            child: _TabButton(
-              label: 'Quản lý bài học',
-              isSelected: _selectedTabIndex == 0,
-              onTap: () => setState(() => _selectedTabIndex = 0),
-            ),
-          ),
-          Expanded(
-            child: _TabButton(
-              label: 'Ôn tập',
-              isSelected: _selectedTabIndex == 1,
-              onTap: () => setState(() => _selectedTabIndex = 1),
-            ),
-          ),
-        ],
-      ),
+    return AppSegmentedTabs(
+      tabs: const ['Quản lý bài học', 'Ôn tập'],
+      selectedIndex: _selectedTabIndex,
+      onTap: (index) => setState(() => _selectedTabIndex = index),
     );
+  }
+
+  void _navigateToForm({String? lessonId}) {
+    context.push(
+      RoutePaths.lessonForm(widget.subjectId, widget.curriculumId),
+      extra: {
+        'curriculumName': widget.curriculumName,
+        'publisher': widget.publisher,
+        if (lessonId != null) 'lessonId': lessonId,
+      },
+    ).then((result) {
+      if (result == true && mounted) {
+        final authState = context.read<AuthBloc>().state;
+        final studentId =
+            authState is AuthAuthenticated ? authState.user.id : '';
+        context.read<LessonsListBloc>().add(LessonsLoadRequested(
+              curriculumId: widget.curriculumId,
+              studentId: studentId,
+            ));
+      }
+    });
   }
 
   Widget _buildCreateButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => context.go(
-          RoutePaths.lessonForm(widget.subjectId, widget.curriculumId),
-          extra: {
-            'curriculumName': widget.curriculumName,
-            'publisher': widget.publisher,
-          },
-        ),
+        onPressed: () => _navigateToForm(),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.primaryForeground,
@@ -312,14 +308,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
           child: LessonCardWidget(
             lesson: lesson,
             index: index,
-            onEdit: () => context.go(
-              RoutePaths.lessonForm(widget.subjectId, widget.curriculumId),
-              extra: {
-                'curriculumName': widget.curriculumName,
-                'publisher': widget.publisher,
-                'lessonId': lesson.id,
-              },
-            ),
+            onEdit: () => _navigateToForm(lessonId: lesson.id),
             onDelete: () => _showDeleteConfirmation(context, lesson.id),
           ),
         );
@@ -418,48 +407,4 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
   }
 }
 
-class _TabButton extends StatelessWidget {
-  const _TabButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
 
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.card : Colors.transparent,
-          borderRadius: AppBorders.borderRadiusSm,
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.labelMedium.copyWith(
-              color: isSelected
-                  ? AppColors.foreground
-                  : AppColors.mutedForeground,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

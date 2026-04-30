@@ -17,7 +17,7 @@ class HomeCategoryTabs extends StatelessWidget {
   final ValueChanged<int> onChanged;
 
   static const _tabs = [
-    (icon: LucideIcons.bookOpen, label: 'Sổ tay môn học'),
+    (icon: LucideIcons.bookOpen, label: 'Sổ tay \nmôn học'),
     (icon: LucideIcons.gamepad2, label: 'Game'),
     (icon: LucideIcons.timer, label: 'Chuyên tâm'),
   ];
@@ -62,50 +62,63 @@ class HomeCategoryTabs extends StatelessWidget {
                       child: InkWell(
                         borderRadius: AppBorders.borderRadiusLg,
                         onTap: () => onChanged(index),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.smMd),
-                          child: Column(
-                            children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 220),
-                                switchInCurve: Curves.easeOut,
-                                switchOutCurve: Curves.easeIn,
-                                transitionBuilder: (child, animation) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: ScaleTransition(
-                                      scale: Tween<double>(
-                                        begin: 0.95,
-                                        end: 1,
-                                      ).animate(animation),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: Icon(
-                                  tab.icon,
-                                  key: ValueKey('${tab.label}-$isSelected'),
-                                  size: 18,
-                                  color: isSelected
-                                      ? AppColors.primaryForeground
-                                      : AppColors.mutedForeground,
+                        child: SizedBox(
+                          height: 68,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.smMd,
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 220),
+                                  switchInCurve: Curves.easeOut,
+                                  switchOutCurve: Curves.easeIn,
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: ScaleTransition(
+                                        scale: Tween<double>(
+                                          begin: 0.95,
+                                          end: 1,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    tab.icon,
+                                    key: ValueKey('${tab.label}-$isSelected'),
+                                    size: 18,
+                                    color: isSelected
+                                        ? AppColors.primaryForeground
+                                        : AppColors.mutedForeground,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                              AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOut,
-                                style: AppTypography.buttonMedium.copyWith(
-                                  color: isSelected
-                                      ? AppColors.primaryForeground
-                                      : AppColors.mutedForeground,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
+                                const SizedBox(height: AppSpacing.xs),
+                                AnimatedDefaultTextStyle(
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOut,
+                                  style: AppTypography.buttonSmall.copyWith(
+                                    color: isSelected
+                                        ? AppColors.primaryForeground
+                                        : AppColors.mutedForeground,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                    height: 1.2,
+                                  ),
+                                  child: Text(
+                                    tab.label,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                child: Text(tab.label),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

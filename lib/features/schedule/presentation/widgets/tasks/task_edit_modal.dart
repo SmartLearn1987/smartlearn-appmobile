@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/widgets/app_dropdown_field.dart';
 import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/task_item_entity.dart';
 import '../../cubit/tasks/tasks_cubit.dart';
 import 'task_add_form.dart';
@@ -83,12 +84,7 @@ class _TaskEditModalState extends State<TaskEditModal> {
 
     context.read<TasksCubit>().editTask(updated);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã cập nhật nhiệm vụ'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    AppToast.success(context, 'Đã cập nhật nhiệm vụ');
   }
 
   @override

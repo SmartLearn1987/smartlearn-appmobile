@@ -6,6 +6,8 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/show_delete_confirm.dart';
 import '../../cubit/tasks/tasks_cubit.dart';
 import '../../helpers/task_helpers.dart';
 import 'month_group_widget.dart';
@@ -33,9 +35,7 @@ class TasksTab extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(modalContext).viewInsets.bottom,
           ),
-          child: const SingleChildScrollView(
-            child: TaskAddForm(),
-          ),
+          child: const SingleChildScrollView(child: TaskAddForm()),
         ),
       ),
     );
@@ -45,10 +45,8 @@ class TasksTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<TasksCubit, TasksState>(
       listenWhen: (prev, curr) =>
-          (curr.editingTask != null &&
-              prev.editingTask != curr.editingTask) ||
-          (curr.viewingTask != null &&
-              prev.viewingTask != curr.viewingTask),
+          (curr.editingTask != null && prev.editingTask != curr.editingTask) ||
+          (curr.viewingTask != null && prev.viewingTask != curr.viewingTask),
       listener: (context, state) {
         if (state.viewingTask != null) {
           showDialog<void>(
@@ -109,20 +107,9 @@ class TasksTab extends StatelessWidget {
                     ),
                   ),
                 ),
-                OutlinedButton.icon(
+                ElevatedButton(
                   onPressed: () => _showAddModal(context),
-                  icon: const Icon(LucideIcons.plus, size: 16),
-                  label: const Text('Thêm nhiệm vụ'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    shape: AppBorders.shapeSm,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _RefreshButton(
-                  isLoading: state.status == TasksStatus.loading,
-                  onPressed: () => cubit.loadTasks(),
+                  child: const Icon(LucideIcons.plus, size: 16),
                 ),
               ],
             ),
@@ -142,30 +129,31 @@ class TasksTab extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final monthKey = monthKeys[index];
                         final tasks = grouped[monthKey]!;
-                        final isCollapsed =
-                            state.collapsedMonths.contains(monthKey);
+                        final isCollapsed = state.collapsedMonths.contains(
+                          monthKey,
+                        );
 
                         return MonthGroupWidget(
                           monthKey: monthKey,
                           tasks: tasks,
                           isCollapsed: isCollapsed,
-                          onToggle: () =>
-                              cubit.toggleMonthCollapse(monthKey),
+                          onToggle: () => cubit.toggleMonthCollapse(monthKey),
                           childBuilder: (task) => TaskItemCard(
                             task: task,
-                            onToggle: () =>
-                                cubit.toggleCompletion(task.id),
+                            onToggle: () => cubit.toggleCompletion(task.id),
                             onView: () => cubit.setViewingTask(task),
                             onEdit: () => cubit.setEditingTask(task),
-                            onDelete: () {
+                          onDelete: () async {
+                            final confirmed = await showDeleteConfirm(
+                              context,
+                              title: 'Xóa nhiệm vụ',
+                              message: 'Bạn có chắc chắn muốn xóa nhiệm vụ này?',
+                            );
+                            if (confirmed == true && context.mounted) {
                               cubit.deleteTask(task.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Đã xóa nhiệm vụ'),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                            },
+                              AppToast.success(context, 'Đã xóa nhiệm vụ');
+                            }
+                          },
                           ),
                         );
                       },
@@ -250,9 +238,7 @@ class _RefreshButtonState extends State<_RefreshButton>
       tooltip: 'Làm mới',
       style: IconButton.styleFrom(
         side: const BorderSide(color: AppColors.border),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorders.borderRadiusSm,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
       ),
       icon: RotationTransition(
         turns: _controller,

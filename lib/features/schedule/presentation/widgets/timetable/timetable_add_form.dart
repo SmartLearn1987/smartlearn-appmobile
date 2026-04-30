@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/widgets/app_dropdown_field.dart';
 import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../cubit/timetable/timetable_cubit.dart';
 import 'timetable_day_section.dart';
 
@@ -37,7 +38,11 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(context: context, initialTime: initial);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      initialEntryMode: TimePickerEntryMode.input,
+    );
     if (picked != null && mounted) {
       setState(() {
         if (isStart) {
@@ -53,19 +58,14 @@ class _TimetableAddFormState extends State<TimetableAddForm> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<TimetableCubit>().addEntry(
-          day: _selectedDay,
-          subject: _subjectController.text.trim(),
-          startTime: _formatTime(_startTime),
-          endTime: _formatTime(_endTime),
-          room: _roomController.text.trim(),
-        );
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã thêm môn học'),
-        duration: Duration(seconds: 3),
-      ),
+      day: _selectedDay,
+      subject: _subjectController.text.trim(),
+      startTime: _formatTime(_startTime),
+      endTime: _formatTime(_endTime),
+      room: _roomController.text.trim(),
     );
+    Navigator.of(context).pop();
+    AppToast.success(context, 'Đã thêm môn học');
   }
 
   @override

@@ -1,52 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:toastification/toastification.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_typography.dart';
-
-/// Centralized toast/snackbar utility.
+/// Centralized toast utility backed by the `toastification` package.
 ///
 /// Usage:
 /// ```dart
 /// AppToast.success(context, 'Thành công!');
 /// AppToast.error(context, 'Có lỗi xảy ra');
 /// AppToast.info(context, 'Sắp ra mắt');
+/// AppToast.warning(context, 'Cảnh báo');
 /// ```
+///
+/// Context is optional when [ToastificationWrapper] wraps the root widget.
 abstract final class AppToast {
-  /// Shows a success toast (green).
-  static void success(BuildContext context, String message) =>
-      _show(context, message, AppColors.success, AppColors.successForeground);
+  static const _duration = Duration(seconds: 4);
+  static const _alignment = Alignment.topCenter;
 
-  /// Shows an error toast (red).
-  static void error(BuildContext context, String message) =>
-      _show(
+  /// Shows a success toast (green).
+  static void success(BuildContext context, String message) => _show(
         context,
         message,
-        AppColors.destructive,
-        AppColors.destructiveForeground,
+        ToastificationType.success,
       );
 
-  /// Shows an info toast (default style).
-  static void info(BuildContext context, String message) =>
-      _show(context, message);
+  /// Shows an error toast (red).
+  static void error(BuildContext context, String message) => _show(
+        context,
+        message,
+        ToastificationType.error,
+      );
+
+  /// Shows an info toast (blue).
+  static void info(BuildContext context, String message) => _show(
+        context,
+        message,
+        ToastificationType.info,
+      );
+
+  /// Shows a warning toast (amber).
+  static void warning(BuildContext context, String message) => _show(
+        context,
+        message,
+        ToastificationType.warning,
+      );
 
   static void _show(
     BuildContext context,
-    String message, [
-    Color? backgroundColor,
-    Color? foregroundColor,
-  ]) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: foregroundColor != null
-                ? AppTypography.bodyMedium.copyWith(color: foregroundColor)
-                : null,
-          ),
-          backgroundColor: backgroundColor,
-        ),
-      );
+    String message,
+    ToastificationType type,
+  ) {
+    toastification.show(
+      context: context,
+      type: type,
+      style: ToastificationStyle.fillColored,
+      title: Text(message),
+      alignment: _alignment,
+      autoCloseDuration: _duration,
+      showProgressBar: false,
+      animationDuration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: BorderRadius.circular(12),
+    );
   }
 }

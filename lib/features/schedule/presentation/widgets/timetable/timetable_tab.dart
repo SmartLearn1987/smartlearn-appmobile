@@ -6,6 +6,8 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/show_delete_confirm.dart';
 import '../../cubit/timetable/timetable_cubit.dart';
 import '../../helpers/timetable_helpers.dart';
 import 'group_switcher_widget.dart';
@@ -31,9 +33,7 @@ class TimetableTab extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(modalContext).viewInsets.bottom,
           ),
-          child: const SingleChildScrollView(
-            child: TimetableAddForm(),
-          ),
+          child: const SingleChildScrollView(child: TimetableAddForm()),
         ),
       ),
     );
@@ -70,51 +70,43 @@ class TimetableTab extends StatelessWidget {
         final groupedByDay = groupEntriesByDay(entries);
         // Sort day keys by the canonical day order
         final sortedDays = groupedByDay.keys.toList()
-          ..sort(
-            (a, b) => dayOrder.indexOf(a).compareTo(dayOrder.indexOf(b)),
-          );
+          ..sort((a, b) => dayOrder.indexOf(a).compareTo(dayOrder.indexOf(b)));
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const GroupSwitcherWidget(),
             const SizedBox(height: AppSpacing.md),
-            if (currentGroup != null) ...[
-              Text(
-                currentGroup.name,
-                style: AppTypography.h4.copyWith(color: AppColors.foreground),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Quản lý lịch học hàng tuần của bạn',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.mutedForeground,
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.smMd),
-            // Add + Refresh buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showAddModal(context),
-                    icon: const Icon(LucideIcons.plus, size: 16),
-                    label: const Text('Thêm môn học'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: AppBorders.shapeSm,
+            if (currentGroup != null)
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          currentGroup.name,
+                          style: AppTypography.h4.copyWith(
+                            color: AppColors.foreground,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Quản lý lịch học hàng tuần của bạn',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.mutedForeground,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _RefreshButton(
-                  isLoading: state.status == TimetableStatus.loading,
-                  onPressed: () => cubit.loadGroups(),
-                ),
-              ],
-            ),
+                  const SizedBox(height: AppSpacing.smMd),
+                  ElevatedButton(
+                    onPressed: () => _showAddModal(context),
+                    child: const Icon(LucideIcons.plus, size: 16),
+                  ),
+                ],
+              ),
             const SizedBox(height: AppSpacing.smMd),
             // Content
             Expanded(
@@ -128,14 +120,16 @@ class TimetableTab extends StatelessWidget {
                           day: day,
                           entries: groupedByDay[day]!,
                           onEdit: (entry) => cubit.setEditingEntry(entry),
-                          onDelete: (entryId) {
-                            cubit.deleteEntry(entryId);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Đã xóa môn học'),
-                                duration: Duration(seconds: 3),
-                              ),
+                          onDelete: (entryId) async {
+                            final confirmed = await showDeleteConfirm(
+                              context,
+                              title: 'Xóa môn học',
+                              message: 'Bạn có chắc chắn muốn xóa môn học này?',
                             );
+                            if (confirmed == true && context.mounted) {
+                              cubit.deleteEntry(entryId);
+                              AppToast.success(context, 'Đã xóa môn học');
+                            }
                           },
                         );
                       },
@@ -227,9 +221,7 @@ class _RefreshButtonState extends State<_RefreshButton>
       tooltip: 'Làm mới',
       style: IconButton.styleFrom(
         side: const BorderSide(color: AppColors.border),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppBorders.borderRadiusSm,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
       ),
       icon: RotationTransition(
         turns: _controller,

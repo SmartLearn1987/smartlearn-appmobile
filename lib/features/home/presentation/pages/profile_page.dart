@@ -8,6 +8,7 @@ import 'package:smart_learn/core/theme/app_shadows.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/widgets/app_cached_image.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
@@ -34,17 +35,11 @@ class _ProfileView extends StatelessWidget {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileUpdateSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cập nhật thành công')),
-          );
+          AppToast.success(context, 'Cập nhật thành công');
         } else if (state is ProfilePasswordChanged) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đổi mật khẩu thành công')),
-          );
+          AppToast.success(context, 'Đổi mật khẩu thành công');
         } else if (state is ProfileError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          AppToast.error(context, state.message);
         }
       },
       builder: (context, state) {

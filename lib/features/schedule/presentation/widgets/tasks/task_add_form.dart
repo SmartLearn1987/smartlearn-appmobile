@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/widgets/app_dropdown_field.dart';
 import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../cubit/tasks/tasks_cubit.dart';
 
 const _priorityItems = <DropdownMenuItem<String>>[
@@ -65,12 +66,7 @@ class _TaskAddFormState extends State<TaskAddForm> {
           priority: _priority,
         );
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã thêm nhiệm vụ'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    AppToast.success(context, 'Đã thêm nhiệm vụ');
   }
 
   @override

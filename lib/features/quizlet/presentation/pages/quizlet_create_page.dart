@@ -7,6 +7,7 @@ import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/csv_import_dialog.dart';
@@ -45,9 +46,7 @@ class _QuizletCreateViewState extends State<_QuizletCreateView> {
               previous.errorMessage != current.errorMessage,
           listener: (context, state) {
             if (state.isSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã tạo học phần thành công!')),
-              );
+              AppToast.success(context, 'Đã tạo học phần thành công!');
               if (context.canPop()) {
                 context.pop(true);
               } else {
@@ -56,9 +55,7 @@ class _QuizletCreateViewState extends State<_QuizletCreateView> {
               return;
             }
             if (state.errorMessage != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+              AppToast.error(context, state.errorMessage!);
             }
           },
           child: BlocBuilder<QuizletCreateBloc, QuizletCreateState>(

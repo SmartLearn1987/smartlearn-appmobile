@@ -219,6 +219,12 @@ class AppRouter {
           },
         ),
         GoRoute(
+          path: RoutePaths.profile,
+          name: RouteNames.profile,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
           path: RoutePaths.dictationPlay,
           name: RouteNames.dictationPlay,
           parentNavigatorKey: _rootNavigatorKey,
@@ -316,15 +322,6 @@ class AppRouter {
             );
           },
           branches: [
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: RoutePaths.home,
-                  name: RouteNames.home,
-                  builder: (context, state) => const HomePage(),
-                ),
-              ],
-            ),
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -440,6 +437,15 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
+                  path: RoutePaths.home,
+                  name: RouteNames.home,
+                  builder: (context, state) => const HomePage(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
                   path: RoutePaths.quizlet,
                   name: RouteNames.quizlet,
                   builder: (context, state) => const QuizletListPage(),
@@ -452,15 +458,6 @@ class AppRouter {
                   path: RoutePaths.quizzes,
                   name: RouteNames.quizzes,
                   builder: (context, state) => const ExamListPage(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: RoutePaths.profile,
-                  name: RouteNames.profile,
-                  builder: (context, state) => const ProfilePage(),
                 ),
               ],
             ),

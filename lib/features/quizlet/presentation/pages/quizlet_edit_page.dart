@@ -8,6 +8,7 @@ import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/quizlet/domain/usecases/delete_quizlet_use_case.dart';
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
@@ -51,9 +52,7 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
               previous.errorMessage != current.errorMessage,
           listener: (context, state) {
             if (state.isSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã lưu thành công!')),
-              );
+              AppToast.success(context, 'Đã lưu thành công!');
               if (context.canPop()) {
                 context.pop(true);
               } else {
@@ -62,9 +61,7 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
               return;
             }
             if (state.errorMessage != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+              AppToast.error(context, state.errorMessage!);
             }
           },
           child: BlocBuilder<QuizletCreateBloc, QuizletCreateState>(
@@ -254,14 +251,9 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                           return;
                         }
                         result.fold(
-                          (failure) =>
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(failure.message)),
-                              ),
+                          (failure) => AppToast.error(context, failure.message),
                           (_) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Đã xóa học phần')),
-                            );
+                            AppToast.success(context, 'Đã xóa học phần');
                             context.go('/quizlet');
                           },
                         );

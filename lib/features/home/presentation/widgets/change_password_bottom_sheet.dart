@@ -4,6 +4,7 @@ import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
 
@@ -98,15 +99,9 @@ class _ChangePasswordBottomSheetState extends State<ChangePasswordBottomSheet> {
         listener: (context, state) {
           if (state is ProfilePasswordChanged) {
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Đổi mật khẩu thành công'),
-              ),
-            );
+            AppToast.success(context, 'Đổi mật khẩu thành công');
           } else if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            AppToast.error(context, state.message);
           }
         },
         child: Padding(

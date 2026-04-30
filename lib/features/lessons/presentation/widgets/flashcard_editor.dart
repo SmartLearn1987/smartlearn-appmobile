@@ -12,8 +12,8 @@ class EditableFlashcard {
   EditableFlashcard({
     TextEditingController? frontController,
     TextEditingController? backController,
-  })  : frontController = frontController ?? TextEditingController(),
-        backController = backController ?? TextEditingController();
+  }) : frontController = frontController ?? TextEditingController(),
+       backController = backController ?? TextEditingController();
 
   final TextEditingController frontController;
   final TextEditingController backController;
@@ -124,8 +124,8 @@ class FlashcardEditorState extends State<FlashcardEditor> {
           _buildEmptyState()
         else
           ..._flashcards.asMap().entries.map(
-                (entry) => _buildFlashcardCard(entry.key, entry.value),
-              ),
+            (entry) => _buildFlashcardCard(entry.key, entry.value),
+          ),
         const SizedBox(height: AppSpacing.smMd),
         _buildActionButtons(),
       ],
@@ -146,11 +146,7 @@ class FlashcardEditorState extends State<FlashcardEditor> {
       ),
       child: Column(
         children: [
-          Icon(
-            LucideIcons.layers,
-            size: 32,
-            color: AppColors.mutedForeground,
-          ),
+          Icon(LucideIcons.layers, size: 32, color: AppColors.mutedForeground),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Chưa có thẻ nào. Nhấn "Thêm thẻ" hoặc "Nhập" để bắt đầu.',
@@ -229,9 +225,7 @@ class FlashcardEditorState extends State<FlashcardEditor> {
             ),
             child: Text(
               'Thẻ ${index + 1}',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.accent,
-              ),
+              style: AppTypography.labelSmall.copyWith(color: AppColors.accent),
             ),
           ),
           const Spacer(),
@@ -276,8 +270,10 @@ class FlashcardEditorState extends State<FlashcardEditor> {
         isDense: true,
         border: _inputBorder(AppColors.input),
         enabledBorder: _inputBorder(AppColors.input),
-        focusedBorder:
-            _inputBorder(AppColors.primary, width: AppBorders.widthMedium),
+        focusedBorder: _inputBorder(
+          AppColors.primary,
+          width: AppBorders.widthMedium,
+        ),
       ),
     );
   }
@@ -291,14 +287,14 @@ class FlashcardEditorState extends State<FlashcardEditor> {
             icon: const Icon(LucideIcons.plus, size: 16),
             label: const Text('Thêm thẻ'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.accent,
+              foregroundColor: AppColors.primary,
               textStyle: AppTypography.buttonMedium,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
               shape: RoundedRectangleBorder(
                 borderRadius: AppBorders.borderRadiusSm,
               ),
               side: BorderSide(
-                color: AppColors.accent.withValues(alpha: 0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
                 width: AppBorders.widthThin,
               ),
             ),
@@ -311,14 +307,14 @@ class FlashcardEditorState extends State<FlashcardEditor> {
             icon: const Icon(LucideIcons.fileInput, size: 16),
             label: const Text('Nhập'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.accent,
+              foregroundColor: AppColors.primary,
               textStyle: AppTypography.buttonMedium,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
               shape: RoundedRectangleBorder(
                 borderRadius: AppBorders.borderRadiusSm,
               ),
               side: BorderSide(
-                color: AppColors.accent.withValues(alpha: 0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
                 width: AppBorders.widthThin,
               ),
             ),
@@ -328,8 +324,10 @@ class FlashcardEditorState extends State<FlashcardEditor> {
     );
   }
 
-  OutlineInputBorder _inputBorder(Color color,
-      {double width = AppBorders.widthThin}) {
+  OutlineInputBorder _inputBorder(
+    Color color, {
+    double width = AppBorders.widthThin,
+  }) {
     return OutlineInputBorder(
       borderRadius: AppBorders.borderRadiusSm,
       borderSide: BorderSide(color: color, width: width),

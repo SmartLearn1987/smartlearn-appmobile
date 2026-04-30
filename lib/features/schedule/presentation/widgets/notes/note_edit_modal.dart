@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/note_item_entity.dart';
 import '../../cubit/notes/notes_cubit.dart';
 
@@ -58,12 +59,7 @@ class _NoteEditModalState extends State<NoteEditModal> {
 
     context.read<NotesCubit>().editNote(updated);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã lưu ghi chú'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    AppToast.success(context, 'Đã lưu ghi chú');
   }
 
   @override

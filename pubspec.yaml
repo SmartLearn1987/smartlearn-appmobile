@@ -52,6 +52,7 @@ dependencies:
   logger: ^2.5.0
   collection: ^1.19.1
   cached_network_image: ^3.4.1
+  toastification: ^2.3.0
 
 dev_dependencies:
   flutter_test:

@@ -7,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../app/di/injection.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_entity.dart';
@@ -93,13 +94,9 @@ class _ExamListViewState extends State<_ExamListView> {
     final result = await getIt<ExamRepository>().deleteExam(examId);
     if (!mounted) return;
     result.fold(
-      (failure) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) => AppToast.error(context, failure.message),
       (_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Đã xóa bài thi')));
+        AppToast.success(context, 'Đã xóa bài thi');
         _fetchExams(isRefresh: true);
       },
     );

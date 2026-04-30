@@ -376,14 +376,14 @@ class QuizQuestionEditorState extends State<QuizQuestionEditor> {
         icon: const Icon(LucideIcons.plus, size: 16),
         label: const Text('Thêm câu hỏi'),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.quiz,
+          foregroundColor: AppColors.primary,
           textStyle: AppTypography.buttonMedium,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
           shape: RoundedRectangleBorder(
             borderRadius: AppBorders.borderRadiusSm,
           ),
           side: BorderSide(
-            color: AppColors.quiz.withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             width: AppBorders.widthThin,
           ),
         ),

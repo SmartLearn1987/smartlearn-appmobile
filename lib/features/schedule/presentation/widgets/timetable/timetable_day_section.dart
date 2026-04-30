@@ -249,30 +249,8 @@ class _EntryRow extends StatelessWidget {
                   ],
                 ),
               ),
-              // Edit button
-              GestureDetector(
-                onTap: onEdit,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(
-                    LucideIcons.pencil,
-                    size: 15,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              // Delete button
-              GestureDetector(
-                onTap: onDelete,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(
-                    LucideIcons.trash2,
-                    size: 15,
-                    color: AppColors.destructive,
-                  ),
-                ),
-              ),
+              // More button
+              _MoreButton(onEdit: onEdit, onDelete: onDelete),
             ],
           ),
         ),
@@ -306,6 +284,76 @@ class _SubjectPill extends StatelessWidget {
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
+      ),
+    );
+  }
+}
+
+// ── More button (edit / delete popup) ────────────────────────────────────────
+
+enum _EntryAction { edit, delete }
+
+class _MoreButton extends StatelessWidget {
+  const _MoreButton({required this.onEdit, required this.onDelete});
+
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton<_EntryAction>(
+        onSelected: (action) {
+          if (action == _EntryAction.edit) {
+            onEdit();
+          } else {
+            onDelete();
+          }
+        },
+        padding: EdgeInsets.zero,
+        iconSize: 16,
+        icon: const Icon(LucideIcons.moreVertical, color: AppColors.mutedForeground),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            value: _EntryAction.edit,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.pencil, size: 14, color: AppColors.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Sửa',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.foreground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: _EntryAction.delete,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.trash2, size: 14, color: AppColors.destructive),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Xóa',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.destructive,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

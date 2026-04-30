@@ -248,7 +248,7 @@ class _LessonFormViewState extends State<_LessonFormView> {
     if (state is LessonSaveSuccess) {
       setState(() => _isSaving = false);
       AppToast.success(context, 'Đã lưu bài học thành công');
-      context.pop();
+      context.pop(true);
     } else if (state is LessonSaveFailure) {
       setState(() => _isSaving = false);
       AppToast.error(

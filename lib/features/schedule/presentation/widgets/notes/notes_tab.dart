@@ -6,6 +6,8 @@ import '../../../../../core/theme/app_borders.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/show_delete_confirm.dart';
 import '../../cubit/notes/notes_cubit.dart';
 import 'note_add_form.dart';
 import 'note_detail_modal.dart';
@@ -82,7 +84,6 @@ class NotesTab extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title + count badge + Add button
             Row(
               children: [
                 Text(
@@ -111,20 +112,9 @@ class NotesTab extends StatelessWidget {
                   ),
                 ],
                 const Spacer(),
-                OutlinedButton.icon(
+                ElevatedButton(
                   onPressed: () => _showAddModal(context),
-                  icon: const Icon(LucideIcons.plus, size: 16),
-                  label: const Text('Thêm ghi chú'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    shape: AppBorders.shapeSm,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _RefreshButton(
-                  isLoading: state.status == NotesStatus.loading,
-                  onPressed: () => cubit.loadNotes(),
+                  child: const Icon(LucideIcons.plus, size: 16),
                 ),
               ],
             ),
@@ -148,14 +138,16 @@ class NotesTab extends StatelessWidget {
                           note: note,
                           onView: () => cubit.setViewingNote(note),
                           onEdit: () => cubit.setEditingNote(note),
-                          onDelete: () {
-                            cubit.deleteNote(note.id);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Đã xóa ghi chú'),
-                                duration: Duration(seconds: 3),
-                              ),
+                          onDelete: () async {
+                            final confirmed = await showDeleteConfirm(
+                              context,
+                              title: 'Xóa ghi chú',
+                              message: 'Bạn có chắc chắn muốn xóa ghi chú này?',
                             );
+                            if (confirmed == true && context.mounted) {
+                              cubit.deleteNote(note.id);
+                              AppToast.success(context, 'Đã xóa ghi chú');
+                            }
                           },
                         );
                       },
