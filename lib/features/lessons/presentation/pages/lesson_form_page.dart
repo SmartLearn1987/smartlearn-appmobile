@@ -33,6 +33,7 @@ class LessonFormPage extends StatelessWidget {
     required this.subjectId,
     required this.curriculumId,
     this.curriculumName,
+    this.subjectName,
     this.publisher,
     this.lessonId,
   });
@@ -42,6 +43,7 @@ class LessonFormPage extends StatelessWidget {
   final String? curriculumName;
   final String? publisher;
   final String? lessonId;
+  final String? subjectName;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,7 @@ class LessonFormPage extends StatelessWidget {
         curriculumName: curriculumName,
         publisher: publisher,
         lessonId: lessonId,
+        subjectName: subjectName,
       ),
     );
   }
@@ -65,6 +68,7 @@ class _LessonFormView extends StatefulWidget {
     this.curriculumName,
     this.publisher,
     this.lessonId,
+    this.subjectName,
   });
 
   final String subjectId;
@@ -72,7 +76,7 @@ class _LessonFormView extends StatefulWidget {
   final String? curriculumName;
   final String? publisher;
   final String? lessonId;
-
+  final String? subjectName;
   @override
   State<_LessonFormView> createState() => _LessonFormViewState();
 }
@@ -264,18 +268,45 @@ class _LessonFormViewState extends State<_LessonFormView> {
     return AppBar(
       leading: BackButton(onPressed: () => context.pop()),
       title: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.sm,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.curriculumName ?? '',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: AppBorders.borderRadiusSm,
+                ),
+                child: Text(
+                  'Môn: ${widget.subjectName ?? ''}',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.textXs.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
           Text(
             _isEditMode ? 'Sửa bài học' : 'Tạo bài học',
-            style: AppTypography.h3.copyWith(color: AppColors.foreground),
-          ),
-          if (widget.curriculumName != null)
-            Text(
-              widget.curriculumName!,
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.primary,
-              ),
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.mutedForeground,
             ),
+          ),
         ],
       ),
     );
@@ -348,7 +379,7 @@ class _LessonFormViewState extends State<_LessonFormView> {
   Widget _buildSummaryField() {
     return AppTextField(
       controller: _summaryController,
-      label: 'Tóm tắt',
+      label: 'Tóm tắt bài học',
       hintText: 'Tóm tắt nội dung bài học',
       maxLines: 5,
       minLines: 3,
@@ -360,8 +391,8 @@ class _LessonFormViewState extends State<_LessonFormView> {
   Widget _buildKeyPointsField() {
     return AppTextField(
       controller: _keyPointsController,
-      label: 'Điểm chính',
-      hintText: 'Mỗi điểm chính trên một dòng',
+      label: 'Các ý chính (mỗi dòng một ý)',
+      hintText: 'Ý chính 1\nÝ chính 2',
       maxLines: 5,
       minLines: 3,
     );
@@ -509,15 +540,17 @@ class _LessonFormViewState extends State<_LessonFormView> {
       'title': _titleController.text.trim(),
       'description': _descriptionController.text.trim(),
       'content': contentBlocks
-          .map((b) => {
-                'type': b.type,
-                'content': b.content,
-                if (b.fontSize != null) 'font_size': b.fontSize,
-                if (b.fontFamily != null) 'font_family': b.fontFamily,
-                if (b.color != null) 'color': b.color,
-                if (b.bold != null) 'bold': b.bold,
-                if (b.italic != null) 'italic': b.italic,
-              })
+          .map(
+            (b) => {
+              'type': b.type,
+              'content': b.content,
+              if (b.fontSize != null) 'font_size': b.fontSize,
+              if (b.fontFamily != null) 'font_family': b.fontFamily,
+              if (b.color != null) 'color': b.color,
+              if (b.bold != null) 'bold': b.bold,
+              if (b.italic != null) 'italic': b.italic,
+            },
+          )
           .toList(),
       'summary': _summaryController.text.trim(),
       'key_points': keyPoints,

@@ -30,8 +30,8 @@ class _SubjectDetailPageState extends State<SubjectDetailPage> {
   void initState() {
     super.initState();
     context.read<SubjectDetailBloc>().add(
-          SubjectDetailLoadRequested(subjectId: widget.subjectId),
-        );
+      SubjectDetailLoadRequested(subjectId: widget.subjectId),
+    );
   }
 
   @override
@@ -39,8 +39,8 @@ class _SubjectDetailPageState extends State<SubjectDetailPage> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.subjectId != widget.subjectId) {
       context.read<SubjectDetailBloc>().add(
-            SubjectDetailLoadRequested(subjectId: widget.subjectId),
-          );
+        SubjectDetailLoadRequested(subjectId: widget.subjectId),
+      );
     }
   }
 
@@ -211,6 +211,7 @@ class _SubjectDetailView extends StatelessWidget {
                 extra: {
                   'curriculumName': curriculum.name,
                   'publisher': curriculum.publisher,
+                  'subjectName': subjectName,
                 },
               ),
               onEdit: () => context.go(

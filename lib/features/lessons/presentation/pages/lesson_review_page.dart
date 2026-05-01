@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
 import '../../../../app/di/injection.dart';
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_segmented_tabs.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../router/route_names.dart';
@@ -23,18 +20,21 @@ class LessonReviewPage extends StatelessWidget {
   const LessonReviewPage({
     super.key,
     required this.subjectId,
+    this.subjectName,
     required this.curriculumId,
     required this.lessonId,
     this.curriculumName,
     this.publisher,
+    required this.lessonCount,
   });
 
   final String subjectId;
+  final String? subjectName;
   final String curriculumId;
   final String lessonId;
   final String? curriculumName;
   final String? publisher;
-
+  final int lessonCount;
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LessonDetailBloc>(
@@ -51,8 +51,10 @@ class LessonReviewPage extends StatelessWidget {
       },
       child: _LessonReviewView(
         subjectId: subjectId,
+        subjectName: subjectName,
         curriculumId: curriculumId,
         lessonId: lessonId,
+        lessonCount: lessonCount,
         curriculumName: curriculumName,
         publisher: publisher,
       ),
@@ -63,18 +65,21 @@ class LessonReviewPage extends StatelessWidget {
 class _LessonReviewView extends StatefulWidget {
   const _LessonReviewView({
     required this.subjectId,
+    this.subjectName,
     required this.curriculumId,
     required this.lessonId,
     this.curriculumName,
     this.publisher,
+    required this.lessonCount,
   });
 
   final String subjectId;
+  final String? subjectName;
   final String curriculumId;
   final String lessonId;
   final String? curriculumName;
   final String? publisher;
-
+  final int lessonCount;
   @override
   State<_LessonReviewView> createState() => _LessonReviewViewState();
 }
@@ -108,20 +113,57 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
                 extra: {
                   'curriculumName': widget.curriculumName,
                   'publisher': widget.publisher,
+                  'subjectName': widget.subjectName,
                 },
               ),
             ),
-            title: Text(_lessonTitle(state), overflow: TextOverflow.ellipsis),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: AppSpacing.sm,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.curriculumName ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: AppBorders.borderRadiusSm,
+                      ),
+                      child: Text(
+                        'Môn: ${widget.subjectName ?? ''}',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.textXs.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Ôn tập nội dung (${widget.lessonCount} bài)',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
           ),
           body: _buildBody(state),
         );
       },
     );
-  }
-
-  String _lessonTitle(LessonDetailState state) {
-    if (state is LessonDetailLoaded) return state.lesson.title;
-    return 'Ôn tập bài học';
   }
 
   void _handleStateChanges(BuildContext context, LessonDetailState state) {
@@ -156,9 +198,11 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(state.lesson),
-          const SizedBox(height: AppSpacing.md),
-          _buildProgressToggle(),
+          Row(
+            spacing: AppSpacing.sm,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Expanded(child: _buildHeader(state.lesson))],
+          ),
           const SizedBox(height: AppSpacing.md),
           AppSegmentedTabs(
             tabs: _tabLabels,
@@ -176,48 +220,49 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          lesson.title,
-          style: AppTypography.h2.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          spacing: AppSpacing.sm,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                lesson.title,
+                style: AppTypography.h2.copyWith(
+                  color: AppColors.foreground,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            _buildProgressToggle(),
+          ],
         ),
-        if (lesson.description != null && lesson.description!.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
+        if (lesson.description != null && lesson.description!.isNotEmpty)
           Text(
             lesson.description!,
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.mutedForeground,
             ),
           ),
-        ],
       ],
     );
   }
 
   Widget _buildProgressToggle() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: _onToggleProgress,
-        icon: Icon(
-          _isCompleted ? LucideIcons.checkCircle2 : LucideIcons.circle,
-          size: 18,
-        ),
-        label: Text(_isCompleted ? 'Đã học' : 'Đánh dấu học'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _isCompleted ? AppColors.success : AppColors.muted,
-          foregroundColor: _isCompleted
-              ? AppColors.successForeground
-              : AppColors.foreground,
-          textStyle: AppTypography.buttonMedium,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorders.borderRadiusSm,
-          ),
-          elevation: _isCompleted ? 2 : 0,
-        ),
+    return ElevatedButton(
+      onPressed: _onToggleProgress,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _isCompleted ? AppColors.success : AppColors.muted,
+        foregroundColor: _isCompleted
+            ? AppColors.successForeground
+            : AppColors.foreground,
+        textStyle: AppTypography.buttonMedium,
+        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
+        elevation: _isCompleted ? 2 : 0,
+      ),
+      child: Icon(
+        _isCompleted ? LucideIcons.checkCircle2 : LucideIcons.circle,
+        size: 18,
       ),
     );
   }
@@ -355,29 +400,21 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
       children: [
         // Summary text
         if (hasSummary) ...[
-          Text(
-            'Tóm tắt',
-            style: AppTypography.h4.copyWith(
-              color: AppColors.foreground,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.mdLg),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: AppBorders.borderRadiusSm,
-              border: Border.all(
-                color: AppColors.border,
-                width: AppBorders.widthThin,
-              ),
-            ),
-            child: Text(
-              state.lesson.summary!,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.foreground,
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.mdLg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('📝 Tổng kết', style: AppTypography.textLg.bold),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    state.lesson.summary!,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.foreground,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -386,62 +423,72 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
         // Key points numbered list
         if (hasKeyPoints) ...[
           if (hasSummary) const SizedBox(height: AppSpacing.md),
-          Text(
-            'Điểm chính',
-            style: AppTypography.h4.copyWith(
-              color: AppColors.foreground,
-              fontWeight: FontWeight.w700,
+          Card(
+            color: AppColors.primary.withValues(alpha: 0.05),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppBorders.borderRadiusSm,
+              side: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                width: AppBorders.widthThin,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          ...state.lesson.keyPoints.asMap().entries.map(
-            (entry) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.smMd),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: AppBorders.borderRadiusSm,
-                  border: Border.all(
-                    color: AppColors.border,
-                    width: AppBorders.widthThin,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.mdLg),
+              child: Column(
+                spacing: AppSpacing.md,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    spacing: AppSpacing.sm,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.lightbulb,
+                        size: 20,
                         color: AppColors.primary,
-                        borderRadius: AppBorders.borderRadiusSm,
                       ),
-                      child: Center(
-                        child: Text(
-                          '${entry.key + 1}',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.primaryForeground,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Text(
+                        'Điểm cần nhớ',
+                        style: AppTypography.textLg.bold.withColor(
+                          AppColors.primary,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.smMd),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.xs),
-                        child: Text(
-                          entry.value,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.foreground,
+                    ],
+                  ),
+                  ...state.lesson.keyPoints.asMap().entries.map(
+                    (entry) => Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${entry.key + 1}',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: AppSpacing.smMd),
+                        Expanded(
+                          child: Text(
+                            entry.value,
+                            style: AppTypography.textSm.copyWith(
+                              color: AppColors.foreground,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -518,5 +565,3 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
     );
   }
 }
-
-

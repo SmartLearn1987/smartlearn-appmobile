@@ -50,7 +50,7 @@ class App extends StatelessWidget {
                 ).copyWith(textScaler: TextScaler.noScaling),
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  // onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                   child: BlocListener<AuthBloc, AuthState>(
                     listenWhen: (prev, curr) =>
                         curr is AuthUnauthenticated && curr.message != null,

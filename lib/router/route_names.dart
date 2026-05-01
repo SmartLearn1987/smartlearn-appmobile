@@ -68,7 +68,10 @@ abstract final class RoutePaths {
     String subjectId,
     String curriculumId,
     String lessonId,
-  ) => '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId';
+    String? subjectName,
+    String? curriculumName,
+    int lessonCount,
+  ) => '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId?subjectName=$subjectName&curriculumName=$curriculumName';
 }
 
 abstract final class RouteNames {

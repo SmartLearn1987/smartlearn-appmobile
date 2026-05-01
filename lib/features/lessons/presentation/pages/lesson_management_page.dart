@@ -22,31 +22,36 @@ class LessonManagementPage extends StatelessWidget {
     required this.curriculumId,
     this.curriculumName,
     this.publisher,
+    this.subjectName,
   });
 
   final String subjectId;
   final String curriculumId;
   final String? curriculumName;
   final String? publisher;
-
+  final String? subjectName;
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LessonsListBloc>(
       create: (_) {
         final bloc = getIt<LessonsListBloc>();
         final authState = context.read<AuthBloc>().state;
-        final studentId =
-            authState is AuthAuthenticated ? authState.user.id : '';
-        bloc.add(LessonsLoadRequested(
-          curriculumId: curriculumId,
-          studentId: studentId,
-        ));
+        final studentId = authState is AuthAuthenticated
+            ? authState.user.id
+            : '';
+        bloc.add(
+          LessonsLoadRequested(
+            curriculumId: curriculumId,
+            studentId: studentId,
+          ),
+        );
         return bloc;
       },
       child: _LessonManagementView(
         subjectId: subjectId,
         curriculumId: curriculumId,
         curriculumName: curriculumName,
+        subjectName: subjectName,
         publisher: publisher,
       ),
     );
@@ -58,12 +63,14 @@ class _LessonManagementView extends StatefulWidget {
     required this.subjectId,
     required this.curriculumId,
     this.curriculumName,
+    this.subjectName,
     this.publisher,
   });
 
   final String subjectId;
   final String curriculumId;
   final String? curriculumName;
+  final String? subjectName;
   final String? publisher;
 
   @override
@@ -86,13 +93,52 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
           backgroundColor: AppColors.background,
           appBar: AppBar(
             leading: BackButton(
-              onPressed: () => context.go(
-                RoutePaths.subjectDetail(widget.subjectId),
-              ),
+              onPressed: () =>
+                  context.go(RoutePaths.subjectDetail(widget.subjectId)),
             ),
-            title: Text(
-              widget.curriculumName ?? 'Quản lý bài học',
-              overflow: TextOverflow.ellipsis,
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: AppSpacing.sm,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.curriculumName ?? 'Quản lý bài học',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: AppBorders.borderRadiusSm,
+                      ),
+                      child: Text(
+                        'Môn: ${widget.subjectName ?? ''}',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.textXs.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  _selectedTabIndex == 0
+                      ? 'Quản lý bài học (${state is LessonsListLoaded ? state.lessons.length : 0} bài)'
+                      : 'Ôn tập nội dung (${state is LessonsListLoaded ? state.lessons.length : 0} bài)',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+              ],
             ),
           ),
           body: SingleChildScrollView(
@@ -100,9 +146,11 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(state),
-                const SizedBox(height: AppSpacing.md),
-                _buildTabSwitcher(),
+                AppSegmentedTabs(
+                  tabs: const ['Quản lý bài học', 'Ôn tập'],
+                  selectedIndex: _selectedTabIndex,
+                  onTap: (index) => setState(() => _selectedTabIndex = index),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 if (_selectedTabIndex == 0) _buildCreateButton(),
                 if (_selectedTabIndex == 0)
@@ -128,90 +176,31 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
     }
   }
 
-  Widget _buildHeader(LessonsListState state) {
-    final lessonCount = state is LessonsListLoaded ? state.lessons.length : 0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.curriculumName ?? '',
-          style: AppTypography.h2.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            if (widget.publisher != null && widget.publisher!.isNotEmpty) ...[
-              _buildSubjectBadge(widget.publisher!),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Text(
-              '$lessonCount bài học',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.mutedForeground,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubjectBadge(String label) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.15),
-        borderRadius: AppBorders.borderRadiusSm,
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: AppColors.primary,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabSwitcher() {
-    return AppSegmentedTabs(
-      tabs: const ['Quản lý bài học', 'Ôn tập'],
-      selectedIndex: _selectedTabIndex,
-      onTap: (index) => setState(() => _selectedTabIndex = index),
-    );
-  }
-
   void _navigateToForm({String? lessonId}) {
-    context.push(
-      RoutePaths.lessonForm(widget.subjectId, widget.curriculumId),
-      extra: {
-        'curriculumName': widget.curriculumName,
-        'publisher': widget.publisher,
-        if (lessonId != null) 'lessonId': lessonId,
-      },
-    ).then((result) {
-      if (result == true && mounted) {
-        final authState = context.read<AuthBloc>().state;
-        final studentId =
-            authState is AuthAuthenticated ? authState.user.id : '';
-        context.read<LessonsListBloc>().add(LessonsLoadRequested(
-              curriculumId: widget.curriculumId,
-              studentId: studentId,
-            ));
-      }
-    });
+    context
+        .push(
+          RoutePaths.lessonForm(widget.subjectId, widget.curriculumId),
+          extra: {
+            'curriculumName': widget.curriculumName,
+            'publisher': widget.publisher,
+            'subjectName': widget.subjectName,
+            'lessonId': ?lessonId,
+          },
+        )
+        .then((result) {
+          if (result == true && mounted) {
+            final authState = context.read<AuthBloc>().state;
+            final studentId = authState is AuthAuthenticated
+                ? authState.user.id
+                : '';
+            context.read<LessonsListBloc>().add(
+              LessonsLoadRequested(
+                curriculumId: widget.curriculumId,
+                studentId: studentId,
+              ),
+            );
+          }
+        });
   }
 
   Widget _buildCreateButton() {
@@ -237,15 +226,16 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
   Widget _buildContent(LessonsListState state) {
     return switch (state) {
       LessonsListLoading() => const Center(
-          child: Padding(
-            padding: EdgeInsets.only(top: AppSpacing.xxl),
-            child: CircularProgressIndicator(),
-          ),
+        child: Padding(
+          padding: EdgeInsets.only(top: AppSpacing.xxl),
+          child: CircularProgressIndicator(),
         ),
+      ),
       LessonsListError(:final message) => _buildError(message),
-      LessonsListLoaded() => _selectedTabIndex == 0
-          ? _buildManageTab(state)
-          : _buildReviewTab(state),
+      LessonsListLoaded() =>
+        _selectedTabIndex == 0
+            ? _buildManageTab(state)
+            : _buildReviewTab(state),
       _ => const SizedBox.shrink(),
     };
   }
@@ -274,14 +264,15 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
             ElevatedButton(
               onPressed: () {
                 final authState = context.read<AuthBloc>().state;
-                final studentId =
-                    authState is AuthAuthenticated ? authState.user.id : '';
+                final studentId = authState is AuthAuthenticated
+                    ? authState.user.id
+                    : '';
                 context.read<LessonsListBloc>().add(
-                      LessonsLoadRequested(
-                        curriculumId: widget.curriculumId,
-                        studentId: studentId,
-                      ),
-                    );
+                  LessonsLoadRequested(
+                    curriculumId: widget.curriculumId,
+                    studentId: studentId,
+                  ),
+                );
               },
               child: const Text('Thử lại'),
             ),
@@ -293,9 +284,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
 
   Widget _buildManageTab(LessonsListLoaded state) {
     if (state.lessons.isEmpty) {
-      return _buildEmptyState(
-        'Chưa có bài học nào cho giáo trình này.',
-      );
+      return _buildEmptyState('Chưa có bài học nào cho giáo trình này.');
     }
     return ListView.builder(
       shrinkWrap: true,
@@ -321,9 +310,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Xóa bài học'),
-        content: const Text(
-          'Bạn có chắc chắn muốn xóa bài học này?',
-        ),
+        content: const Text('Bạn có chắc chắn muốn xóa bài học này?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -331,27 +318,23 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.destructive,
-            ),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Xóa'),
           ),
         ],
       ),
     ).then((confirmed) {
       if (confirmed == true && context.mounted) {
-        context
-            .read<LessonsListBloc>()
-            .add(LessonDeleteRequested(lessonId: lessonId));
+        context.read<LessonsListBloc>().add(
+          LessonDeleteRequested(lessonId: lessonId),
+        );
       }
     });
   }
 
   Widget _buildReviewTab(LessonsListLoaded state) {
     if (state.lessons.isEmpty) {
-      return _buildEmptyState(
-        'Bạn chưa có bài học nào để ôn tập.',
-      );
+      return _buildEmptyState('Bạn chưa có bài học nào để ôn tập.');
     }
     return ListView.builder(
       shrinkWrap: true,
@@ -372,7 +355,15 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
                 widget.subjectId,
                 widget.curriculumId,
                 lesson.id,
+                widget.subjectName,
+                widget.curriculumName,
+                state.lessons.length,
               ),
+              extra: {
+                'subjectName': widget.subjectName,
+                'curriculumName': widget.curriculumName,
+                'lessonCount': state.lessons.length,
+              },
             ),
           ),
         );
@@ -406,5 +397,3 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
     );
   }
 }
-
-

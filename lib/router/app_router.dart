@@ -374,6 +374,7 @@ class AppRouter {
                           builder: (context, state) {
                             final extra = state.extra as Map<String, dynamic>?;
                             return LessonManagementPage(
+                              subjectName: extra?['subjectName'] as String?,
                               subjectId: state.pathParameters['subjectId']!,
                               curriculumId:
                                   state.pathParameters['curriculumId']!,
@@ -391,6 +392,7 @@ class AppRouter {
                                     state.extra as Map<String, dynamic>?;
                                 return LessonFormPage(
                                   subjectId: state.pathParameters['subjectId']!,
+                                  subjectName: extra?['subjectName'] as String?,
                                   curriculumId:
                                       state.pathParameters['curriculumId']!,
                                   curriculumName:
@@ -407,6 +409,7 @@ class AppRouter {
                                 final extra =
                                     state.extra as Map<String, dynamic>?;
                                 return LessonReviewPage(
+                                  subjectName: extra?['subjectName'] as String?,
                                   subjectId: state.pathParameters['subjectId']!,
                                   curriculumId:
                                       state.pathParameters['curriculumId']!,
@@ -414,6 +417,7 @@ class AppRouter {
                                   curriculumName:
                                       extra?['curriculumName'] as String?,
                                   publisher: extra?['publisher'] as String?,
+                                  lessonCount: extra?['lessonCount'] as int? ?? 0,
                                 );
                               },
                             ),
