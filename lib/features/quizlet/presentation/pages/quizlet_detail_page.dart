@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/features/quizlet/presentation/pages/quizlet_fullscreen_page.dart';
 
 import '../../../../app/di/injection.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/quizlet_term_entity.dart';
@@ -227,6 +226,79 @@ class _LoadedContentState extends State<_LoadedContent> {
     });
   }
 
+  void _pushFullscreen(
+    BuildContext context,
+    QuizletTermEntity currentTerm,
+    List<QuizletTermEntity> terms,
+  ) {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final cardRect = renderBox != null
+        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+        : Rect.zero;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder<void>(
+        opaque: true,
+        transitionDuration: const Duration(milliseconds: 420),
+        reverseTransitionDuration: const Duration(milliseconds: 350),
+        pageBuilder: (_, __, ___) => QuizletFullscreenPage(
+          terms: terms,
+          initialIndex: _currentIndex,
+          initialMode: _mode,
+          isShuffled: _isShuffled,
+          order: List.of(_order),
+        ),
+        transitionsBuilder: (_, animation, __, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          final scaleX = Tween<double>(
+            begin: cardRect.width / screenSize.width,
+            end: 1.0,
+          ).animate(curved);
+          final scaleY = Tween<double>(
+            begin: cardRect.height / screenSize.height,
+            end: 1.0,
+          ).animate(curved);
+          final dx = Tween<double>(
+            begin:
+                (cardRect.left + cardRect.width / 2 - screenSize.width / 2) /
+                screenSize.width,
+            end: 0.0,
+          ).animate(curved);
+          final dy = Tween<double>(
+            begin:
+                (cardRect.top + cardRect.height / 2 - screenSize.height / 2) /
+                screenSize.height,
+            end: 0.0,
+          ).animate(curved);
+          final radius = Tween<double>(begin: 16.0, end: 0.0).animate(curved);
+
+          return AnimatedBuilder(
+            animation: curved,
+            builder: (_, child) => Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..translate(
+                  dx.value * screenSize.width,
+                  dy.value * screenSize.height,
+                )
+                ..scale(scaleX.value, scaleY.value),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius.value),
+                child: child,
+              ),
+            ),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
   void _checkAnswer() {
     if (displayTerms().isEmpty) {
       return;
@@ -279,72 +351,98 @@ class _LoadedContentState extends State<_LoadedContent> {
                   _goPrevious();
                 }
               },
-              child: _buildCardByMode(context, currentTerm),
-            ),
-          ),
-          if (_mode == StudyMode.front || _mode == StudyMode.back) ...[
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    controller: _answerController,
-                    hintText: 'Nhập đáp án...',
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _checkAnswer(),
+              child: Card(
+                child: Padding(
+                  padding: AppSpacing.paddingCard,
+                  child: Column(
+                    children: [
+                      Expanded(child: _buildCardByMode(context, currentTerm)),
+                      if (_mode == StudyMode.front ||
+                          _mode == StudyMode.back) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppTextField(
+                                controller: _answerController,
+                                hintText: 'Nhập đáp án...',
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _checkAnswer(),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            ElevatedButton(
+                              onPressed: _checkAnswer,
+                              child: const Text('Kiểm tra'),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _toggleAutoPlay,
+                                icon: Icon(
+                                  _isAutoPlaying
+                                      ? LucideIcons.pause
+                                      : LucideIcons.play,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: _toggleShuffle,
+                                icon: Icon(
+                                  LucideIcons.shuffle,
+                                  color: _isShuffled ? AppColors.primary : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: isFirst ? null : _goPrevious,
+                                icon: const Icon(LucideIcons.chevronLeft),
+                              ),
+                              Text(
+                                '${currentIndex + 1} / ${terms.length}',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: AppColors.foreground,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: isLast ? null : _goNext,
+                                icon: const Icon(LucideIcons.chevronRight),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const SizedBox(width: 48),
+                              IconButton(
+                                onPressed: () => _pushFullscreen(
+                                  context,
+                                  currentTerm,
+                                  terms,
+                                ),
+                                icon: const Icon(LucideIcons.maximize2),
+                                tooltip: 'Toàn màn hình',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                ElevatedButton(
-                  onPressed: _checkAnswer,
-                  child: const Text('Kiểm tra'),
-                ),
-              ],
+              ),
             ),
-          ],
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _toggleAutoPlay,
-                    icon: Icon(
-                      _isAutoPlaying ? LucideIcons.pause : LucideIcons.play,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _toggleShuffle,
-                    icon: Icon(
-                      LucideIcons.shuffle,
-                      color: _isShuffled ? AppColors.primary : null,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: isFirst ? null : _goPrevious,
-                    icon: const Icon(LucideIcons.chevronLeft),
-                  ),
-                  Text(
-                    '${currentIndex + 1} / ${terms.length}',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.foreground,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: isLast ? null : _goNext,
-                    icon: const Icon(LucideIcons.chevronRight),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 96),
-            ],
           ),
+
           const SizedBox(height: AppSpacing.lg),
         ],
       ),

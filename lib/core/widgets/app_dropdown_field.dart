@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/theme.dart';
 
 /// Reusable dropdown field matching AppTextField style.
@@ -48,7 +49,7 @@ class AppDropdownField<T> extends StatelessWidget {
           isExpanded: true,
           style: AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
           icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
+            LucideIcons.chevronDown,
             color: AppColors.mutedForeground,
           ),
           decoration: InputDecoration(

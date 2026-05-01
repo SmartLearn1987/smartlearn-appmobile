@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/theme.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
@@ -166,8 +167,8 @@ class _ChangePasswordBottomSheetState extends State<ChangePasswordBottomSheet> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                              ? LucideIcons.eyeOff
+                              : LucideIcons.eye,
                           color: AppColors.mutedForeground,
                           size: 20,
                         ),
@@ -244,8 +245,8 @@ class _ChangePasswordBottomSheetState extends State<ChangePasswordBottomSheet> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmation
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                              ? LucideIcons.eyeOff
+                              : LucideIcons.eye,
                           color: AppColors.mutedForeground,
                           size: 20,
                         ),

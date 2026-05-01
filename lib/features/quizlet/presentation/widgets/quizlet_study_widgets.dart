@@ -24,6 +24,7 @@ class StudyModeTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusLg,
@@ -111,7 +112,7 @@ class SingleFaceStudyCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: AppColors.gray100,
         borderRadius: BorderRadius.circular(AppSpacing.md),
         border: Border.all(color: AppColors.border),
       ),
@@ -142,7 +143,7 @@ class PracticeStudyCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: AppColors.gray100,
         borderRadius: BorderRadius.circular(AppSpacing.md),
         border: Border.all(color: AppColors.border),
       ),

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/entities/subject_entity.dart';
@@ -311,7 +309,7 @@ class _SubjectSelectionModalState extends State<SubjectSelectionModal> {
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  ? const Icon(LucideIcons.check, size: 16, color: Colors.white)
                   : null,
             ),
           ],

@@ -113,7 +113,7 @@ class _FlashcardFront extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: AppColors.gray100,
         borderRadius: AppBorders.borderRadiusMd,
         border: Border.all(color: AppColors.border),
       ),
@@ -167,7 +167,7 @@ class _FlashcardBack extends StatelessWidget {
       transform: Matrix4.identity()..rotateY(pi),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: AppColors.gray100,
           borderRadius: AppBorders.borderRadiusMd,
           border: Border.all(color: AppColors.border),
         ),

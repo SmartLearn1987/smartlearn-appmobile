@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../constants/api_constants.dart';
 import '../theme/app_colors.dart';
@@ -66,9 +67,9 @@ class AppCachedImage extends StatelessWidget {
       width: width,
       height: height,
       color: AppColors.muted,
-      child: const Center(
+      child: Center(
         child: Icon(
-          Icons.broken_image_outlined,
+          LucideIcons.imageOff,
           size: 32,
           color: AppColors.mutedForeground,
         ),
