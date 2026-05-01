@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../app/di/injection.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../router/route_names.dart';
 import '../../domain/entities/exam_detail_entity.dart';
 import '../bloc/exam_detail/exam_detail_bloc.dart';

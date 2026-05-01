@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/quizlet_term_entity.dart';
 
 enum StudyMode { flashcard, front, back, practice }
@@ -18,18 +14,16 @@ class StudyModeTabs extends StatelessWidget {
   final StudyMode value;
   final ValueChanged<StudyMode> onChanged;
 
+  static const _tabs = [
+    (label: 'Flashcard', mode: StudyMode.flashcard),
+    (label: 'Kiểm tra\nmặt trước', mode: StudyMode.front),
+    (label: 'Kiểm tra\nmặt sau', mode: StudyMode.back),
+    (label: 'Luyện tập', mode: StudyMode.practice),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final tabs = [
-      (label: 'FlashCard', mode: StudyMode.flashcard),
-      (label: 'Mặt trước', mode: StudyMode.front),
-      (label: 'Mặt sau', mode: StudyMode.back),
-      (label: 'Luyện tập', mode: StudyMode.practice),
-    ];
-    final activeIndex = tabs.indexWhere((tab) => tab.mode == value);
-
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusLg,
@@ -37,57 +31,64 @@ class StudyModeTabs extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tabWidth = constraints.maxWidth / tabs.length;
-          return Stack(
-            children: [
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOutCubic,
-                left: tabWidth * activeIndex,
-                top: 0,
-                bottom: 0,
-                width: tabWidth,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: AppBorders.borderRadiusSm,
+          final cellW = constraints.maxWidth / 2;
+          const cellH = 56.0;
+          final activeIndex = _tabs.indexWhere((t) => t.mode == value);
+          final col = activeIndex % 2;
+          final row = activeIndex ~/ 2;
+
+          return SizedBox(
+            height: cellH * 2,
+            child: Stack(
+              children: [
+                // ── Animated pill ──
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeInOutCubic,
+                  left: col * cellW + AppSpacing.xs,
+                  top: row * cellH + AppSpacing.xs,
+                  width: cellW - AppSpacing.sm,
+                  height: cellH - AppSpacing.sm,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: AppBorders.borderRadiusSm,
+                    ),
                   ),
                 ),
-              ),
-              Row(
-                children: tabs.map((tab) {
-                  final selected = tab.mode == value;
-                  return Expanded(
-                    child: InkWell(
-                      borderRadius: AppBorders.borderRadiusSm,
-                      onTap: () => onChanged(tab.mode),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.sm,
-                          horizontal: AppSpacing.xs,
-                        ),
-                        child: AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOut,
-                          style: AppTypography.labelSmall.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: selected
-                                ? AppColors.primaryForeground
-                                : AppColors.mutedForeground,
-                          ),
-                          child: Text(
-                            tab.label,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                // ── Labels ──
+                Wrap(
+                  children: List.generate(_tabs.length, (i) {
+                    final selected = _tabs[i].mode == value;
+                    return GestureDetector(
+                      onTap: () => onChanged(_tabs[i].mode),
+                      behavior: HitTestBehavior.opaque,
+                      child: SizedBox(
+                        width: cellW,
+                        height: cellH,
+                        child: Center(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
+                            style: AppTypography.labelSmall.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: selected
+                                  ? AppColors.primaryForeground
+                                  : AppColors.mutedForeground,
+                            ),
+                            child: Text(
+                              _tabs[i].label,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+                    );
+                  }),
+                ),
+              ],
+            ),
           );
         },
       ),

@@ -206,6 +206,7 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
           const SizedBox(height: AppSpacing.md),
           AppSegmentedTabs(
             tabs: _tabLabels,
+            variant: AppSegmentedTabsVariant.primary,
             selectedIndex: _selectedTabIndex,
             onTap: (index) => setState(() => _selectedTabIndex = index),
           ),

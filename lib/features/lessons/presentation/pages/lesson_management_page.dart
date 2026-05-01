@@ -148,6 +148,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
               children: [
                 AppSegmentedTabs(
                   tabs: const ['Quản lý bài học', 'Ôn tập'],
+                  variant: AppSegmentedTabsVariant.primary,
                   selectedIndex: _selectedTabIndex,
                   onTap: (index) => setState(() => _selectedTabIndex = index),
                 ),

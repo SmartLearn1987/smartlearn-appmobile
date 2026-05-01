@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';

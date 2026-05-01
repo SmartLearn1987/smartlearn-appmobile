@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
 class AppCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const AppCustomAppBar({

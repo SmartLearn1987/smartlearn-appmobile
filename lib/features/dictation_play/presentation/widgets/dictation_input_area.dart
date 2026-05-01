@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_button_styles.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 
 /// Input area for the dictation game where users type what they heard.
 ///

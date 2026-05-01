@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 import 'package:smart_learn/features/home/presentation/bloc/focus_cubit.dart';
 import 'package:smart_learn/features/home/presentation/bloc/focus_state.dart';
 import 'package:smart_learn/features/home/presentation/pages/focus_fullscreen_page.dart';

@@ -260,7 +260,6 @@ class _LoadedContentState extends State<_LoadedContent> {
     final currentIndex = _currentIndex;
     final isFirst = currentIndex == 0;
     final isLast = currentIndex == terms.length - 1;
-    final progress = (currentIndex + 1) / terms.length;
     final currentTerm = terms[currentIndex];
 
     return Padding(
@@ -269,18 +268,6 @@ class _LoadedContentState extends State<_LoadedContent> {
         children: [
           const SizedBox(height: AppSpacing.sm),
           StudyModeTabs(value: _mode, onChanged: _setMode),
-          const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.xs),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.muted,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.primary,
-              ),
-              minHeight: AppSpacing.xs,
-            ),
-          ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
             child: GestureDetector(

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_learn/core/theme/app_borders.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_shadows.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
+
+import '../theme/theme.dart';
+
+/// Visual variant for [AppSegmentedTabs].
+///
+/// - [muted]: default white pill on muted background.
+/// - [primary]: primary-colored pill on light primary background, white text.
+enum AppSegmentedTabsVariant { muted, primary }
 
 /// Reusable segmented tab bar with animated sliding pill indicator.
 ///
@@ -18,6 +21,14 @@ import 'package:smart_learn/core/theme/app_typography.dart';
 ///   selectedIndex: _index,
 ///   onTap: (i) => setState(() => _index = i),
 /// )
+///
+/// // Primary variant:
+/// AppSegmentedTabs(
+///   tabs: const ['Tab A', 'Tab B'],
+///   selectedIndex: _index,
+///   onTap: (i) => setState(() => _index = i),
+///   variant: AppSegmentedTabsVariant.primary,
+/// )
 /// ```
 class AppSegmentedTabs extends StatelessWidget {
   const AppSegmentedTabs({
@@ -25,15 +36,15 @@ class AppSegmentedTabs extends StatelessWidget {
     required this.selectedIndex,
     required this.onTap,
     this.height = 40,
+    this.variant = AppSegmentedTabsVariant.muted,
     super.key,
   });
 
   final List<String> tabs;
   final int selectedIndex;
   final ValueChanged<int> onTap;
-
-  /// Height of the tab bar (excluding outer padding).
   final double height;
+  final AppSegmentedTabsVariant variant;
 
   static const _padding = AppSpacing.xs;
   static const _duration = Duration(milliseconds: 250);
@@ -41,10 +52,22 @@ class AppSegmentedTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPrimary = variant == AppSegmentedTabsVariant.primary;
+
+    final trackColor = AppColors.muted;
+
+    final pillColor = isPrimary ? AppColors.primary : AppColors.card;
+
+    final selectedTextColor = isPrimary
+        ? AppColors.primaryForeground
+        : AppColors.foreground;
+
+    final unselectedTextColor = AppColors.mutedForeground;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.muted,
+        color: trackColor,
         borderRadius: AppBorders.borderRadiusMd,
       ),
       padding: const EdgeInsets.all(_padding),
@@ -69,9 +92,9 @@ class AppSegmentedTabs extends StatelessWidget {
                   width: tabWidth,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.card,
+                      color: pillColor,
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      boxShadow: AppShadows.tabActive,
+                      boxShadow: isPrimary ? null : AppShadows.tabActive,
                     ),
                   ),
                 ),
@@ -89,14 +112,11 @@ class AppSegmentedTabs extends StatelessWidget {
                             child: AnimatedDefaultTextStyle(
                               duration: _duration,
                               curve: _curve,
-                              style: AppTypography.buttonSmall.copyWith(
+                              style: AppTypography.buttonSmall.bold.copyWith(
                                 fontSize: 13,
                                 color: isSelected
-                                    ? AppColors.foreground
-                                    : AppColors.mutedForeground,
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
+                                    ? selectedTextColor
+                                    : unselectedTextColor,
                               ),
                               child: Text(tabs[index]),
                             ),
