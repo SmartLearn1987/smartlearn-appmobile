@@ -544,8 +544,8 @@ class _LessonFormViewState extends State<_LessonFormView> {
             (b) => {
               'type': b.type,
               'content': b.content,
-              if (b.fontSize != null) 'font_size': b.fontSize,
-              if (b.fontFamily != null) 'font_family': b.fontFamily,
+              if (b.fontSize != null) 'fontSize': b.fontSize,
+              if (b.fontFamily != null) 'fontFamily': b.fontFamily,
               if (b.color != null) 'color': b.color,
               if (b.bold != null) 'bold': b.bold,
               if (b.italic != null) 'italic': b.italic,

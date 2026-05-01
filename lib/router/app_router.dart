@@ -7,6 +7,8 @@ import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/auth/presentation/pages/login_page.dart';
 import 'package:smart_learn/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:smart_learn/features/auth/presentation/pages/register_page.dart';
+import 'package:smart_learn/features/home/presentation/pages/focus_fullscreen_page.dart';
+import 'package:smart_learn/features/home/presentation/bloc/focus_cubit.dart';
 import 'package:smart_learn/features/home/presentation/pages/home_page.dart';
 import 'package:smart_learn/features/schedule/presentation/pages/schedule_page.dart';
 import 'package:smart_learn/features/subjects/presentation/pages/create_curriculum_page.dart';
@@ -223,6 +225,16 @@ class AppRouter {
           name: RouteNames.profile,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: RoutePaths.focusFullscreen,
+          name: RouteNames.focusFullscreen,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final cubit = state.extra as FocusCubit?;
+            if (cubit == null) return const _RedirectToHome();
+            return FocusFullscreenPage(cubit: cubit);
+          },
         ),
         GoRoute(
           path: RoutePaths.dictationPlay,

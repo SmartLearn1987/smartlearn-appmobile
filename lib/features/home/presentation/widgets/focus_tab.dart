@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/features/home/presentation/bloc/focus_cubit.dart';
 import 'package:smart_learn/features/home/presentation/bloc/focus_state.dart';
+import 'package:smart_learn/features/home/presentation/pages/focus_fullscreen_page.dart';
 import 'package:smart_learn/features/home/presentation/widgets/clock_widget.dart';
 import 'package:smart_learn/features/home/presentation/widgets/pomodoro_widget.dart';
 import 'package:smart_learn/features/home/presentation/widgets/stopwatch_widget.dart';
 
+const _subTabs = [
+  (icon: LucideIcons.clock, label: 'ĐỒNG HỒ', mode: FocusMode.clock),
+  (icon: LucideIcons.timer, label: 'BẤM GIỜ', mode: FocusMode.stopwatch),
+  (icon: LucideIcons.hourglass, label: 'POMODORO', mode: FocusMode.pomodoro),
+];
+
 class FocusTab extends StatelessWidget {
   const FocusTab({super.key});
-
-  static const _subTabs = [
-    (label: 'ĐỒNG HỒ', mode: FocusMode.clock),
-    (label: 'BẤM GIỜ', mode: FocusMode.stopwatch),
-    (label: 'POMODORO', mode: FocusMode.pomodoro),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,31 +36,28 @@ class FocusTab extends StatelessWidget {
           borderRadius: AppBorders.borderRadiusXl,
         ),
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.mdLg),
-              child: Column(
-                children: [
-                  _buildSubTabs(),
-                  const SizedBox(height: AppSpacing.xl),
-                  _buildContent(),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-              ),
-            ),
-            // Positioned(
-            //   right: AppSpacing.smMd,
-            //   bottom: AppSpacing.smMd,
-            //   child: _buildFullscreenButton(),
-            // ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.mdLg),
+          child: Column(
+            children: [
+              _SubTabs(),
+              const SizedBox(height: AppSpacing.xl),
+              _Content(),
+              const SizedBox(height: AppSpacing.sm),
+              _ExpandButton(),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildSubTabs() {
+// ── Sub-tabs ──────────────────────────────────────────────────────────────────
+
+class _SubTabs extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<FocusCubit, FocusState>(
       buildWhen: (prev, curr) => prev.mode != curr.mode,
       builder: (context, state) {
@@ -80,14 +79,28 @@ class FocusTab extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: AppBorders.borderRadiusSm,
                 ),
-                child: Text(
-                  tab.label,
-                  style: AppTypography.buttonSmall.copyWith(
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.5),
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  ),
+                child: Row(
+                  spacing: AppSpacing.xs,
+                  children: [
+                    Icon(
+                      tab.icon,
+                      size: 16,
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
+                    ),
+                    Text(
+                      tab.label,
+                      style: AppTypography.buttonSmall.copyWith(
+                        color: isSelected
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.5),
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -96,8 +109,13 @@ class FocusTab extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildContent() {
+// ── Content ───────────────────────────────────────────────────────────────────
+
+class _Content extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<FocusCubit, FocusState>(
       buildWhen: (prev, curr) => prev.mode != curr.mode,
       builder: (context, state) {
@@ -117,6 +135,113 @@ class FocusTab extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ── Expand button ─────────────────────────────────────────────────────────────
+
+class _ExpandButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () => _pushFullscreen(context),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: AppBorders.borderRadiusSm,
+          ),
+          child: const Icon(
+            LucideIcons.maximize2,
+            size: 16,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _pushFullscreen(BuildContext context) {
+    final cubit = context.read<FocusCubit>();
+
+    // Get the render box of the card to use as animation origin
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final cardRect = renderBox != null
+        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+        : Rect.zero;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder<void>(
+        opaque: true,
+        transitionDuration: const Duration(milliseconds: 420),
+        reverseTransitionDuration: const Duration(milliseconds: 350),
+        pageBuilder: (_, __, ___) => FocusFullscreenPage(cubit: cubit),
+        transitionsBuilder: (_, animation, __, child) {
+          // Curved animation
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+
+          // Scale: from card position/size → full screen
+          final scaleX = Tween<double>(
+            begin: cardRect.width / screenSize.width,
+            end: 1.0,
+          ).animate(curved);
+
+          final scaleY = Tween<double>(
+            begin: cardRect.height / screenSize.height,
+            end: 1.0,
+          ).animate(curved);
+
+          // Translate: from card center → screen center
+          final cardCenterX = cardRect.left + cardRect.width / 2;
+          final cardCenterY = cardRect.top + cardRect.height / 2;
+          final screenCenterX = screenSize.width / 2;
+          final screenCenterY = screenSize.height / 2;
+
+          final dx = Tween<double>(
+            begin: (cardCenterX - screenCenterX) / screenSize.width,
+            end: 0.0,
+          ).animate(curved);
+
+          final dy = Tween<double>(
+            begin: (cardCenterY - screenCenterY) / screenSize.height,
+            end: 0.0,
+          ).animate(curved);
+
+          // Border radius: from card radius → 0
+          final borderRadius = Tween<double>(
+            begin: AppBorders.radiusXl,
+            end: 0.0,
+          ).animate(curved);
+
+          return AnimatedBuilder(
+            animation: curved,
+            builder: (context, child) {
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..translate(
+                    dx.value * screenSize.width,
+                    dy.value * screenSize.height,
+                  )
+                  ..scale(scaleX.value, scaleY.value),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(borderRadius.value),
+                  child: child,
+                ),
+              );
+            },
+            child: child,
+          );
+        },
+      ),
     );
   }
 }

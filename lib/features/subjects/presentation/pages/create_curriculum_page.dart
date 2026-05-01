@@ -74,7 +74,10 @@ class _CreateCurriculumView extends StatelessWidget {
                     buildWhen: (prev, curr) => prev.step != curr.step,
                     builder: (context, state) => state.step == 0
                         ? ConfigStepForm(onCancel: () => context.pop())
-                        : PreviewStepContent(subjectId: subjectId),
+                        : PreviewStepContent(
+                            subjectId: subjectId,
+                            subjectName: subjectName,
+                          ),
                   ),
                 ),
               ],

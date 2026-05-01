@@ -160,7 +160,7 @@ class _EditCurriculumViewState extends State<_EditCurriculumView> {
                     buildWhen: (prev, curr) => prev.step != curr.step,
                     builder: (context, state) => state.step == 0
                         ? ConfigStepForm(onCancel: () => context.pop())
-                        : PreviewStepContent(subjectId: widget.subjectId),
+                        : PreviewStepContent(subjectId: widget.subjectId, subjectName: widget.subjectName),
                   ),
                 ),
               ],

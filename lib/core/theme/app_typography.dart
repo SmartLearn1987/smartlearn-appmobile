@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Smart Learn Typography Tokens
 /// Font: Quicksand (Google Fonts)
 abstract final class AppTypography {
-  static String get _fontFamily => GoogleFonts.quicksand().fontFamily!;
+  static String get _fontFamily => 'Quicksand';
 
   // ─── Headings ───
   static TextStyle get h1 => TextStyle(

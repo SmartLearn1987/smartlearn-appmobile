@@ -25,6 +25,7 @@ abstract final class RoutePaths {
   static const nncPlay = '/games/nhanh-nhu-chop/play';
   static const cdtnPlay = '/games/ca-dao-tuc-ngu/play';
   static const hcbPlay = '/games/hoc-cung-be/play';
+  static const focusFullscreen = '/focus-fullscreen';
 
   // ─── Path templates (for GoRoute definitions) ───
   static const quizletDetailTemplate = '/quizlet/:id';
@@ -106,4 +107,5 @@ abstract final class RouteNames {
   static const lessons = 'lessons';
   static const lessonForm = 'lessonForm';
   static const lessonReview = 'lessonReview';
+  static const focusFullscreen = 'focusFullscreen';
 }

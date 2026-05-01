@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/constants/education_level.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
@@ -24,49 +21,142 @@ class PreviewStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CurriculumFormBloc, CurriculumFormState>(
       builder: (context, state) {
+        final name = state.name.trim().isEmpty ? 'Chưa đặt tên' : state.name;
+        final publisher = state.publisher.trim().isEmpty
+            ? 'Chưa chọn NXB'
+            : state.publisher;
         return SingleChildScrollView(
           child: Column(
+            spacing: AppSpacing.md,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCoverImage(state),
-              const SizedBox(height: AppSpacing.md),
-              _buildName(state),
-              const SizedBox(height: AppSpacing.xs),
-              _buildPublisher(state),
-              const SizedBox(height: AppSpacing.smMd),
-              _buildBadges(state),
-              const SizedBox(height: AppSpacing.md),
-              _buildInfoRows(state),
-              const SizedBox(height: AppSpacing.lg),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.muted.withValues(alpha: 0.3),
+                  borderRadius: AppBorders.borderRadiusLg,
+                  border: Border.all(
+                    color: AppColors.border,
+                    width: AppBorders.widthThin,
+                  ),
+                ),
+                child: Column(
+                  spacing: AppSpacing.md,
+                  children: [
+                    Row(
+                      spacing: AppSpacing.md,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: AppBorders.borderRadiusLg,
+                          clipBehavior: Clip.hardEdge,
+                          child: Container(
+                            width: 96,
+                            height: 96,
+                            decoration: BoxDecoration(
+                              borderRadius: AppBorders.borderRadiusLg,
+                              border: Border.all(
+                                color: AppColors.border,
+                                width: AppBorders.widthThin,
+                              ),
+                            ),
+                            child: state.imageFile != null
+                                ? Image.file(
+                                    state.imageFile!,
+                                    width: 96,
+                                    height: 96,
+                                    fit: BoxFit.cover,
+                                  )
+                                : state.existingImageUrl != null
+                                ? AppCachedImage(
+                                    imageUrl: state.existingImageUrl!,
+                                    width: 96,
+                                    height: 96,
+                                    borderRadius: AppBorders.borderRadiusLg,
+                                    errorWidget: _buildFallbackIcon(),
+                                  )
+                                : _buildFallbackIcon(),
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            spacing: AppSpacing.xs,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: AppTypography.h3.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                publisher,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.mutedForeground,
+                                ),
+                              ),
+                              _buildBadges(state),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Row(
+                      spacing: AppSpacing.md,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            spacing: AppSpacing.xs,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Môn học'.toUpperCase(),
+                                style: AppTypography.bodyMedium.bold.copyWith(
+                                  color: AppColors.mutedForeground,
+                                ),
+                              ),
+                              Text(
+                                subjectName ?? 'Chưa chọn môn học',
+                                style: AppTypography.bodyMedium.bold.copyWith(
+                                  color: AppColors.foreground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            spacing: AppSpacing.xs,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Số bài học'.toUpperCase(),
+                                style: AppTypography.bodyMedium.bold.copyWith(
+                                  color: AppColors.mutedForeground,
+                                ),
+                              ),
+                              Text(
+                                '${state.lessonCount} bài',
+                                style: AppTypography.bodyMedium.bold.copyWith(
+                                  color: AppColors.foreground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               _buildButtons(context, state),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCoverImage(CurriculumFormState state) {
-    return Center(
-      child: ClipRRect(
-        borderRadius: AppBorders.borderRadiusLg,
-        child: state.imageFile != null
-            ? Image.file(
-                state.imageFile!,
-                width: 96,
-                height: 96,
-                fit: BoxFit.cover,
-              )
-            : state.existingImageUrl != null
-            ? AppCachedImage(
-                imageUrl: state.existingImageUrl!,
-                width: 96,
-                height: 96,
-                borderRadius: AppBorders.borderRadiusLg,
-                errorWidget: _buildFallbackIcon(),
-              )
-            : _buildFallbackIcon(),
-      ),
     );
   }
 
@@ -86,100 +176,39 @@ class PreviewStepContent extends StatelessWidget {
     );
   }
 
-  Widget _buildName(CurriculumFormState state) {
-    final name = state.name.trim().isEmpty ? 'Chưa đặt tên' : state.name;
-    return Center(
-      child: Text(
-        name,
-        style: AppTypography.h3.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w700,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildPublisher(CurriculumFormState state) {
-    final publisher = state.publisher.trim().isEmpty
-        ? 'Chưa chọn NXB'
-        : state.publisher;
-    return Center(
-      child: Text(
-        publisher,
-        style: AppTypography.bodyMedium.copyWith(
-          color: AppColors.mutedForeground,
-        ),
-      ),
-    );
-  }
-
   Widget _buildBadges(CurriculumFormState state) {
     final level = EducationLevel.fromApiValue(state.educationLevel);
-    final levelLabel = level?.displayLabel ?? 'Chưa phân loại';
+    final levelLabel = level?.label ?? 'Chưa chọn cấp độ';
     final gradeLabel = state.grade.trim().isEmpty
-        ? 'Chưa chọn lớp'
+        ? 'Lớp ?'
         : 'Lớp ${state.grade}';
-    final visibilityLabel = state.isPublic ? '🌍 Công khai' : '🔒 Cá nhân';
+    final visibilityLabel = state.isPublic ? 'Công khai' : 'Riêng tư';
 
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
-      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.start,
       children: [
-        _badge(gradeLabel),
-        _badge(levelLabel),
-        _badge(visibilityLabel),
+        _badge(gradeLabel, AppColors.primary),
+        _badge(levelLabel, AppColors.primary),
+        _badge(visibilityLabel, AppColors.mutedForeground),
       ],
     );
   }
 
-  Widget _badge(String text) {
+  Widget _badge(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.smMd,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.muted,
+        color: color.withValues(alpha: 0.1),
         borderRadius: AppBorders.borderRadiusFull,
       ),
       child: Text(
         text,
-        style: AppTypography.caption.copyWith(color: AppColors.foreground),
-      ),
-    );
-  }
-
-  Widget _buildInfoRows(CurriculumFormState state) {
-    return Column(
-      children: [
-        if (subjectName != null) _infoRow('Môn học', subjectName!),
-        _infoRow('Số bài học dự kiến', '${state.lessonCount}'),
-      ],
-    );
-  }
-
-  Widget _infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.mutedForeground,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.foreground,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+        style: AppTypography.caption.bold.copyWith(color: color),
       ),
     );
   }
@@ -201,7 +230,26 @@ class PreviewStepContent extends StatelessWidget {
               ),
               side: const BorderSide(color: AppColors.border),
             ),
-            child: const Text('← Quay lại'),
+            child: Row(
+              spacing: AppSpacing.xs,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  LucideIcons.arrowLeft,
+                  size: 16,
+                  color: AppColors.mutedForeground,
+                ),
+                Flexible(
+                  child: Text(
+                    'Quay lại',
+                    style: AppTypography.buttonMedium.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.smMd),
@@ -230,7 +278,26 @@ class PreviewStepContent extends StatelessWidget {
                       color: AppColors.primaryForeground,
                     ),
                   )
-                : const Text('Xác nhận & Lưu'),
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: AppSpacing.xs,
+                    children: [
+                      const Icon(
+                        LucideIcons.upload,
+                        size: 16,
+                        color: AppColors.primaryForeground,
+                      ),
+                      Flexible(
+                        child: Text(
+                          'Xác nhận & Lưu',
+                          style: AppTypography.buttonMedium.copyWith(
+                            color: AppColors.primaryForeground,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ],

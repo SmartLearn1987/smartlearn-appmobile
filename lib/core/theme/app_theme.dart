@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_borders.dart';
 import 'app_colors.dart';
 import 'app_input_styles.dart';
@@ -13,7 +12,7 @@ class AppTheme {
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    fontFamily: GoogleFonts.quicksand().fontFamily,
+    fontFamily: 'Quicksand',
 
     // ─── Color Scheme ───
     colorScheme: const ColorScheme.light(
