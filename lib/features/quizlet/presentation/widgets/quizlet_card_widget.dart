@@ -123,29 +123,66 @@ class QuizletCardWidget extends StatelessWidget {
                       ),
                     if (showMenu)
                       PopupMenuButton<String>(
-                        icon: const Icon(LucideIcons.moreVertical),
+                        padding: EdgeInsets.zero,
+                        iconSize: 15,
+                        icon: const Icon(
+                          LucideIcons.moreVertical,
+                          color: AppColors.mutedForeground,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         onSelected: (value) {
-                          if (value == 'edit') {
-                            onEdit();
-                          } else if (value == 'delete') {
-                            onDelete();
-                          }
+                          if (value == 'edit') onEdit();
+                          if (value == 'delete') onDelete();
                         },
-                        itemBuilder: (_) => const [
+                        itemBuilder: (_) => [
                           PopupMenuItem<String>(
                             value: 'edit',
-                            child: ListTile(
-                              leading: Icon(LucideIcons.edit),
-                              title: Text('Chỉnh sửa'),
-                              contentPadding: EdgeInsets.zero,
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.smMd,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.pencil,
+                                  size: 14,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Chỉnh sửa',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.foreground,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           PopupMenuItem<String>(
                             value: 'delete',
-                            child: ListTile(
-                              leading: Icon(LucideIcons.trash),
-                              title: Text('Xóa học phần'),
-                              contentPadding: EdgeInsets.zero,
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.smMd,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.trash2,
+                                  size: 14,
+                                  color: AppColors.destructive,
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Xóa học phần',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.destructive,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

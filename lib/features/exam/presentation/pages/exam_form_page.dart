@@ -255,9 +255,10 @@ class _ExamFormPageState extends State<ExamFormPage> {
         AppToast.error(context, failure.message);
       },
       (_) {
-        AppToast.success(context, widget.isEdit
-            ? 'Đã cập nhật bài thi'
-            : 'Đã tạo bài thi thành công');
+        AppToast.success(
+          context,
+          widget.isEdit ? 'Đã cập nhật bài thi' : 'Đã tạo bài thi thành công',
+        );
         context.pop(true);
       },
     );
@@ -288,13 +289,10 @@ class _ExamFormPageState extends State<ExamFormPage> {
     final result = await getIt<ExamRepository>().deleteExam(widget.examId!);
     if (!mounted) return;
     setState(() => _isSaving = false);
-    result.fold(
-      (failure) => AppToast.error(context, failure.message),
-      (_) {
-        AppToast.success(context, 'Đã xóa bài thi');
-        context.pop(true);
-      },
-    );
+    result.fold((failure) => AppToast.error(context, failure.message), (_) {
+      AppToast.success(context, 'Đã xóa bài thi');
+      context.pop(true);
+    });
   }
 
   @override
@@ -304,13 +302,6 @@ class _ExamFormPageState extends State<ExamFormPage> {
         title: Text(
           widget.isEdit ? 'Chỉnh sửa bài trắc nghiệm' : 'Tạo bài trắc nghiệm',
         ),
-        actions: [
-          if (widget.isEdit)
-            IconButton(
-              icon: const Icon(LucideIcons.trash2),
-              onPressed: _isSaving ? null : _deleteExam,
-            ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -344,7 +335,10 @@ class _ExamFormPageState extends State<ExamFormPage> {
                       value: _isPublic,
                       label: 'Chế độ hiển thị',
                       items: [
-                        DropdownMenuItem(value: VisibilityMode.public.value, child: Text(VisibilityMode.public.displayLabel)),
+                        DropdownMenuItem(
+                          value: VisibilityMode.public.value,
+                          child: Text(VisibilityMode.public.displayLabel),
+                        ),
                         DropdownMenuItem(
                           value: VisibilityMode.private.value,
                           child: Text(VisibilityMode.private.displayLabel),
@@ -459,6 +453,9 @@ class _ExamFormPageState extends State<ExamFormPage> {
                                     },
                                   ),
                                   IconButton(
+                                    style: IconButton.styleFrom(
+                                      foregroundColor: AppColors.destructive,
+                                    ),
                                     onPressed: _questions.length <= 1
                                         ? null
                                         : () => _removeQuestion(index),
@@ -513,15 +510,32 @@ class _ExamFormPageState extends State<ExamFormPage> {
                                 ) {
                                   final optionIndex = optionEntry.key;
                                   final option = optionEntry.value;
+                                  final isSingle = question.type == 'single';
                                   return Row(
                                     children: [
-                                      Checkbox(
-                                        value: option.isCorrect,
-                                        onChanged: (_) => _toggleOptionCorrect(
-                                          index,
-                                          optionIndex,
+                                      if (isSingle)
+                                        RadioGroup<int>(
+                                          groupValue: question.options
+                                              .indexWhere((o) => o.isCorrect),
+                                          onChanged: (newValue) {
+                                            if (newValue != null) {
+                                              _toggleOptionCorrect(
+                                                index,
+                                                newValue,
+                                              );
+                                            }
+                                          },
+                                          child: Radio<int>(value: optionIndex),
+                                        )
+                                      else
+                                        Checkbox(
+                                          value: option.isCorrect,
+                                          onChanged: (_) =>
+                                              _toggleOptionCorrect(
+                                                index,
+                                                optionIndex,
+                                              ),
                                         ),
-                                      ),
                                       Expanded(
                                         child: AppTextField(
                                           initialValue: option.content,
@@ -584,10 +598,13 @@ class _ExamFormPageState extends State<ExamFormPage> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     if (widget.isEdit)
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.destructive,
-                          foregroundColor: AppColors.destructiveForeground,
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.destructive,
+                          side: const BorderSide(
+                            color: AppColors.destructive,
+                            width: AppBorders.widthThin,
+                          ),
                         ),
                         onPressed: _isSaving ? null : _deleteExam,
                         child: const Text('Xóa bài thi'),

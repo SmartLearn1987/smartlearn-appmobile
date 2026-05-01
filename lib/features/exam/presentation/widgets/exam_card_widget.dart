@@ -120,22 +120,67 @@ class ExamCardWidget extends StatelessWidget {
                         ),
                       ),
                       PopupMenuButton<String>(
+                        padding: EdgeInsets.zero,
+                        iconSize: 24,
                         icon: const Icon(
                           LucideIcons.moreVertical,
-                          size: AppSpacing.mdLg,
+                          color: AppColors.mutedForeground,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         onSelected: (value) {
                           if (value == 'edit') onEdit();
                           if (value == 'delete') onDelete();
                         },
-                        itemBuilder: (context) => const [
+                        itemBuilder: (context) => [
                           PopupMenuItem<String>(
                             value: 'edit',
-                            child: Text('Chỉnh sửa'),
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.smMd,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.pencil,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Chỉnh sửa',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.foreground,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           PopupMenuItem<String>(
                             value: 'delete',
-                            child: Text('Xóa bài thi'),
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.smMd,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.trash2,
+                                  size: 20,
+                                  color: AppColors.destructive,
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Xóa bài thi',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.destructive,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
