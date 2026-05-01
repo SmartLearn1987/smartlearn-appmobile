@@ -3,11 +3,16 @@ import 'package:smart_learn/features/lessons/domain/entities/content_block.dart'
 
 part 'content_block_model.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.none)
 class ContentBlockModel extends ContentBlock {
   const ContentBlockModel({
     required super.type,
     required super.content,
+    super.fontSize,
+    super.fontFamily,
+    super.color,
+    super.bold,
+    super.italic,
   });
 
   factory ContentBlockModel.fromJson(Map<String, dynamic> json) =>
