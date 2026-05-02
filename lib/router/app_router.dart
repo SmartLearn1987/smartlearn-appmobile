@@ -251,7 +251,16 @@ class AppRouter {
             if (url == null || title == null) {
               return const _RedirectToHome();
             }
-            return WebViewPage(url: url, title: title);
+            Map<String, dynamic>? hvuiPayload;
+            final rawPayload = extra['hvui_session_payload'];
+            if (rawPayload is Map) {
+              hvuiPayload = Map<String, dynamic>.from(rawPayload);
+            }
+            return WebViewPage(
+              url: url,
+              title: title,
+              hvuiSessionPayload: hvuiPayload,
+            );
           },
         ),
         GoRoute(

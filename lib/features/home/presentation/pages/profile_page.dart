@@ -9,11 +9,13 @@ import 'package:smart_learn/core/theme/theme.dart';
 import 'package:smart_learn/core/widgets/app_cached_image.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
+import 'package:smart_learn/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/change_password_bottom_sheet.dart';
 import 'package:smart_learn/features/home/presentation/widgets/delete_account_dialog.dart';
 import 'package:smart_learn/features/home/presentation/widgets/edit_profile_bottom_sheet.dart';
+import 'package:smart_learn/features/web_view/presentation/helpers/hvui_web_session.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 /// Khoảng indent divider (padding trái + vòng icon + spacing).
@@ -455,10 +457,27 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  void _openWebView(BuildContext context, _AppInfoItem item) {
+  Future<void> _openWebView(BuildContext context, _AppInfoItem item) async {
+    Map<String, dynamic>? hvuiPayload;
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      hvuiPayload = await buildHvuiSessionPayload(
+        user: authState.user,
+        local: getIt<AuthLocalDatasource>(),
+      );
+    }
+
+    if (!context.mounted) return;
+
     context.pushNamed(
       RouteNames.webView,
-      extra: <String, dynamic>{'url': item.fullUrl, 'title': item.label},
+      extra: <String, dynamic>{
+        'url': item.fullUrl,
+        'title': item.label,
+        ...?hvuiPayload != null
+            ? <String, dynamic>{'hvui_session_payload': hvuiPayload}
+            : null,
+      },
     );
   }
 
