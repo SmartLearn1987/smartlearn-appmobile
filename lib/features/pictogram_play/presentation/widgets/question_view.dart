@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:pinput/pinput.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../../../home/domain/entities/pictogram_entity.dart';
 import '../bloc/pictogram_play_bloc.dart';
+import '../controllers/game_session_controller.dart';
 
 class QuestionView extends StatefulWidget {
   const QuestionView({
@@ -15,12 +16,11 @@ class QuestionView extends StatefulWidget {
     required this.totalQuestions,
     required this.remainingSeconds,
     required this.answeredQuestions,
-    required this.onSubmit,
+    required this.session,
     required this.onGoTo,
     required this.onPrevious,
     required this.onNext,
     required this.onEndGame,
-    this.lastAnswerResult,
     super.key,
   });
 
@@ -29,8 +29,7 @@ class QuestionView extends StatefulWidget {
   final int totalQuestions;
   final int remainingSeconds;
   final Map<int, AnswerResult> answeredQuestions;
-  final AnswerResult? lastAnswerResult;
-  final ValueChanged<String> onSubmit;
+  final GameSessionController session;
   final ValueChanged<int> onGoTo;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
@@ -41,47 +40,59 @@ class QuestionView extends StatefulWidget {
 }
 
 class _QuestionViewState extends State<QuestionView> {
-  late List<String?> _letterSlots;
-  int _activeSlot = 0;
-  final _answerController = TextEditingController();
+  /// Mỗi từ trong câu hiện tại có 1 [FocusNode] để auto-advance giữa các Pinput.
+  List<FocusNode> _wordFocusNodes = const [];
 
   @override
   void initState() {
     super.initState();
-    _initSlots();
+    _rebuildFocusNodes();
+    // Sau khi build xong, focus ô từ đầu tiên còn trống → mở bàn phím luôn.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusFirstIncompleteWord();
+    });
   }
 
   @override
   void didUpdateWidget(covariant QuestionView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentIndex != widget.currentIndex) {
-      _initSlots();
-      _answerController.clear();
+      _rebuildFocusNodes();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusFirstIncompleteWord();
+      });
     }
   }
 
   @override
   void dispose() {
-    _answerController.dispose();
+    for (final n in _wordFocusNodes) {
+      n.dispose();
+    }
     super.dispose();
   }
 
-  void _initSlots() {
-    final answer = widget.question.answer.trim();
-    _letterSlots = List.filled(answer.length, null);
-    _activeSlot = 0;
+  void _rebuildFocusNodes() {
+    for (final n in _wordFocusNodes) {
+      n.dispose();
+    }
+    final words = widget.session.wordsFor(widget.currentIndex);
+    _wordFocusNodes = List.generate(words.length, (_) => FocusNode());
   }
 
-  void _onSlotTap(int index) {
-    setState(() {
-      _letterSlots[index] = null;
-      _activeSlot = index;
-    });
+  void _focusFirstIncompleteWord() {
+    final words = widget.session.wordsFor(widget.currentIndex);
+    final controllers = widget.session.wordControllersFor(widget.currentIndex);
+    for (var i = 0; i < words.length; i++) {
+      if (controllers[i].text.length < words[i].length) {
+        _wordFocusNodes[i].requestFocus();
+        return;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasResult = widget.lastAnswerResult != null;
     final minutes = widget.remainingSeconds ~/ 60;
     final seconds = widget.remainingSeconds % 60;
     final timeStr =
@@ -89,95 +100,69 @@ class _QuestionViewState extends State<QuestionView> {
 
     return Column(
       children: [
-        // ─── Header ───
-        _buildHeader(timeStr),
-        const SizedBox(height: AppSpacing.smMd),
-
-        // ─── Question Navigator ───
-        _buildQuestionNavigator(),
-        const SizedBox(height: AppSpacing.smMd),
-
-        // ─── Image + Answer area ───
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildImageCard(hasResult),
+                _buildHeader(timeStr),
+                const SizedBox(height: AppSpacing.smMd),
+                _buildQuestionNavigator(),
+                const SizedBox(height: AppSpacing.smMd),
+                _buildImageCard(),
                 const SizedBox(height: AppSpacing.md),
-                if (hasResult)
-                  _buildFeedback()
-                else ...[
-                  _buildAnswerInput(),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildLetterCircles(),
-                ],
+                _buildPinputGroups(),
+                const SizedBox(height: AppSpacing.md),
               ],
             ),
           ),
         ),
-
-        // ─── Bottom Nav ───
         _buildBottomNav(),
       ],
     );
   }
 
+  // ── Header ──────────────────────────────────────────────────────────────────
+
   Widget _buildHeader(String timeStr) {
+    final isLow = widget.remainingSeconds <= 30;
+    final timerBg = isLow
+        ? AppColors.destructive.withValues(alpha: 0.1)
+        : AppColors.primaryLight;
+    final timerBorder = isLow
+        ? AppColors.destructive.withValues(alpha: 0.3)
+        : AppColors.primary.withValues(alpha: 0.2);
+    final timerColor = isLow ? AppColors.destructive : AppColors.primary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       child: Column(
+        spacing: AppSpacing.sm,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('🎮', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: AppSpacing.sm),
-              Column(
-                children: [
-                  Text(
-                    'Đuổi hình bắt chữ',
-                    style: AppTypography.labelLarge.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                  ),
-                  Text(
-                    'CÂU ${widget.currentIndex + 1} / ${widget.totalQuestions}',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Timer badge
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: timerBg,
+              border: Border.all(color: timerBorder),
               borderRadius: AppBorders.borderRadiusFull,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.timer_outlined, size: 16, color: Colors.white),
-                const SizedBox(width: AppSpacing.xs),
+                Icon(LucideIcons.clock, size: 20, color: timerColor),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   timeStr,
-                  style: AppTypography.labelLarge.copyWith(color: Colors.white),
+                  style: AppTypography.textXl.bold.copyWith(color: timerColor),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Hoàn thành button
           SizedBox(
             width: 140,
-            height: 36,
+            height: 40,
             child: ElevatedButton(
               onPressed: widget.onEndGame,
               style: ElevatedButton.styleFrom(
@@ -194,14 +179,20 @@ class _QuestionViewState extends State<QuestionView> {
     );
   }
 
+  // ── Question navigator ───────────────────────────────────────────────────────
+
   Widget _buildQuestionNavigator() {
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       padding: const EdgeInsets.all(AppSpacing.smMd),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(color: AppColors.border, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,14 +217,12 @@ class _QuestionViewState extends State<QuestionView> {
               children: List.generate(widget.totalQuestions, (i) {
                 final isCurrent = i == widget.currentIndex;
                 final result = widget.answeredQuestions[i];
-                final isAnswered = result != null;
-
                 Color bgColor;
                 Color textColor;
                 if (isCurrent) {
                   bgColor = AppColors.primary;
                   textColor = Colors.white;
-                } else if (isAnswered) {
+                } else if (result != null) {
                   bgColor = result == AnswerResult.correct
                       ? AppColors.success.withValues(alpha: 0.15)
                       : AppColors.destructive.withValues(alpha: 0.15);
@@ -244,7 +233,6 @@ class _QuestionViewState extends State<QuestionView> {
                   bgColor = AppColors.muted;
                   textColor = AppColors.foreground;
                 }
-
                 return Padding(
                   padding: EdgeInsets.only(
                     right: i < widget.totalQuestions - 1 ? AppSpacing.xs : 0,
@@ -276,7 +264,9 @@ class _QuestionViewState extends State<QuestionView> {
     );
   }
 
-  Widget _buildImageCard(bool hasResult) {
+  // ── Image card ───────────────────────────────────────────────────────────────
+
+  Widget _buildImageCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -313,7 +303,7 @@ class _QuestionViewState extends State<QuestionView> {
             imageUrl: widget.question.imageUrl,
             height: 200,
             width: double.infinity,
-            fit: BoxFit.contain,
+            fit: BoxFit.cover,
             borderRadius: AppBorders.borderRadiusMd,
           ),
         ],
@@ -321,165 +311,83 @@ class _QuestionViewState extends State<QuestionView> {
     );
   }
 
-  Widget _buildAnswerInput() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _answerController,
-              decoration: InputDecoration(
-                hintText: 'Nhập câu trả lời...',
-                hintStyle: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.mutedForeground,
-                ),
-                filled: true,
-                fillColor: AppColors.card,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.smMd,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: AppBorders.borderRadiusSm,
-                  borderSide: const BorderSide(color: AppColors.input),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: AppBorders.borderRadiusSm,
-                  borderSide: const BorderSide(color: AppColors.input),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: AppBorders.borderRadiusSm,
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
-                    width: 2,
-                  ),
-                ),
-              ),
-              style: AppTypography.bodyLarge,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _handleSubmit(),
-              onChanged: (value) {
-                // Sync text input to letter slots for visual feedback
-                setState(() {
-                  final chars = value.split('');
-                  for (var i = 0; i < _letterSlots.length; i++) {
-                    _letterSlots[i] = i < chars.length ? chars[i] : null;
-                  }
-                  _activeSlot = chars.length < _letterSlots.length
-                      ? chars.length
-                      : _letterSlots.length;
-                });
-              },
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          SizedBox(
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _handleSubmit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: AppBorders.shapeSm,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              ),
-              child: const Text('Trả lời'),
-            ),
-          ),
-        ],
+  // ── Pinput groups (mỗi từ = 1 Pinput) ───────────────────────────────────────
+
+  Widget _buildPinputGroups() {
+    final words = widget.session.wordsFor(widget.currentIndex);
+    final controllers = widget.session.wordControllersFor(widget.currentIndex);
+
+    final defaultTheme = PinTheme(
+      width: 44,
+      height: 48,
+      textStyle: AppTypography.labelLarge.copyWith(
+        color: AppColors.primary,
+        fontWeight: FontWeight.bold,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: AppBorders.borderRadiusSm,
+        border: Border.all(color: AppColors.border),
       ),
     );
-  }
 
-  void _handleSubmit() {
-    final text = _answerController.text.trim();
-    if (text.isNotEmpty) {
-      widget.onSubmit(text);
-    }
-  }
+    final focusedTheme = defaultTheme.copyWith(
+      decoration: defaultTheme.decoration!.copyWith(
+        color: AppColors.primary.withValues(alpha: 0.04),
+        border: Border.all(color: AppColors.primary, width: 2),
+      ),
+    );
 
-  Widget _buildLetterCircles() {
-    final answer = widget.question.answer.trim();
+    final submittedTheme = defaultTheme.copyWith(
+      decoration: defaultTheme.decoration!.copyWith(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+        ),
+      ),
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       child: Wrap(
         alignment: WrapAlignment.center,
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        children: List.generate(answer.length, (i) {
-          final letter = _letterSlots[i];
-          final isActive = i == _activeSlot;
-
-          return GestureDetector(
-            onTap: letter != null ? () => _onSlotTap(i) : null,
-            child: Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: letter != null ? AppColors.primary.withValues(alpha: 0.1) : AppColors.card,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isActive
-                      ? AppColors.primary
-                      : letter != null
-                          ? AppColors.primary.withValues(alpha: 0.3)
-                          : AppColors.border,
-                  width: isActive ? 2 : 1,
-                ),
-              ),
-              child: letter != null
-                  ? Text(
-                      letter.toUpperCase(),
-                      style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    )
-                  : null,
+        spacing: AppSpacing.lg,
+        runSpacing: AppSpacing.md,
+        children: List.generate(words.length, (wordIndex) {
+          return Pinput(
+            length: words[wordIndex].length,
+            controller: controllers[wordIndex],
+            focusNode: _wordFocusNodes[wordIndex],
+            defaultPinTheme: defaultTheme,
+            focusedPinTheme: focusedTheme,
+            submittedPinTheme: submittedTheme,
+            separatorBuilder: (_) => const SizedBox(width: AppSpacing.xs),
+            keyboardType: TextInputType.text,
+            textCapitalization: TextCapitalization.characters,
+            enableSuggestions: false,
+            inputFormatters: [_UpperCaseTextFormatter()],
+            showCursor: true,
+            cursor: Container(
+              width: 1.5,
+              height: 22,
+              color: AppColors.primary,
             ),
+            onCompleted: (_) {
+              final next = wordIndex + 1;
+              if (next < _wordFocusNodes.length) {
+                _wordFocusNodes[next].requestFocus();
+              } else {
+                _wordFocusNodes[wordIndex].unfocus();
+              }
+            },
+            onChanged: (_) => setState(() {}),
           );
         }),
       ),
     );
   }
 
-  Widget _buildFeedback() {
-    final isCorrect = widget.lastAnswerResult == AnswerResult.correct;
-    final color = isCorrect ? AppColors.success : AppColors.destructive;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: AppBorders.borderRadiusSm,
-        border: Border.all(color: color, width: AppBorders.widthThin),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            isCorrect ? Icons.check_circle : Icons.cancel,
-            color: color,
-            size: 32,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            isCorrect ? 'Chính xác!' : 'Sai rồi!',
-            style: AppTypography.labelLarge.copyWith(color: color),
-          ),
-          if (!isCorrect) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Đáp án: ${widget.question.answer}',
-              style: AppTypography.bodyMedium.copyWith(color: color),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  // ── Bottom nav ───────────────────────────────────────────────────────────────
 
   Widget _buildBottomNav() {
     final isFirst = widget.currentIndex == 0;
@@ -495,30 +403,43 @@ class _QuestionViewState extends State<QuestionView> {
         children: [
           TextButton.icon(
             onPressed: isFirst ? null : widget.onPrevious,
-            icon: const Icon(Icons.chevron_left, size: 20),
-            label: const Text('Câu trước'),
+            icon: const Icon(LucideIcons.chevronLeft, size: 20),
+            label: const Text('CÂU TRƯỚC'),
             style: TextButton.styleFrom(
-              foregroundColor:
-                  isFirst ? AppColors.mutedForeground : AppColors.foreground,
+              foregroundColor: isFirst
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
             ),
           ),
           TextButton.icon(
             onPressed: isLast ? null : widget.onNext,
-            icon: const Text(''),
+            icon: const SizedBox.shrink(),
             label: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Câu sau'),
-                const Icon(Icons.chevron_right, size: 20),
+                const Text('CÂU SAU'),
+                const Icon(LucideIcons.chevronRight, size: 20),
               ],
             ),
             style: TextButton.styleFrom(
-              foregroundColor:
-                  isLast ? AppColors.mutedForeground : AppColors.foreground,
+              foregroundColor: isLast
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+/// Buộc mọi ký tự nhập vào Pinput thành chữ hoa.
+class _UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(text: newValue.text.toUpperCase());
   }
 }

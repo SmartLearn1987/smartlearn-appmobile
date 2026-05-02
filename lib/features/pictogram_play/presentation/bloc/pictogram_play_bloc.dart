@@ -19,6 +19,7 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
     on<TimerTick>(_onTimerTick);
     on<NextQuestion>(_onNextQuestion);
     on<EndGame>(_onEndGame);
+    on<EndGameWithResults>(_onEndGameWithResults);
     on<GoToQuestion>(_onGoToQuestion);
     on<PreviousQuestion>(_onPreviousQuestion);
   }
@@ -177,6 +178,29 @@ class PictogramPlayBloc extends Bloc<PictogramPlayEvent, PictogramPlayState> {
       correctCount: currentState.correctCount,
       totalQuestions: currentState.questions.length,
       elapsedSeconds: elapsedSeconds,
+      questions: currentState.questions,
+      answeredQuestions: currentState.answeredQuestions,
+    ));
+  }
+
+  void _onEndGameWithResults(
+    EndGameWithResults event,
+    Emitter<PictogramPlayState> emit,
+  ) {
+    _timer?.cancel();
+    _timer = null;
+
+    final currentState = state;
+    if (currentState is! PictogramPlayInProgress) return;
+
+    final elapsedSeconds = _totalSeconds - currentState.remainingSeconds;
+
+    emit(PictogramPlayFinished(
+      correctCount: event.correctCount,
+      totalQuestions: currentState.questions.length,
+      elapsedSeconds: elapsedSeconds,
+      questions: currentState.questions,
+      answeredQuestions: event.answeredQuestions,
     ));
   }
 

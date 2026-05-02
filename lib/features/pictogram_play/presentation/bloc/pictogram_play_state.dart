@@ -46,13 +46,23 @@ final class PictogramPlayFinished extends PictogramPlayState {
   final int correctCount;
   final int totalQuestions;
   final int elapsedSeconds;
+  final List<PictogramEntity> questions;
+  final Map<int, AnswerResult> answeredQuestions;
 
   const PictogramPlayFinished({
     required this.correctCount,
     required this.totalQuestions,
     required this.elapsedSeconds,
+    required this.questions,
+    required this.answeredQuestions,
   });
 
   @override
-  List<Object?> get props => [correctCount, totalQuestions, elapsedSeconds];
+  List<Object?> get props => [
+        correctCount,
+        totalQuestions,
+        elapsedSeconds,
+        questions,
+        answeredQuestions,
+      ];
 }

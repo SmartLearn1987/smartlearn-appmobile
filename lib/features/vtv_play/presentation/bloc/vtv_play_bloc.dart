@@ -23,6 +23,7 @@ class VTVPlayBloc extends Bloc<VTVPlayEvent, VTVPlayState> {
     on<GoToQuestion>(_onGoToQuestion);
     on<UpdateAnswer>(_onUpdateAnswer);
     on<EndGame>(_onEndGame);
+    on<RestartGame>(_onRestartGame);
   }
 
   void _onStartGame(StartGame event, Emitter<VTVPlayState> emit) {
@@ -207,6 +208,16 @@ class VTVPlayBloc extends Bloc<VTVPlayEvent, VTVPlayState> {
       correctCount: correctCount,
       totalQuestions: currentState.questions.length,
       elapsedSeconds: elapsedSeconds,
+    ));
+  }
+
+  void _onRestartGame(RestartGame event, Emitter<VTVPlayState> emit) {
+    final currentState = state;
+    if (currentState is! VTVPlayFinished) return;
+
+    add(StartGame(
+      questions: currentState.questions,
+      timeInMinutes: _totalSeconds ~/ 60,
     ));
   }
 

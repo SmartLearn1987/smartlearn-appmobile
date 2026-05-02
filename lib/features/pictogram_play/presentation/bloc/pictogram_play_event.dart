@@ -45,6 +45,19 @@ final class EndGame extends PictogramPlayEvent {
   const EndGame();
 }
 
+final class EndGameWithResults extends PictogramPlayEvent {
+  final Map<int, AnswerResult> answeredQuestions;
+  final int correctCount;
+
+  const EndGameWithResults({
+    required this.answeredQuestions,
+    required this.correctCount,
+  });
+
+  @override
+  List<Object?> get props => [answeredQuestions, correctCount];
+}
+
 final class GoToQuestion extends PictogramPlayEvent {
   final int index;
 

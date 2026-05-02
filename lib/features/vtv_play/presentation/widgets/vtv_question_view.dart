@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../bloc/answer_status.dart';
 import '../bloc/vtv_play_bloc.dart';
 
@@ -52,7 +50,8 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
         final total = state.questions.length;
         final currentStatus =
             state.answerStatuses[state.currentIndex] ?? AnswerStatus.unanswered;
-        final isChecked = currentStatus == AnswerStatus.checkedCorrect ||
+        final isChecked =
+            currentStatus == AnswerStatus.checkedCorrect ||
             currentStatus == AnswerStatus.checkedIncorrect;
         final checkedCount = state.answerStatuses.values
             .where(
@@ -65,48 +64,35 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
 
         return Column(
           children: [
-            // ─── Header ───
-            _buildHeader(context, state),
-            const SizedBox(height: AppSpacing.smMd),
-
-            // ─── Question Grid ───
-            _buildQuestionGrid(context, state),
-            const SizedBox(height: AppSpacing.smMd),
-
-            // ─── Progress Bar ───
-            _buildProgressBar(progress, checkedCount, total),
-            const SizedBox(height: AppSpacing.smMd),
-
             // ─── Scrollable content ───
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ─── Question Card ───
+                    _buildHeader(context, state),
+                    const SizedBox(height: AppSpacing.smMd),
+                    _buildQuestionGrid(
+                      context,
+                      state,
+                      progress: progress,
+                      checkedCount: checkedCount,
+                    ),
+                    const SizedBox(height: AppSpacing.smMd),
                     _buildQuestionCard(state.currentIndex, question.question),
                     const SizedBox(height: AppSpacing.md),
-
-                    // ─── Hint Card ───
                     if (state.isHintVisible)
-                      _buildHintCard(question.hint),
-
-                    // ─── Feedback ───
+                      _buildHintCard(context, question.hint),
                     if (state.lastCheckResult != null)
                       _buildFeedback(state.lastCheckResult!),
-
                     if (!isChecked) ...[
                       const SizedBox(height: AppSpacing.md),
-                      // ─── Answer Input ───
                       _buildAnswerInput(context),
                     ],
-
                     const SizedBox(height: AppSpacing.md),
                   ],
                 ),
               ),
             ),
-
-            // ─── Bottom Nav ───
             _buildBottomNav(context, state),
           ],
         );
@@ -120,68 +106,49 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
 
   Widget _buildHeader(BuildContext context, VTVPlayInProgress state) {
     final timeStr = formatTime(state.remainingSeconds);
-    final progressStr = formatProgress(state.currentIndex, state.questions.length);
+    final isLow = state.remainingSeconds <= 30;
+    final timerBg = isLow
+        ? AppColors.destructive.withValues(alpha: 0.1)
+        : AppColors.primaryLight;
+    final timerBorder = isLow
+        ? AppColors.destructive.withValues(alpha: 0.3)
+        : AppColors.primary.withValues(alpha: 0.2);
+    final timerColor = isLow ? AppColors.destructive : AppColors.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       child: Column(
+        spacing: AppSpacing.sm,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('📝', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: AppSpacing.sm),
-              Column(
-                children: [
-                  Text(
-                    'Vua Tiếng Việt',
-                    style: AppTypography.labelLarge.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                  ),
-                  Text(
-                    progressStr.toUpperCase(),
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Timer badge
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: timerBg,
+              border: Border.all(color: timerBorder),
               borderRadius: AppBorders.borderRadiusFull,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.timer_outlined, size: 16, color: Colors.white),
-                const SizedBox(width: AppSpacing.xs),
+                Icon(LucideIcons.clock, size: 20, color: timerColor),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   timeStr,
-                  style: AppTypography.labelLarge.copyWith(color: Colors.white),
+                  style: AppTypography.textXl.bold.copyWith(color: timerColor),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Kết thúc button
           SizedBox(
             width: 140,
-            height: 36,
+            height: 40,
             child: ElevatedButton(
-              onPressed: () =>
-                  context.read<VTVPlayBloc>().add(const EndGame()),
+              onPressed: () => context.read<VTVPlayBloc>().add(const EndGame()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.destructive,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: AppBorders.shapeFull,
                 padding: EdgeInsets.zero,
@@ -198,127 +165,189 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
   // Question Grid
   // ─────────────────────────────────────────────────────────────────────────
 
-  Widget _buildQuestionGrid(BuildContext context, VTVPlayInProgress state) {
+  Widget _buildQuestionGrid(
+    BuildContext context,
+    VTVPlayInProgress state, {
+    required double progress,
+    required int checkedCount,
+  }) {
     final total = state.questions.length;
+    final percent = (progress * 100).toInt();
+    const columns = 5;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      padding: const EdgeInsets.all(AppSpacing.smMd),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusMd,
-        border:
-            Border.all(color: AppColors.border, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Danh sách câu hỏi',
+            'DANH SÁCH CÂU HỎI',
             style: AppTypography.labelMedium.copyWith(
               color: AppColors.foreground,
+              letterSpacing: 0.5,
             ),
           ),
           Text(
-            'NHẤN ĐỂ CHUYỂN NHANH',
+            'TIẾN TRÌNH CỦA BẠN',
             style: AppTypography.caption.copyWith(
               color: AppColors.mutedForeground,
               fontSize: 10,
+              letterSpacing: 0.8,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(total, (i) {
-                final isCurrent = i == state.currentIndex;
-                final status =
-                    state.answerStatuses[i] ?? AnswerStatus.unanswered;
-
-                Color bgColor;
-                Color textColor;
-
-                if (isCurrent) {
-                  bgColor = AppColors.primary;
-                  textColor = Colors.white;
-                } else {
-                  switch (status) {
-                    case AnswerStatus.checkedCorrect:
-                      bgColor = AppColors.success.withValues(alpha: 0.15);
-                      textColor = AppColors.success;
-                    case AnswerStatus.checkedIncorrect:
-                      bgColor = AppColors.destructive.withValues(alpha: 0.15);
-                      textColor = AppColors.destructive;
-                    case AnswerStatus.answered:
-                      bgColor = AppColors.mutedForeground.withValues(alpha: 0.15);
-                      textColor = AppColors.foreground;
-                    case AnswerStatus.unanswered:
-                      bgColor = AppColors.muted;
-                      textColor = AppColors.mutedForeground;
-                  }
-                }
-
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: i < total - 1 ? AppSpacing.xs : 0,
-                  ),
-                  child: GestureDetector(
-                    onTap: () => context
-                        .read<VTVPlayBloc>()
-                        .add(GoToQuestion(index: i)),
-                    child: Container(
-                      width: 40,
-                      height: 36,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        borderRadius: AppBorders.borderRadiusSm,
-                      ),
-                      child: Text(
-                        '${i + 1}',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: textColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Progress Bar
-  // ─────────────────────────────────────────────────────────────────────────
-
-  Widget _buildProgressBar(double progress, int checked, int total) {
-    final percent = (progress * 100).toInt();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            '$checked/$total ($percent%)',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.mutedForeground,
-            ),
+          const SizedBox(height: AppSpacing.md),
+          // ─── Progress section ───
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TIẾN ĐỘ HOÀN THÀNH',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedForeground,
+                  fontSize: 10,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Text(
+                '$percent%',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.xs),
           ClipRRect(
             borderRadius: AppBorders.borderRadiusFull,
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 8,
+              minHeight: 6,
               backgroundColor: AppColors.muted,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // ─── Circle grid ───
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = AppSpacing.md;
+              final itemSize =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: List.generate(total, (i) {
+                  final isCurrent = i == state.currentIndex;
+                  final status =
+                      state.answerStatuses[i] ?? AnswerStatus.unanswered;
+
+                  Color bgColor;
+                  Color textColor;
+                  List<BoxShadow>? shadow;
+
+                  if (isCurrent) {
+                    bgColor = AppColors.primary;
+                    textColor = Colors.white;
+                    shadow = [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ];
+                  } else {
+                    switch (status) {
+                      case AnswerStatus.checkedCorrect:
+                        bgColor = AppColors.success.withValues(alpha: 0.15);
+                        textColor = AppColors.success;
+                      case AnswerStatus.checkedIncorrect:
+                        bgColor = AppColors.destructive.withValues(alpha: 0.15);
+                        textColor = AppColors.destructive;
+                      case AnswerStatus.answered:
+                        bgColor = AppColors.mutedForeground.withValues(
+                          alpha: 0.15,
+                        );
+                        textColor = AppColors.foreground;
+                      case AnswerStatus.unanswered:
+                        bgColor = AppColors.muted;
+                        textColor = AppColors.mutedForeground;
+                    }
+                  }
+
+                  final isChecked =
+                      status == AnswerStatus.checkedCorrect ||
+                      status == AnswerStatus.checkedIncorrect;
+                  final isCorrect = status == AnswerStatus.checkedCorrect;
+
+                  return SizedBox(
+                    width: itemSize,
+                    height: itemSize,
+                    child: GestureDetector(
+                      onTap: () => context.read<VTVPlayBloc>().add(
+                        GoToQuestion(index: i),
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned.fill(
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: bgColor,
+                                shape: BoxShape.circle,
+                                boxShadow: shadow,
+                              ),
+                              child: Text(
+                                '${i + 1}',
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (isChecked)
+                            Positioned(
+                              top: -2,
+                              right: -2,
+                              child: Container(
+                                width: 18,
+                                height: 18,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: isCorrect
+                                      ? AppColors.success
+                                      : AppColors.destructive,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColors.card,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  isCorrect ? LucideIcons.check : LucideIcons.x,
+                                  size: 10,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
           ),
         ],
       ),
@@ -363,12 +392,13 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            questionText,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.foreground,
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              questionText,
+              style: AppTypography.h3.copyWith(color: AppColors.foreground),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -379,11 +409,19 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
   // Hint Card
   // ─────────────────────────────────────────────────────────────────────────
 
-  Widget _buildHintCard(String hint) {
+  Widget _buildHintCard(BuildContext context, String hint) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.mdLg,
+        vertical: AppSpacing.smMd,
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: AppColors.warning.withValues(alpha: 0.1),
         borderRadius: AppBorders.borderRadiusMd,
@@ -393,16 +431,43 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text('💡', style: TextStyle(fontSize: 20)),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.xs),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.amber200,
+                width: AppBorders.widthThin,
+              ),
+            ),
+            child: Icon(
+              LucideIcons.lightbulb,
+              size: 20,
+              color: AppColors.amber900,
+            ),
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              hint,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.foreground,
+            child: Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xxs),
+              child: Text(
+                hint,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.amber900,
+                ),
               ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          InkResponse(
+            onTap: () => context.read<VTVPlayBloc>().add(const ToggleHint()),
+            radius: 18,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xxs),
+              child: Icon(LucideIcons.x, size: 18, color: AppColors.amber900),
             ),
           ),
         ],
@@ -450,14 +515,10 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
                 ),
               ),
             ),
-            style: AppTypography.h4.copyWith(
-              color: AppColors.foreground,
-            ),
+            style: AppTypography.h4.copyWith(color: AppColors.foreground),
             textInputAction: TextInputAction.done,
             onChanged: (value) {
-              context
-                  .read<VTVPlayBloc>()
-                  .add(UpdateAnswer(answer: value));
+              context.read<VTVPlayBloc>().add(UpdateAnswer(answer: value));
             },
             onSubmitted: (_) => _handleCheck(context),
           ),
@@ -465,30 +526,19 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () => _handleCheck(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: AppBorders.shapeSm,
-                    minimumSize: const Size(0, 48),
-                  ),
-                  child: const Text('Kiểm tra'),
+                  icon: const Icon(LucideIcons.check, size: 20),
+                  label: const Text('Kiểm tra'),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () =>
                     context.read<VTVPlayBloc>().add(const ToggleHint()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.warning,
-                  foregroundColor: Colors.white,
-                  shape: AppBorders.shapeSm,
-                  minimumSize: const Size(0, 48),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                ),
-                child: const Text('Gợi ý'),
+                style: AppButtonStyles.secondary,
+                icon: const Icon(LucideIcons.info, size: 20),
+                label: const Text('Gợi ý'),
               ),
             ],
           ),
@@ -545,83 +595,45 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
   Widget _buildBottomNav(BuildContext context, VTVPlayInProgress state) {
     final isFirst = state.currentIndex == 0;
     final isLast = state.currentIndex == state.questions.length - 1;
-    final total = state.questions.length;
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.mdLg,
         vertical: AppSpacing.smMd,
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Dot indicators
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(total, (i) {
-                final isCurrent = i == state.currentIndex;
-                return GestureDetector(
-                  onTap: () => context
-                      .read<VTVPlayBloc>()
-                      .add(GoToQuestion(index: i)),
-                  child: Container(
-                    width: isCurrent ? 12 : 8,
-                    height: isCurrent ? 12 : 8,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCurrent
-                          ? AppColors.primary
-                          : AppColors.muted,
-                    ),
-                  ),
-                );
-              }),
+          TextButton.icon(
+            onPressed: isFirst
+                ? null
+                : () =>
+                      context.read<VTVPlayBloc>().add(const PreviousQuestion()),
+            icon: const Icon(LucideIcons.chevronLeft, size: 20),
+            label: const Text('CÂU TRƯỚC'),
+            style: TextButton.styleFrom(
+              foregroundColor: isFirst
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Navigation buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton.icon(
-                onPressed: isFirst
-                    ? null
-                    : () => context
-                        .read<VTVPlayBloc>()
-                        .add(const PreviousQuestion()),
-                icon: const Icon(Icons.chevron_left, size: 20),
-                label: const Text('Câu trước'),
-                style: TextButton.styleFrom(
-                  foregroundColor: isFirst
-                      ? AppColors.mutedForeground
-                      : AppColors.foreground,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: isLast
-                    ? null
-                    : () => context
-                        .read<VTVPlayBloc>()
-                        .add(const NextQuestion()),
-                icon: const Text(''),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Câu sau'),
-                    const Icon(Icons.chevron_right, size: 20),
-                  ],
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: isLast
-                      ? AppColors.mutedForeground
-                      : AppColors.foreground,
-                ),
-              ),
-            ],
+          TextButton.icon(
+            onPressed: isLast
+                ? null
+                : () => context.read<VTVPlayBloc>().add(const NextQuestion()),
+            icon: const SizedBox.shrink(),
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('CÂU SAU'),
+                const Icon(LucideIcons.chevronRight, size: 20),
+              ],
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: isLast
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
+            ),
           ),
         ],
       ),

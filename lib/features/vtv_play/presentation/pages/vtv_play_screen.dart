@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../router/route_names.dart';
 import '../../../home/domain/entities/vtv_question_entity.dart';
 import '../bloc/vtv_play_bloc.dart';
@@ -34,19 +36,78 @@ class _VTVPlayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
-      ),
-      backgroundColor: AppColors.background,
-      body: BlocBuilder<VTVPlayBloc, VTVPlayState>(
-        builder: (context, state) => switch (state) {
-          VTVPlayInProgress() => const VTVQuestionView(),
-          VTVPlayFinished() => const VTVGameResultView(),
-          _ => const Center(
+    return BlocBuilder<VTVPlayBloc, VTVPlayState>(
+      builder: (context, state) => switch (state) {
+        VTVPlayInProgress() => Scaffold(
+          appBar: _AppBar(
+            currentIndex: state.currentIndex,
+            totalQuestions: state.questions.length,
+          ),
+          body: SafeArea(child: const VTVQuestionView()),
+        ),
+        VTVPlayFinished() => Scaffold(
+          body: SafeArea(child: const VTVGameResultView()),
+        ),
+        _ => Scaffold(
+          appBar: AppBar(
+            leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
+          ),
+          body: const Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           ),
-        },
+        ),
+      },
+    );
+  }
+}
+
+class _AppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _AppBar({required this.currentIndex, required this.totalQuestions});
+
+  final int currentIndex;
+  final int totalQuestions;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
+      title: Padding(
+        padding: const EdgeInsets.only(right: kToolbarHeight),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(LucideIcons.gamepad2, color: AppColors.primary),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Vua Tiếng Việt', style: AppTypography.textBase.bold),
+                  Text(
+                    'CÂU ${currentIndex + 1} / $totalQuestions',
+                    style: AppTypography.text2Xs.semiBold.withColor(
+                      AppColors.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

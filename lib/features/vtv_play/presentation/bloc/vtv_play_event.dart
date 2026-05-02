@@ -66,3 +66,8 @@ final class UpdateAnswer extends VTVPlayEvent {
 final class EndGame extends VTVPlayEvent {
   const EndGame();
 }
+
+/// Khởi động lại lượt chơi với cùng bộ câu hỏi và thời gian ban đầu.
+final class RestartGame extends VTVPlayEvent {
+  const RestartGame();
+}

@@ -80,13 +80,6 @@ class _SubTabs extends StatelessWidget {
                 child: Row(
                   spacing: AppSpacing.xs,
                   children: [
-                    Icon(
-                      tab.icon,
-                      size: 16,
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.5),
-                    ),
                     Text(
                       tab.label,
                       style: AppTypography.buttonSmall.copyWith(
