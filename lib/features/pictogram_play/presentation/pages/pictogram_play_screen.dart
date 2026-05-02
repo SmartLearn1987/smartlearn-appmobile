@@ -5,7 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../home/domain/entities/pictogram_entity.dart';
-import '../../../../router/route_names.dart';
+import '../../../home/presentation/helpers/level_icon_circle.dart';
 import '../bloc/pictogram_play_bloc.dart';
 import '../controllers/game_session_controller.dart';
 import '../widgets/game_result_view.dart';
@@ -15,11 +15,13 @@ class PictogramPlayScreen extends StatefulWidget {
   const PictogramPlayScreen({
     required this.questions,
     required this.timeInMinutes,
+    this.level,
     super.key,
   });
 
   final List<PictogramEntity> questions;
   final int timeInMinutes;
+  final String? level;
 
   @override
   State<PictogramPlayScreen> createState() => _PictogramPlayScreenState();
@@ -60,6 +62,7 @@ class _PictogramPlayScreenState extends State<PictogramPlayScreen> {
       child: _PictogramPlayView(
         questions: widget.questions,
         timeInMinutes: widget.timeInMinutes,
+        level: widget.level,
         session: _session,
         onRestart: _restartSession,
       ),
@@ -73,12 +76,14 @@ class _PictogramPlayView extends StatelessWidget {
     required this.timeInMinutes,
     required this.session,
     required this.onRestart,
+    this.level,
   });
 
   final List<PictogramEntity> questions;
   final int timeInMinutes;
   final GameSessionController session;
   final VoidCallback onRestart;
+  final String? level;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +93,7 @@ class _PictogramPlayView extends StatelessWidget {
           appBar: _AppBar(
             currentIndex: state.currentIndex,
             totalQuestions: state.questions.length,
+            level: level,
           ),
           body: SafeArea(
             child: QuestionView(
@@ -137,7 +143,7 @@ class _PictogramPlayView extends StatelessWidget {
                   ),
                 );
               },
-              onGoHome: () => context.go(RoutePaths.home),
+              onGoHome: () => context.pop(),
             ),
           ),
         ),
@@ -152,10 +158,15 @@ class _PictogramPlayView extends StatelessWidget {
 }
 
 class _AppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _AppBar({required this.currentIndex, required this.totalQuestions});
+  const _AppBar({
+    required this.currentIndex,
+    required this.totalQuestions,
+    this.level,
+  });
 
   final int currentIndex;
   final int totalQuestions;
+  final String? level;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -163,24 +174,13 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
+      leading: BackButton(onPressed: () => context.pop()),
       title: Padding(
         padding: const EdgeInsets.only(right: kToolbarHeight),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.2),
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(LucideIcons.gamepad2, color: AppColors.primary),
-            ),
+            LevelIconCircle(icon: LucideIcons.gamepad2, level: level),
             const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Column(

@@ -53,3 +53,8 @@ final class GoToQuestion extends NNCPlayEvent {
 final class EndGame extends NNCPlayEvent {
   const EndGame();
 }
+
+/// Chơi lại với đúng bộ câu hỏi và thời gian ban đầu.
+final class RestartGame extends NNCPlayEvent {
+  const RestartGame();
+}

@@ -21,6 +21,7 @@ class NNCPlayBloc extends Bloc<NNCPlayEvent, NNCPlayState> {
     on<PreviousQuestion>(_onPreviousQuestion);
     on<GoToQuestion>(_onGoToQuestion);
     on<EndGame>(_onEndGame);
+    on<RestartGame>(_onRestartGame);
   }
 
   Future<void> _onStartGame(
@@ -155,6 +156,16 @@ class NNCPlayBloc extends Bloc<NNCPlayEvent, NNCPlayState> {
       correctCount: correctCount,
       totalQuestions: s.questions.length,
       elapsedSeconds: elapsedSeconds,
+    ));
+  }
+
+  void _onRestartGame(RestartGame event, Emitter<NNCPlayState> emit) {
+    final s = state;
+    if (s is! NNCPlayFinished) return;
+
+    add(StartGame(
+      questions: s.questions,
+      timeInMinutes: _totalSeconds ~/ 60,
     ));
   }
 

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
-import 'package:smart_learn/core/theme/app_typography.dart';
 import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/domain/entities/learning_category_entity.dart';
@@ -173,6 +170,7 @@ class _HCBCategorySelectionModalState extends State<HCBCategorySelectionModal> {
       context.pushNamed(
         RouteNames.hcbPlay,
         extra: {
+          'categoryName': category.name,
           'questions': questions,
           'generalQuestion': category.generalQuestion,
         },

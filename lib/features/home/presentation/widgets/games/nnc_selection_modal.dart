@@ -107,9 +107,13 @@ class _NNCSelectionModalState extends State<NNCSelectionModal> {
         return;
       }
       Navigator.of(context).pop();
-      context.go(
+      context.push(
         RoutePaths.nncPlay,
-        extra: {'questions': questions, 'timeInMinutes': _selectedTime},
+        extra: {
+          'questions': questions,
+          'timeInMinutes': _selectedTime,
+          'level': levelValueAt(_selectedLevel),
+        },
       );
     });
   }

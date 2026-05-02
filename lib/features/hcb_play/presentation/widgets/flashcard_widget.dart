@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -45,9 +46,10 @@ class _FlashcardWidgetState extends State<FlashcardWidget>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // Sync initial state
     if (widget.isFlipped) {
@@ -109,14 +111,10 @@ class _FlashcardWidgetState extends State<FlashcardWidget>
   }
 }
 
-
 // ─── Front Side ──────────────────────────────────────────────────────────
 
 class _FrontSide extends StatelessWidget {
-  const _FrontSide({
-    required this.imageUrl,
-    required this.generalQuestion,
-  });
+  const _FrontSide({required this.imageUrl, required this.generalQuestion});
 
   final String imageUrl;
   final String generalQuestion;
@@ -152,14 +150,24 @@ class _FrontSide extends StatelessWidget {
               horizontal: AppSpacing.md,
               vertical: AppSpacing.smMd,
             ),
-            child: Text(
-              generalQuestion,
-              style: AppTypography.h4.copyWith(
-                color: AppColors.foreground,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: AppSpacing.xs,
+              children: [
+                Icon(
+                  LucideIcons.helpCircle,
+                  size: 24,
+                  color: AppColors.primary,
+                ),
+                Text(
+                  generalQuestion,
+                  style: AppTypography.h3.copyWith(color: AppColors.primary),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -171,10 +179,7 @@ class _FrontSide extends StatelessWidget {
 // ─── Back Side ───────────────────────────────────────────────────────────
 
 class _BackSide extends StatelessWidget {
-  const _BackSide({
-    required this.imageUrl,
-    required this.answer,
-  });
+  const _BackSide({required this.imageUrl, required this.answer});
 
   final String imageUrl;
   final String answer;

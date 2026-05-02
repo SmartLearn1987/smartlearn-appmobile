@@ -92,7 +92,7 @@ class _DictationSelectionModalState extends State<DictationSelectionModal> {
     ) {
       Navigator.of(context).pop();
       if (context.mounted) {
-        context.go(RoutePaths.dictationPlay, extra: dictation);
+        context.push(RoutePaths.dictationPlay, extra: dictation);
       }
     });
   }

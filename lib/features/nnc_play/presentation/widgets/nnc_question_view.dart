@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme.dart';
 import '../bloc/nnc_play_bloc.dart';
 
+/// Màn chơi cho game Nhanh Như Chớp.
+///
+/// Style đồng bộ với [pictogram_play/widgets/question_view.dart]:
+///   - Header: timer pill (đổi màu khi còn ≤ 30s) + nút "Hoàn thành"
+///   - Question navigator: card chứa list số câu cuộn ngang
+///   - Question card + options list
+///   - Bottom nav: "CÂU TRƯỚC" / "CÂU SAU"
 class NNCQuestionView extends StatelessWidget {
   const NNCQuestionView({super.key});
 
@@ -19,155 +24,88 @@ class NNCQuestionView extends StatelessWidget {
         }
 
         final question = state.questions[state.currentIndex];
-        final total = state.questions.length;
-        final answeredPercent = calculateAnsweredPercentage(state.userAnswers);
-        final answeredCount =
-            state.userAnswers.where((a) => a != -1).length;
+        final timeStr = formatTime(state.remainingSeconds);
 
         return Column(
           children: [
-            // ─── Header ───
-            _buildHeader(context, state),
-            const SizedBox(height: AppSpacing.smMd),
-
-            // ─── Scrollable content ───
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ─── Question Card ───
-                    _buildQuestionCard(
-                      state.currentIndex,
-                      question.question,
-                    ),
+                    _buildHeader(context, state, timeStr),
+                    const SizedBox(height: AppSpacing.smMd),
+                    _buildQuestionNavigator(context, state),
+                    const SizedBox(height: AppSpacing.smMd),
+                    _buildQuestionCard(state.currentIndex, question.question),
                     const SizedBox(height: AppSpacing.md),
-
-                    // ─── Options List ───
                     _buildOptionsList(context, state),
-                    const SizedBox(height: AppSpacing.md),
-
-                    // ─── Progress Sidebar ───
-                    _buildProgressSidebar(
-                      context,
-                      state,
-                      answeredPercent,
-                      answeredCount,
-                      total,
-                    ),
                     const SizedBox(height: AppSpacing.md),
                   ],
                 ),
               ),
             ),
-
-            // ─── Question Navigator ───
-            _buildQuestionNavigator(context, state),
+            _buildBottomNav(context, state),
           ],
         );
       },
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────
-  // Header
-  // ───────────────────────────────────────────────────────────────────────
+  // ── Header ──────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(BuildContext context, NNCPlayInProgress state) {
-    final timeStr = formatTime(state.remainingSeconds);
-    final progressStr =
-        formatProgress(state.currentIndex, state.questions.length);
+  Widget _buildHeader(
+    BuildContext context,
+    NNCPlayInProgress state,
+    String timeStr,
+  ) {
+    final isLow = state.remainingSeconds <= 30;
+    final timerBg = isLow
+        ? AppColors.destructive.withValues(alpha: 0.1)
+        : AppColors.primaryLight;
+    final timerBorder = isLow
+        ? AppColors.destructive.withValues(alpha: 0.3)
+        : AppColors.primary.withValues(alpha: 0.2);
+    final timerColor = isLow ? AppColors.destructive : AppColors.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       child: Column(
+        spacing: AppSpacing.sm,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('⚡', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: AppSpacing.sm),
-              Column(
-                children: [
-                  Text(
-                    'Nhanh như chớp',
-                    style: AppTypography.labelLarge.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                  ),
-                  Text(
-                    progressStr.toUpperCase(),
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Badge "Tia chớp X"
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: AppColors.secondary,
+              color: timerBg,
+              border: Border.all(color: timerBorder),
               borderRadius: AppBorders.borderRadiusFull,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.bolt, size: 16, color: Colors.white),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  'Tia chớp ${state.currentIndex + 1}',
-                  style:
-                      AppTypography.labelMedium.copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Timer badge
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: AppBorders.borderRadiusFull,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.timer_outlined,
-                    size: 16, color: Colors.white),
-                const SizedBox(width: AppSpacing.xs),
+                Icon(LucideIcons.clock, size: 20, color: timerColor),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   timeStr,
-                  style:
-                      AppTypography.labelLarge.copyWith(color: Colors.white),
+                  style: AppTypography.textXl.bold.copyWith(color: timerColor),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Kết thúc button
           SizedBox(
             width: 140,
-            height: 36,
+            height: 40,
             child: ElevatedButton(
-              onPressed: () =>
-                  context.read<NNCPlayBloc>().add(const EndGame()),
+              onPressed: () => context.read<NNCPlayBloc>().add(const EndGame()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.destructive,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: AppBorders.shapeFull,
                 padding: EdgeInsets.zero,
               ),
-              child: const Text('Kết thúc'),
+              child: const Text('Hoàn thành'),
             ),
           ),
         ],
@@ -175,9 +113,132 @@ class NNCQuestionView extends StatelessWidget {
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────
-  // Question Card
-  // ───────────────────────────────────────────────────────────────────────
+  // ── Question navigator ─────────────────────────────────────────────────────
+
+  Widget _buildQuestionNavigator(
+    BuildContext context,
+    NNCPlayInProgress state,
+  ) {
+    final total = state.questions.length;
+    final answeredCount = state.userAnswers.where((a) => a != -1).length;
+    final progress = total > 0 ? answeredCount / total : 0.0;
+    final percent = (progress * 100).round();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
+      padding: const EdgeInsets.all(AppSpacing.smMd),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: AppBorders.borderRadiusMd,
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Danh sách câu hỏi',
+            style: AppTypography.labelMedium.copyWith(
+              color: AppColors.foreground,
+            ),
+          ),
+          Text(
+            'NHẤN ĐỂ CHUYỂN NHANH',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedForeground,
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // ─── Progress bar ───
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TIẾN ĐỘ HOÀN THÀNH',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedForeground,
+                  fontSize: 10,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Text(
+                '$answeredCount/$total ($percent%)',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          ClipRRect(
+            borderRadius: AppBorders.borderRadiusFull,
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppColors.muted,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // ─── Question chips ───
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: List.generate(total, (i) {
+              final isCurrent = i == state.currentIndex;
+              final isAnswered = state.userAnswers[i] != -1;
+
+              Color bgColor;
+              Color textColor;
+              if (isCurrent) {
+                bgColor = AppColors.primary;
+                textColor = Colors.white;
+              } else if (isAnswered) {
+                bgColor = AppColors.primary.withValues(alpha: 0.15);
+                textColor = AppColors.primary;
+              } else {
+                bgColor = AppColors.muted;
+                textColor = AppColors.foreground;
+              }
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: i < total - 1 ? AppSpacing.xs : 0,
+                ),
+                child: GestureDetector(
+                  onTap: () =>
+                      context.read<NNCPlayBloc>().add(GoToQuestion(index: i)),
+                  child: Container(
+                    width: 40,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: AppBorders.borderRadiusSm,
+                    ),
+                    child: Text(
+                      '${i + 1}',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Question card ──────────────────────────────────────────────────────────
 
   Widget _buildQuestionCard(int index, String questionText) {
     return Container(
@@ -202,13 +263,13 @@ class NNCQuestionView extends StatelessWidget {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: AppColors.secondaryLight,
+              color: AppColors.primaryLight,
               borderRadius: AppBorders.borderRadiusSm,
             ),
             child: Text(
               'CÂU HỎI ${index + 1}',
               style: AppTypography.labelSmall.copyWith(
-                color: AppColors.secondary,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -216,9 +277,7 @@ class NNCQuestionView extends StatelessWidget {
           Center(
             child: Text(
               questionText,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.foreground,
-              ),
+              style: AppTypography.h3.copyWith(color: AppColors.foreground),
               textAlign: TextAlign.center,
             ),
           ),
@@ -227,9 +286,7 @@ class NNCQuestionView extends StatelessWidget {
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────
-  // Options List
-  // ───────────────────────────────────────────────────────────────────────
+  // ── Options list ───────────────────────────────────────────────────────────
 
   Widget _buildOptionsList(BuildContext context, NNCPlayInProgress state) {
     final question = state.questions[state.currentIndex];
@@ -245,13 +302,11 @@ class NNCQuestionView extends StatelessWidget {
 
           return Padding(
             padding: EdgeInsets.only(
-              bottom:
-                  i < question.options.length - 1 ? AppSpacing.sm : 0,
+              bottom: i < question.options.length - 1 ? AppSpacing.sm : 0,
             ),
             child: GestureDetector(
-              onTap: () => context
-                  .read<NNCPlayBloc>()
-                  .add(SelectAnswer(optionIndex: i)),
+              onTap: () =>
+                  context.read<NNCPlayBloc>().add(SelectAnswer(optionIndex: i)),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -264,9 +319,7 @@ class NNCQuestionView extends StatelessWidget {
                       : AppColors.card,
                   borderRadius: AppBorders.borderRadiusMd,
                   border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.border,
+                    color: isSelected ? AppColors.primary : AppColors.border,
                     width: isSelected
                         ? AppBorders.widthThick
                         : AppBorders.widthThin,
@@ -279,9 +332,7 @@ class NNCQuestionView extends StatelessWidget {
                       height: 32,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.muted,
+                        color: isSelected ? AppColors.primary : AppColors.muted,
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -306,8 +357,8 @@ class NNCQuestionView extends StatelessWidget {
                       ),
                     ),
                     if (isSelected)
-                      const Icon(
-                        Icons.check_circle,
+                      Icon(
+                        LucideIcons.checkCircle,
                         color: AppColors.primary,
                         size: 20,
                       ),
@@ -321,217 +372,50 @@ class NNCQuestionView extends StatelessWidget {
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────
-  // Progress Sidebar
-  // ───────────────────────────────────────────────────────────────────────
+  // ── Bottom nav ─────────────────────────────────────────────────────────────
 
-  Widget _buildProgressSidebar(
-    BuildContext context,
-    NNCPlayInProgress state,
-    double answeredPercent,
-    int answeredCount,
-    int total,
-  ) {
-    final percent = (answeredPercent * 100).toInt();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
-      padding: const EdgeInsets.all(AppSpacing.smMd),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(
-          color: AppColors.border,
-          width: AppBorders.widthThin,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Tiến trình tia chớp',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.foreground,
-            ),
-          ),
-          Text(
-            'Phản xạ nhanh!',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.mutedForeground,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Progress bar
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$answeredCount/$total ($percent%)',
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedForeground,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              ClipRRect(
-                borderRadius: AppBorders.borderRadiusFull,
-                child: LinearProgressIndicator(
-                  value: answeredPercent,
-                  minHeight: 8,
-                  backgroundColor: AppColors.muted,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.smMd),
-          // Numbered button grid
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: List.generate(total, (i) {
-              final isCurrent = i == state.currentIndex;
-              final isAnswered = state.userAnswers[i] != -1;
-
-              Color bgColor;
-              Color textColor;
-              double size;
-
-              if (isCurrent) {
-                bgColor = AppColors.primary;
-                textColor = Colors.white;
-                size = 40;
-              } else if (isAnswered) {
-                bgColor = AppColors.primary.withValues(alpha: 0.15);
-                textColor = AppColors.primary;
-                size = 36;
-              } else {
-                bgColor = AppColors.muted;
-                textColor = AppColors.mutedForeground;
-                size = 36;
-              }
-
-              return GestureDetector(
-                onTap: () => context
-                    .read<NNCPlayBloc>()
-                    .add(GoToQuestion(index: i)),
-                child: Container(
-                  width: size,
-                  height: size,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: AppBorders.borderRadiusSm,
-                  ),
-                  child: isAnswered && !isCurrent
-                      ? const Icon(
-                          Icons.check,
-                          color: AppColors.primary,
-                          size: 16,
-                        )
-                      : Text(
-                          '${i + 1}',
-                          style: AppTypography.labelMedium.copyWith(
-                            color: textColor,
-                          ),
-                        ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────────────────────────────
-  // Question Navigator
-  // ───────────────────────────────────────────────────────────────────────
-
-  Widget _buildQuestionNavigator(
-    BuildContext context,
-    NNCPlayInProgress state,
-  ) {
+  Widget _buildBottomNav(BuildContext context, NNCPlayInProgress state) {
     final isFirst = state.currentIndex == 0;
     final isLast = state.currentIndex == state.questions.length - 1;
-    final total = state.questions.length;
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.mdLg,
         vertical: AppSpacing.smMd,
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Dot indicators
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(total, (i) {
-                final isCurrent = i == state.currentIndex;
-                return GestureDetector(
-                  onTap: () => context
-                      .read<NNCPlayBloc>()
-                      .add(GoToQuestion(index: i)),
-                  child: Container(
-                    width: isCurrent ? 12 : 8,
-                    height: isCurrent ? 12 : 8,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          isCurrent ? AppColors.primary : AppColors.muted,
-                    ),
-                  ),
-                );
-              }),
+          TextButton.icon(
+            onPressed: isFirst
+                ? null
+                : () =>
+                      context.read<NNCPlayBloc>().add(const PreviousQuestion()),
+            icon: const Icon(LucideIcons.chevronLeft, size: 20),
+            label: const Text('CÂU TRƯỚC'),
+            style: TextButton.styleFrom(
+              foregroundColor: isFirst
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Navigation buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton.icon(
-                onPressed: isFirst
-                    ? null
-                    : () => context
-                        .read<NNCPlayBloc>()
-                        .add(const PreviousQuestion()),
-                icon: const Icon(Icons.chevron_left, size: 20),
-                label: const Text('Câu trước'),
-                style: TextButton.styleFrom(
-                  foregroundColor: isFirst
-                      ? AppColors.mutedForeground
-                      : AppColors.foreground,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: isLast
-                    ? null
-                    : () => context
-                        .read<NNCPlayBloc>()
-                        .add(const NextQuestion()),
-                icon: const Text(''),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Câu sau'),
-                    const Icon(Icons.chevron_right, size: 20),
-                  ],
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: isLast
-                      ? AppColors.mutedForeground
-                      : AppColors.foreground,
-                ),
-              ),
-            ],
+          TextButton.icon(
+            onPressed: isLast
+                ? null
+                : () => context.read<NNCPlayBloc>().add(const NextQuestion()),
+            icon: const SizedBox.shrink(),
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('CÂU SAU'),
+                const Icon(LucideIcons.chevronRight, size: 20),
+              ],
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: isLast
+                  ? AppColors.mutedForeground
+                  : AppColors.primary,
+            ),
           ),
         ],
       ),

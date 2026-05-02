@@ -6,9 +6,9 @@ import 'package:smart_learn/core/widgets/app_text_field.dart';
 
 import '../../../../app/di/injection.dart';
 import '../../../../features/home/presentation/helpers/contants.dart';
+import '../../../../features/home/presentation/helpers/level_icon_circle.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_toast.dart';
-import '../../../../router/route_names.dart';
 import '../../../home/domain/entities/dictation_entity.dart';
 import '../bloc/dictation_play_bloc.dart';
 import '../widgets/dictation_card.dart';
@@ -118,24 +118,13 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
         ? '🇺🇸 Tiếng Anh'
         : '🇯🇵 Tiếng Nhật';
     return AppBar(
-      leading: BackButton(onPressed: () => context.go(RoutePaths.home)),
+      leading: BackButton(onPressed: () => context.pop()),
       centerTitle: true,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(LucideIcons.book, color: AppColors.primary),
-          ),
+          LevelIconCircle(icon: LucideIcons.book, level: level),
           const SizedBox(width: AppSpacing.sm),
           Flexible(
             child: Column(

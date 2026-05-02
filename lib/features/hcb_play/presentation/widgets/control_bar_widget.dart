@@ -7,7 +7,11 @@ import '../../../../core/theme/app_spacing.dart';
 
 /// Bottom control bar for the flashcard game.
 ///
-/// Provides previous, auto-play toggle, shuffle, and next buttons.
+/// Bốn nút bo góc vuông (squircle) đặt cạnh nhau:
+///   - Trở lại
+///   - Phát/Tạm dừng tự động
+///   - Xáo trộn
+///   - Tiếp theo
 class ControlBarWidget extends StatelessWidget {
   const ControlBarWidget({
     required this.currentIndex,
@@ -41,27 +45,36 @@ class ControlBarWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Previous button
           _ControlButton(
             icon: LucideIcons.chevronLeft,
             onPressed: _isFirst ? null : onPrevious,
+            backgroundColor: AppColors.card,
+            borderColor: AppColors.border,
+            foregroundColor: AppColors.foreground,
             semanticLabel: 'Câu trước',
           ),
-          // Auto-play toggle
-          _AutoPlayButton(
-            isActive: isAutoPlaying,
+          _ControlButton(
+            icon: isAutoPlaying ? LucideIcons.pause : LucideIcons.play,
             onPressed: onToggleAutoPlay,
+            backgroundColor: AppColors.emerald100,
+            borderColor: AppColors.emerald100,
+            foregroundColor: AppColors.primary,
+            semanticLabel: isAutoPlaying ? 'Tạm dừng' : 'Tự động phát',
           ),
-          // Shuffle button
           _ControlButton(
             icon: LucideIcons.shuffle,
             onPressed: onShuffle,
+            backgroundColor: AppColors.amber50,
+            borderColor: AppColors.amber50,
+            foregroundColor: AppColors.secondary,
             semanticLabel: 'Xáo trộn',
           ),
-          // Next button
           _ControlButton(
             icon: LucideIcons.chevronRight,
             onPressed: _isLast ? null : onNext,
+            backgroundColor: AppColors.card,
+            borderColor: AppColors.border,
+            foregroundColor: AppColors.foreground,
             semanticLabel: 'Câu sau',
           ),
         ],
@@ -76,89 +89,48 @@ class _ControlButton extends StatelessWidget {
   const _ControlButton({
     required this.icon,
     required this.onPressed,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.foregroundColor,
     required this.semanticLabel,
   });
 
   final IconData icon;
   final VoidCallback? onPressed;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color foregroundColor;
   final String semanticLabel;
+
+  static const double _size = 56;
+  static const BorderRadius _radius = AppBorders.borderRadiusXl;
 
   bool get _isDisabled => onPressed == null;
 
   @override
   Widget build(BuildContext context) {
+    final bg = _isDisabled ? AppColors.muted : backgroundColor;
+    final border = _isDisabled ? AppColors.muted : borderColor;
+    final fg = _isDisabled ? AppColors.mutedForeground : foregroundColor;
+
     return Semantics(
       label: semanticLabel,
+      button: true,
       child: Material(
-        color: _isDisabled ? AppColors.muted : AppColors.card,
-        borderRadius: AppBorders.borderRadiusFull,
+        color: bg,
+        borderRadius: _radius,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: AppBorders.borderRadiusFull,
+          borderRadius: _radius,
           child: Container(
-            width: 48,
-            height: 48,
+            width: _size,
+            height: _size,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: _isDisabled ? AppColors.muted : AppColors.border,
-                width: AppBorders.widthThin,
-              ),
+              borderRadius: _radius,
+              border: Border.all(color: border, width: AppBorders.widthThin),
             ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: _isDisabled
-                  ? AppColors.mutedForeground
-                  : AppColors.foreground,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Auto-Play Button ────────────────────────────────────────────────────
-
-class _AutoPlayButton extends StatelessWidget {
-  const _AutoPlayButton({
-    required this.isActive,
-    required this.onPressed,
-  });
-
-  final bool isActive;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: isActive ? 'Dừng tự động phát' : 'Tự động phát',
-      child: Material(
-        color: isActive ? AppColors.primary : AppColors.card,
-        borderRadius: AppBorders.borderRadiusFull,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: AppBorders.borderRadiusFull,
-          child: Container(
-            width: 56,
-            height: 56,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isActive ? AppColors.primary : AppColors.border,
-                width: AppBorders.widthThin,
-              ),
-            ),
-            child: Icon(
-              isActive ? LucideIcons.pause : LucideIcons.play,
-              size: 28,
-              color: isActive
-                  ? AppColors.primaryForeground
-                  : AppColors.primary,
-            ),
+            child: Icon(icon, size: 26, color: fg),
           ),
         ),
       ),

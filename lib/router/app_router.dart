@@ -134,9 +134,11 @@ class AppRouter {
             try {
               final questions = extra['questions'] as List<PictogramEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
+              final level = extra['level'] as String?;
               return PictogramPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
+                level: level,
               );
             } catch (_) {
               return const _RedirectToHome();
@@ -153,9 +155,11 @@ class AppRouter {
             try {
               final questions = extra['questions'] as List<VTVQuestionEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
+              final level = extra['level'] as String?;
               return VTVPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
+                level: level,
               );
             } catch (_) {
               return const _RedirectToHome();
@@ -172,9 +176,11 @@ class AppRouter {
             try {
               final questions = extra['questions'] as List<NNCQuestionEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
+              final level = extra['level'] as String?;
               return NNCPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
+                level: level,
               );
             } catch (_) {
               return const _RedirectToHome();
@@ -191,9 +197,11 @@ class AppRouter {
             try {
               final questions = extra['questions'] as List<ProverbEntity>;
               final timeInMinutes = extra['timeInMinutes'] as int;
+              final level = extra['level'] as String?;
               return CDTNPlayScreen(
                 questions: questions,
                 timeInMinutes: timeInMinutes,
+                level: level,
               );
             } catch (_) {
               return const _RedirectToHome();
@@ -211,9 +219,11 @@ class AppRouter {
               final questions =
                   extra['questions'] as List<LearningQuestionEntity>;
               final generalQuestion = extra['generalQuestion'] as String;
+              final categoryName = extra['categoryName'] as String;
               return HCBPlayScreen(
                 questions: questions,
                 generalQuestion: generalQuestion,
+                categoryName: categoryName,
               );
             } catch (_) {
               return const _RedirectToHome();

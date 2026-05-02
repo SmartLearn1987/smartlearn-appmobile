@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
-import '../../../../core/theme/app_button_styles.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../router/route_names.dart';
+import '../../../../core/theme/theme.dart';
 import '../bloc/nnc_play_bloc.dart';
 
 /// Displays the game result after the Nhanh Như Chớp game ends.
 ///
-/// Shows title "KẾT QUẢ PHẢN XẠ", score summary ("Chính xác: X/Y",
-/// "Tỉ lệ: Z%"), a detailed list of each question with user answer,
-/// correct answer when wrong, explanation when available, and navigation
-/// buttons ("Trang chủ" and "Chơi lại").
-///
-/// Reads state from [NNCPlayBloc] via [BlocBuilder] and only renders
-/// when state is [NNCPlayFinished].
+/// Style đồng bộ với pictogram/CDTN result view:
+///   - Trophy + tiêu đề "KẾT QUẢ LƯỢT CHƠI"
+///   - Hai [_StatCard]: "CHÍNH XÁC", "TỈ LỆ"
+///   - Danh sách câu (mỗi câu là một [_QuestionResultTile])
+///   - Hai nút "Về trang chủ" (outlined) và "Chơi lại" (filled)
 class NNCGameResultView extends StatelessWidget {
   const NNCGameResultView({super.key});
 
@@ -30,278 +24,348 @@ class NNCGameResultView extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final percentage = calculatePercentage(
-          state.correctCount,
-          state.totalQuestions,
-        );
+        final percentage = state.totalQuestions > 0
+            ? (state.correctCount / state.totalQuestions * 100).round()
+            : 0;
 
-        return SingleChildScrollView(
+        return Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              // ─── Trophy Icon ───
+              // ── Trophy ──
               Container(
-                width: 80,
-                height: 80,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
                   borderRadius: AppBorders.borderRadiusFull,
                 ),
                 child: const Icon(
-                  Icons.emoji_events_rounded,
-                  size: 48,
+                  LucideIcons.trophy,
+                  size: 40,
                   color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Title ──
+              Text(
+                'KẾT QUẢ LƯỢT CHƠI',
+                style: AppTypography.h3.copyWith(
+                  color: AppColors.foreground,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // ─── Title ───
-              Text(
-                'KẾT QUẢ PHẢN XẠ',
-                style: AppTypography.h2.copyWith(color: AppColors.foreground),
+              // ── Stats row ──
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      label: 'CHÍNH XÁC',
+                      value: '${state.correctCount}/${state.totalQuestions}',
+                      valueColor: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _StatCard(
+                      label: 'TỈ LỆ',
+                      value: '$percentage%',
+                      valueColor: AppColors.blue600,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // ─── Score Card ───
-              _buildScoreCard(state, percentage),
               const SizedBox(height: AppSpacing.lg),
 
-              // ─── Detail List ───
-              _buildDetailList(state),
-              const SizedBox(height: AppSpacing.xl),
+              // ── Question list ──
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(state.totalQuestions, (i) {
+                      final question = state.questions[i];
+                      final userAnswerIndex = state.userAnswers[i];
+                      final hasAttempt = userAnswerIndex != -1;
+                      final isCorrect = hasAttempt &&
+                          userAnswerIndex == question.correctIndex;
+                      final userAnswer = hasAttempt
+                          ? question.options[userAnswerIndex]
+                          : '';
 
-              // ─── Action Buttons ───
-              _buildActionButtons(context),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: _QuestionResultTile(
+                          index: i,
+                          question: question.question,
+                          correctAnswer:
+                              question.options[question.correctIndex],
+                          userAnswer: userAnswer,
+                          explanation: question.explanation,
+                          isCorrect: isCorrect,
+                          hasAttempt: hasAttempt,
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+
+              // ── Action buttons ──
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(LucideIcons.home, size: 18),
+                      label: const Text('Về trang chủ'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.foreground,
+                        side: const BorderSide(color: AppColors.border),
+                        shape: AppBorders.shapeSm,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.smMd,
+                        ),
+                        textStyle: AppTypography.buttonMedium,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => context
+                          .read<NNCPlayBloc>()
+                          .add(const RestartGame()),
+                      icon: const Icon(LucideIcons.refreshCcw, size: 18),
+                      label: const Text('Chơi lại'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.primaryForeground,
+                        shape: AppBorders.shapeSm,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.smMd,
+                        ),
+                        textStyle: AppTypography.buttonMedium,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         );
       },
     );
   }
+}
 
-  Widget _buildScoreCard(NNCPlayFinished state, double percentage) {
+// ── _StatCard ──────────────────────────────────────────────────────────────
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.smMd,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: valueColor.withValues(alpha: 0.1),
         borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(
-          color: AppColors.border,
-          width: AppBorders.widthThin,
-        ),
+        border: Border.all(color: valueColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
           Text(
-            'Chính xác: ${state.correctCount}/${state.totalQuestions}',
-            style: AppTypography.h3.copyWith(color: AppColors.primary),
+            label,
+            style: AppTypography.labelSmall.copyWith(
+              color: valueColor,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            'Tỉ lệ: ${percentage.toStringAsFixed(0)}%',
-            style: AppTypography.labelLarge.copyWith(
-              color: AppColors.mutedForeground,
+            value,
+            style: AppTypography.h3.copyWith(
+              color: valueColor,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildDetailList(NNCPlayFinished state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Chi tiết',
-          style: AppTypography.h4.copyWith(color: AppColors.foreground),
-        ),
-        const SizedBox(height: AppSpacing.smMd),
-        ...List.generate(state.totalQuestions, (index) {
-          return _buildQuestionDetail(state, index);
-        }),
-      ],
-    );
-  }
+// ── _QuestionResultTile ────────────────────────────────────────────────────
 
-  Widget _buildQuestionDetail(NNCPlayFinished state, int index) {
-    final question = state.questions[index];
-    final userAnswerIndex = state.userAnswers[index];
-    final isAnswered = userAnswerIndex != -1;
-    final isCorrect =
-        isAnswered && userAnswerIndex == question.correctIndex;
+class _QuestionResultTile extends StatelessWidget {
+  const _QuestionResultTile({
+    required this.index,
+    required this.question,
+    required this.correctAnswer,
+    required this.userAnswer,
+    required this.explanation,
+    required this.isCorrect,
+    required this.hasAttempt,
+  });
 
-    final indicatorColor =
-        isCorrect ? AppColors.success : AppColors.destructive;
-    final bgColor = isCorrect
-        ? AppColors.success.withValues(alpha: 0.05)
-        : AppColors.destructive.withValues(alpha: 0.05);
+  final int index;
+  final String question;
+  final String correctAnswer;
+  final String userAnswer;
+  final String? explanation;
+  final bool isCorrect;
+  final bool hasAttempt;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isCorrect ? AppColors.success : AppColors.destructive;
 
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: isAnswered ? bgColor : AppColors.card,
-        borderRadius: AppBorders.borderRadiusMd,
+        color: hasAttempt
+            ? accent.withValues(alpha: 0.05)
+            : AppColors.muted.withValues(alpha: 0.4),
+        borderRadius: AppBorders.borderRadiusLg,
         border: Border.all(
-          color: isAnswered
-              ? indicatorColor.withValues(alpha: 0.3)
+          color: hasAttempt
+              ? accent.withValues(alpha: 0.3)
               : AppColors.border,
-          width: AppBorders.widthThin,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Question number + indicator
-          Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isAnswered
-                      ? indicatorColor.withValues(alpha: 0.15)
-                      : AppColors.muted,
-                  borderRadius: AppBorders.borderRadiusFull,
-                ),
-                child: Text(
-                  '${index + 1}',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: isAnswered
-                        ? indicatorColor
-                        : AppColors.mutedForeground,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.smMd),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'CÂU ${index + 1}',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.mutedForeground,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              if (isAnswered)
-                Icon(
-                  isCorrect ? Icons.check_circle : Icons.cancel,
-                  color: indicatorColor,
-                  size: 20,
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // Question content
-          Text(
-            question.question,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.foreground,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // User answer
-          if (isAnswered) ...[
-            Text(
-              'BẠN CHỌN',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.mutedForeground,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              question.options[userAnswerIndex],
-              style: AppTypography.labelMedium.copyWith(
-                color: indicatorColor,
-              ),
-            ),
-          ] else ...[
-            Text(
-              '(Bỏ trống)',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.mutedForeground,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-
-          // Correct answer (shown only when wrong or unanswered)
-          if (!isCorrect) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'ĐÁP ÁN',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.success,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              question.options[question.correctIndex],
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.success,
-              ),
-            ),
-          ],
-
-          // Explanation (if available)
-          if (question.explanation != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(
-                left: AppSpacing.smMd,
-                top: AppSpacing.sm,
-                bottom: AppSpacing.sm,
-              ),
-              decoration: const BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: AppColors.primary,
-                    width: AppBorders.widthThick,
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    question,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ),
-              child: Text(
-                question.explanation!,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.mutedForeground,
-                  fontStyle: FontStyle.italic,
-                ),
+                  const SizedBox(height: AppSpacing.xs),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Đáp án: ',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.mutedForeground,
+                          ),
+                        ),
+                        TextSpan(
+                          text: correctAnswer,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (hasAttempt && !isCorrect) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Bạn chọn: ',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.mutedForeground,
+                            ),
+                          ),
+                          TextSpan(
+                            text: userAnswer,
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.destructive,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (!hasAttempt) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      'Chưa trả lời',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.mutedForeground,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                  if (explanation != null && explanation!.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.smMd,
+                        top: AppSpacing.xs,
+                        bottom: AppSpacing.xs,
+                      ),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: AppColors.primary,
+                            width: AppBorders.widthThick,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        explanation!,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.mutedForeground,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
+            const SizedBox(width: AppSpacing.smMd),
+            Icon(
+              hasAttempt
+                  ? (isCorrect ? LucideIcons.checkCircle : LucideIcons.x)
+                  : LucideIcons.minusCircle,
+              size: 20,
+              color: hasAttempt ? accent : AppColors.mutedForeground,
+            ),
           ],
-        ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Column(
-      children: [
-        // "Chơi lại" button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => context.go(RoutePaths.home),
-            style: AppButtonStyles.primary,
-            child: Text(
-              'Chơi lại',
-              style: AppTypography.buttonLarge,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.smMd),
-
-        // "Trang chủ" button
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => context.go(RoutePaths.home),
-            style: AppButtonStyles.outline,
-            child: Text(
-              'Trang chủ',
-              style: AppTypography.buttonLarge,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

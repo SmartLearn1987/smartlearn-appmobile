@@ -118,19 +118,7 @@ class HCBPlayBloc extends Bloc<HCBPlayEvent, HCBPlayState> {
     if (s is! HCBInProgress || !s.isAutoPlaying) return;
 
     emit(s.copyWith(isFlipped: true));
-
-    // After showing back, wait 4s then advance (or stop if last card)
-    _autoPlayTimer = Timer(const Duration(seconds: 4), () {
-      final current = state;
-      if (current is HCBInProgress && current.isAutoPlaying) {
-        if (current.currentIndex >= current.questions.length - 1) {
-          // Last card — stop auto-play after showing back
-          add(const ToggleAutoPlay());
-        } else {
-          add(const _AutoPlayAdvance());
-        }
-      }
-    });
+    _scheduleAutoPlayStep();
   }
 
   void _onAutoPlayAdvance(
@@ -145,42 +133,39 @@ class HCBPlayBloc extends Bloc<HCBPlayEvent, HCBPlayState> {
       currentIndex: s.currentIndex + 1,
       isFlipped: false,
     ));
-
-    // Continue the cycle — schedule next flip
     _scheduleAutoPlayStep();
   }
 
   // ── Auto-play timer management ───────────────────────────────────────
 
-  /// Schedules the next auto-play step.
+  /// Auto-play cycle (mỗi bước cách nhau [_autoPlayInterval]):
   ///
-  /// Auto-play cycle:
-  /// 1. If front is showing → flip to back immediately
-  /// 2. Wait 4 seconds → advance to next card (front)
-  /// 3. Repeat until last card's back is shown
+  /// 1. Hiển thị mặt trước → đợi → lật sang mặt sau ([_AutoPlayFlip])
+  /// 2. Hiển thị mặt sau   → đợi → sang thẻ tiếp theo và lật về mặt
+  ///    trước ([_AutoPlayAdvance])
+  /// 3. Lặp lại cho đến khi hết thẻ, lúc đó tự dừng auto-play.
   void _scheduleAutoPlayStep() {
     _cancelAutoPlayTimer();
 
     final s = state;
     if (s is! HCBInProgress || !s.isAutoPlaying) return;
 
-    if (!s.isFlipped) {
-      // Front is showing — flip to back
-      add(const _AutoPlayFlip());
-    } else {
-      // Already showing back — wait then advance
-      _autoPlayTimer = Timer(const Duration(seconds: 4), () {
-        final current = state;
-        if (current is HCBInProgress && current.isAutoPlaying) {
-          if (current.currentIndex >= current.questions.length - 1) {
-            add(const ToggleAutoPlay());
-          } else {
-            add(const _AutoPlayAdvance());
-          }
-        }
-      });
-    }
+    _autoPlayTimer = Timer(_autoPlayInterval, () {
+      final current = state;
+      if (current is! HCBInProgress || !current.isAutoPlaying) return;
+
+      if (!current.isFlipped) {
+        add(const _AutoPlayFlip());
+      } else if (current.currentIndex >= current.questions.length - 1) {
+        // Hết thẻ → tự dừng auto-play sau khi hiển thị mặt sau
+        add(const ToggleAutoPlay());
+      } else {
+        add(const _AutoPlayAdvance());
+      }
+    });
   }
+
+  static const Duration _autoPlayInterval = Duration(seconds: 3);
 
   void _cancelAutoPlayTimer() {
     _autoPlayTimer?.cancel();

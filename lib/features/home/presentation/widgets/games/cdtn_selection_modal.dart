@@ -107,9 +107,13 @@ class _CDTNSelectionModalState extends State<CDTNSelectionModal> {
         return;
       }
       Navigator.of(context).pop();
-      context.go(
+      context.push(
         RoutePaths.cdtnPlay,
-        extra: {'questions': questions, 'timeInMinutes': _selectedTime},
+        extra: {
+          'questions': questions,
+          'timeInMinutes': _selectedTime,
+          'level': levelValueAt(_selectedLevel),
+        },
       );
     });
   }

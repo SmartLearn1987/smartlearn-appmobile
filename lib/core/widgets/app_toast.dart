@@ -17,32 +17,20 @@ abstract final class AppToast {
   static const _alignment = Alignment.topCenter;
 
   /// Shows a success toast (green).
-  static void success(BuildContext context, String message) => _show(
-        context,
-        message,
-        ToastificationType.success,
-      );
+  static void success(BuildContext context, String message) =>
+      _show(context, message, ToastificationType.success);
 
   /// Shows an error toast (red).
-  static void error(BuildContext context, String message) => _show(
-        context,
-        message,
-        ToastificationType.error,
-      );
+  static void error(BuildContext context, String message) =>
+      _show(context, message, ToastificationType.error);
 
   /// Shows an info toast (blue).
-  static void info(BuildContext context, String message) => _show(
-        context,
-        message,
-        ToastificationType.info,
-      );
+  static void info(BuildContext context, String message) =>
+      _show(context, message, ToastificationType.info);
 
   /// Shows a warning toast (amber).
-  static void warning(BuildContext context, String message) => _show(
-        context,
-        message,
-        ToastificationType.warning,
-      );
+  static void warning(BuildContext context, String message) =>
+      _show(context, message, ToastificationType.warning);
 
   static void _show(
     BuildContext context,
@@ -52,8 +40,13 @@ abstract final class AppToast {
     toastification.show(
       context: context,
       type: type,
-      style: ToastificationStyle.fillColored,
-      title: Text(message),
+      style: ToastificationStyle.minimal,
+      title: Text(
+        message,
+        softWrap: true,
+        overflow: TextOverflow.visible,
+        maxLines: 10,
+      ),
       alignment: _alignment,
       autoCloseDuration: _duration,
       showProgressBar: false,

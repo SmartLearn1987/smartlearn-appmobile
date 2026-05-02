@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../router/route_names.dart';
 import '../../../home/domain/entities/learning_question_entity.dart';
 import '../bloc/hcb_play_bloc.dart';
 import '../widgets/control_bar_widget.dart';
@@ -17,54 +16,53 @@ class HCBPlayScreen extends StatelessWidget {
   const HCBPlayScreen({
     required this.questions,
     required this.generalQuestion,
+    required this.categoryName,
     super.key,
   });
 
   final List<LearningQuestionEntity> questions;
   final String generalQuestion;
+  final String categoryName;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => HCBPlayBloc()
-        ..add(StartGame(
-          questions: questions,
-          generalQuestion: generalQuestion,
-        )),
-      child: const _HCBPlayView(),
+        ..add(
+          StartGame(questions: questions, generalQuestion: generalQuestion),
+        ),
+      child: _HCBPlayView(categoryName: categoryName),
     );
   }
 }
 
 class _HCBPlayView extends StatelessWidget {
-  const _HCBPlayView();
+  const _HCBPlayView({required this.categoryName});
+
+  final String categoryName;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(
-          onPressed: () => context.go(RoutePaths.home),
-        ),
-        title: Text(
-          'Học cùng bé',
-          style: AppTypography.h4.copyWith(color: AppColors.foreground),
-        ),
+        leading: BackButton(onPressed: () => context.pop()),
+        title: Text(categoryName),
         centerTitle: true,
       ),
       backgroundColor: AppColors.background,
-      body: BlocBuilder<HCBPlayBloc, HCBPlayState>(
-        builder: (context, state) => switch (state) {
-          HCBInitial() => const SizedBox.shrink(),
-          HCBLoading() => const _HCBLoadingView(),
-          HCBInProgress() => _HCBInProgressView(state: state),
-          HCBError() => _HCBErrorView(message: state.message),
-        },
+      body: SafeArea(
+        child: BlocBuilder<HCBPlayBloc, HCBPlayState>(
+          builder: (context, state) => switch (state) {
+            HCBInitial() => const SizedBox.shrink(),
+            HCBLoading() => const _HCBLoadingView(),
+            HCBInProgress() => _HCBInProgressView(state: state),
+            HCBError() => _HCBErrorView(message: state.message),
+          },
+        ),
       ),
     );
   }
 }
-
 
 // ─── Loading View ────────────────────────────────────────────────────────
 
@@ -145,16 +143,13 @@ class _HCBInProgressView extends StatelessWidget {
         // Flashcard
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.mdLg,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
             child: FlashcardWidget(
               imageUrl: question.imageUrl,
               generalQuestion: state.generalQuestion,
               answer: question.answer,
               isFlipped: state.isFlipped,
-              onFlip: () =>
-                  context.read<HCBPlayBloc>().add(const FlipCard()),
+              onFlip: () => context.read<HCBPlayBloc>().add(const FlipCard()),
             ),
           ),
         ),
@@ -165,8 +160,7 @@ class _HCBInProgressView extends StatelessWidget {
           isAutoPlaying: state.isAutoPlaying,
           onPrevious: () =>
               context.read<HCBPlayBloc>().add(const PreviousCard()),
-          onNext: () =>
-              context.read<HCBPlayBloc>().add(const NextCard()),
+          onNext: () => context.read<HCBPlayBloc>().add(const NextCard()),
           onToggleAutoPlay: () =>
               context.read<HCBPlayBloc>().add(const ToggleAutoPlay()),
           onShuffle: () =>
@@ -208,7 +202,7 @@ class _HCBErrorView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
-              onPressed: () => context.go(RoutePaths.home),
+              onPressed: () => context.pop(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.primaryForeground,

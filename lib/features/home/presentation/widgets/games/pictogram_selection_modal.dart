@@ -111,9 +111,13 @@ class _PictogramSelectionModalState extends State<PictogramSelectionModal> {
         return;
       }
       Navigator.of(context).pop();
-      context.go(
+      context.push(
         RoutePaths.pictogramPlay,
-        extra: {'questions': questions, 'timeInMinutes': _selectedTime},
+        extra: {
+          'questions': questions,
+          'timeInMinutes': _selectedTime,
+          'level': levelValueAt(_selectedLevel),
+        },
       );
     });
   }

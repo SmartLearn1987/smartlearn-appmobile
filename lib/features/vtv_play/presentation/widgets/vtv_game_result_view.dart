@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/theme.dart';
-import '../../../../router/route_names.dart';
 import '../bloc/answer_status.dart';
 import '../bloc/vtv_play_bloc.dart';
 
@@ -109,7 +108,7 @@ class VTVGameResultView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => context.go(RoutePaths.home),
+                      onPressed: () => context.pop(),
                       icon: const Icon(LucideIcons.home, size: 18),
                       label: const Text('Về trang chủ'),
                       style: OutlinedButton.styleFrom(

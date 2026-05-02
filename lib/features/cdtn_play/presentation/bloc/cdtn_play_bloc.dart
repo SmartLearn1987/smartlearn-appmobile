@@ -16,23 +16,31 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
 
   CDTNPlayBloc() : super(const CDTNPlayInitial()) {
     on<StartGame>(_onStartGame);
-    on<ReorderWords>(_onReorderWords);
+    on<SelectWord>(_onSelectWord);
+    on<UnselectWord>(_onUnselectWord);
+    on<ClearArrangement>(_onClearArrangement);
     on<CheckAnswer>(_onCheckAnswer);
     on<TimerTick>(_onTimerTick);
     on<NextQuestion>(_onNextQuestion);
     on<PreviousQuestion>(_onPreviousQuestion);
     on<GoToQuestion>(_onGoToQuestion);
     on<EndGame>(_onEndGame);
+    on<RestartGame>(_onRestartGame);
   }
 
   void _onStartGame(StartGame event, Emitter<CDTNPlayState> emit) {
     _totalSeconds = event.timeInMinutes * 60;
-    final arrangements = initializeWordArrangements(event.questions);
+    final allWords = initializeShuffledWords(event.questions);
+    final arrangements = List<List<WordItem>>.generate(
+      event.questions.length,
+      (_) => <WordItem>[],
+    );
 
     emit(CDTNPlayInProgress(
       questions: event.questions,
       currentIndex: 0,
       remainingSeconds: _totalSeconds,
+      allWords: allWords,
       userWordArrangements: arrangements,
       checkStatus: null,
     ));
@@ -43,26 +51,72 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
     });
   }
 
-  void _onReorderWords(ReorderWords event, Emitter<CDTNPlayState> emit) {
+  void _onSelectWord(SelectWord event, Emitter<CDTNPlayState> emit) {
     final s = state;
     if (s is! CDTNPlayInProgress) return;
 
-    final currentWords = List<WordItem>.from(
-      s.userWordArrangements[s.currentIndex],
-    );
-    final item = currentWords.removeAt(event.oldIndex);
-    currentWords.insert(
-      event.oldIndex < event.newIndex ? event.newIndex - 1 : event.newIndex,
-      item,
-    );
+    final pool = s.allWords[s.currentIndex];
+    final selected = s.userWordArrangements[s.currentIndex];
 
+    final word = pool.firstWhere(
+      (w) => w.id == event.wordId,
+      orElse: () => const WordItem(id: '', word: ''),
+    );
+    if (word.id.isEmpty) return;
+    if (selected.any((w) => w.id == word.id)) return;
+
+    final newSelected = List<WordItem>.from(selected)..add(word);
     final newArrangements = List<List<WordItem>>.from(s.userWordArrangements);
-    newArrangements[s.currentIndex] = currentWords;
+    newArrangements[s.currentIndex] = newSelected;
 
     emit(CDTNPlayInProgress(
       questions: s.questions,
       currentIndex: s.currentIndex,
       remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
+      userWordArrangements: newArrangements,
+      checkStatus: null,
+    ));
+  }
+
+  void _onUnselectWord(UnselectWord event, Emitter<CDTNPlayState> emit) {
+    final s = state;
+    if (s is! CDTNPlayInProgress) return;
+
+    final selected = s.userWordArrangements[s.currentIndex];
+    final newSelected =
+        selected.where((w) => w.id != event.wordId).toList(growable: false);
+    if (newSelected.length == selected.length) return;
+
+    final newArrangements = List<List<WordItem>>.from(s.userWordArrangements);
+    newArrangements[s.currentIndex] = newSelected;
+
+    emit(CDTNPlayInProgress(
+      questions: s.questions,
+      currentIndex: s.currentIndex,
+      remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
+      userWordArrangements: newArrangements,
+      checkStatus: null,
+    ));
+  }
+
+  void _onClearArrangement(
+    ClearArrangement event,
+    Emitter<CDTNPlayState> emit,
+  ) {
+    final s = state;
+    if (s is! CDTNPlayInProgress) return;
+    if (s.userWordArrangements[s.currentIndex].isEmpty) return;
+
+    final newArrangements = List<List<WordItem>>.from(s.userWordArrangements);
+    newArrangements[s.currentIndex] = const <WordItem>[];
+
+    emit(CDTNPlayInProgress(
+      questions: s.questions,
+      currentIndex: s.currentIndex,
+      remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
       userWordArrangements: newArrangements,
       checkStatus: null,
     ));
@@ -81,6 +135,7 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
       questions: s.questions,
       currentIndex: s.currentIndex,
       remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
       userWordArrangements: s.userWordArrangements,
       checkStatus: isCorrect ? CheckStatus.correct : CheckStatus.incorrect,
     ));
@@ -101,6 +156,7 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
       questions: s.questions,
       currentIndex: s.currentIndex,
       remainingSeconds: newRemaining,
+      allWords: s.allWords,
       userWordArrangements: s.userWordArrangements,
       checkStatus: s.checkStatus,
     ));
@@ -115,6 +171,7 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
       questions: s.questions,
       currentIndex: s.currentIndex + 1,
       remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
       userWordArrangements: s.userWordArrangements,
       checkStatus: null,
     ));
@@ -132,6 +189,7 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
       questions: s.questions,
       currentIndex: s.currentIndex - 1,
       remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
       userWordArrangements: s.userWordArrangements,
       checkStatus: null,
     ));
@@ -146,6 +204,7 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
       questions: s.questions,
       currentIndex: event.index,
       remainingSeconds: s.remainingSeconds,
+      allWords: s.allWords,
       userWordArrangements: s.userWordArrangements,
       checkStatus: null,
     ));
@@ -172,8 +231,19 @@ class CDTNPlayBloc extends Bloc<CDTNPlayEvent, CDTNPlayState> {
     ));
   }
 
-  /// Splits each question's content into words, assigns unique IDs, and shuffles.
-  static List<List<WordItem>> initializeWordArrangements(
+  void _onRestartGame(RestartGame event, Emitter<CDTNPlayState> emit) {
+    final s = state;
+    if (s is! CDTNPlayFinished) return;
+
+    add(StartGame(
+      questions: s.questions,
+      timeInMinutes: _totalSeconds ~/ 60,
+    ));
+  }
+
+  /// Splits each question's content into words, assigns unique IDs, and shuffles
+  /// to produce the immutable pool used as the source of choices.
+  static List<List<WordItem>> initializeShuffledWords(
     List<ProverbEntity> questions,
   ) {
     final random = Random();

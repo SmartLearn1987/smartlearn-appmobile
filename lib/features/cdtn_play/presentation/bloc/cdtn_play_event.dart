@@ -14,14 +14,32 @@ final class StartGame extends CDTNPlayEvent {
   List<Object?> get props => [questions, timeInMinutes];
 }
 
-final class ReorderWords extends CDTNPlayEvent {
-  final int oldIndex;
-  final int newIndex;
+/// Chọn một từ ở pool → thêm vào cuối danh sách đáp án.
+final class SelectWord extends CDTNPlayEvent {
+  final String wordId;
 
-  const ReorderWords({required this.oldIndex, required this.newIndex});
+  const SelectWord({required this.wordId});
 
   @override
-  List<Object?> get props => [oldIndex, newIndex];
+  List<Object?> get props => [wordId];
+}
+
+/// Bỏ chọn một từ trong đáp án → trả về pool (theo thứ tự gốc).
+final class UnselectWord extends CDTNPlayEvent {
+  final String wordId;
+
+  const UnselectWord({required this.wordId});
+
+  @override
+  List<Object?> get props => [wordId];
+}
+
+/// Xoá toàn bộ đáp án của câu hiện tại.
+final class ClearArrangement extends CDTNPlayEvent {
+  const ClearArrangement();
+
+  @override
+  List<Object?> get props => [];
 }
 
 final class CheckAnswer extends CDTNPlayEvent {
@@ -63,6 +81,14 @@ final class GoToQuestion extends CDTNPlayEvent {
 
 final class EndGame extends CDTNPlayEvent {
   const EndGame();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// Chơi lại với đúng bộ câu hỏi và thời gian ban đầu.
+final class RestartGame extends CDTNPlayEvent {
+  const RestartGame();
 
   @override
   List<Object?> get props => [];
