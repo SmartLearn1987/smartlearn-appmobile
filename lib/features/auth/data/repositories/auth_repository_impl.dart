@@ -142,6 +142,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteAccount({
+    required String userId,
+    required String reason,
+  }) async {
+    try {
+      await _remoteDatasource.deleteAccount(userId, {'reason': reason});
+      await _localDatasource.clearTokens();
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: extractDioErrorMessage(e)));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
+    }
+  }
+
+  @override
   Future<Either<Failure, String>> uploadFile(File file) async {
     try {
       final url = await _remoteDatasource.uploadFile(file);

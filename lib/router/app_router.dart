@@ -42,6 +42,7 @@ import 'package:smart_learn/features/lessons/presentation/pages/lesson_form_page
 import 'package:smart_learn/features/lessons/presentation/pages/lesson_management_page.dart';
 import 'package:smart_learn/features/lessons/presentation/pages/lesson_review_page.dart';
 import 'package:smart_learn/features/auth/presentation/pages/splash_page.dart';
+import 'package:smart_learn/features/web_view/presentation/pages/web_view_page.dart';
 import 'package:smart_learn/router/go_router_refresh_stream.dart';
 import 'package:smart_learn/router/route_names.dart';
 
@@ -235,6 +236,23 @@ class AppRouter {
           name: RouteNames.profile,
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: RoutePaths.webView,
+          name: RouteNames.webView,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! Map<String, dynamic>) {
+              return const _RedirectToHome();
+            }
+            final url = extra['url'] as String?;
+            final title = extra['title'] as String?;
+            if (url == null || title == null) {
+              return const _RedirectToHome();
+            }
+            return WebViewPage(url: url, title: title);
+          },
         ),
         GoRoute(
           path: RoutePaths.focusFullscreen,

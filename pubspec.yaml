@@ -1,7 +1,7 @@
 name: smart_learn
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.8
+version: 0.1.10
 
 environment:
   sdk: ^3.11.4
@@ -48,6 +48,9 @@ dependencies:
 
   # Text-to-Speech
   flutter_tts: ^4.2.5
+
+  # WebView
+  flutter_inappwebview: ^6.1.5
 
   # Utils
   logger: ^2.5.0

@@ -34,5 +34,10 @@ abstract class AuthRepository {
     String newPassword,
   );
 
+  Future<Either<Failure, void>> deleteAccount({
+    required String userId,
+    required String reason,
+  });
+
   Future<Either<Failure, String>> uploadFile(File file);
 }

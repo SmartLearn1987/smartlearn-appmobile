@@ -40,6 +40,12 @@ abstract class AuthRemoteDatasource {
     @Body() Map<String, dynamic> body,
   );
 
+  @DELETE('/users/{id}')
+  Future<void> deleteAccount(
+    @Path('id') String userId,
+    @Body() Map<String, dynamic> body,
+  );
+
   @POST('/upload')
   @MultiPart()
   Future<String> uploadFile(

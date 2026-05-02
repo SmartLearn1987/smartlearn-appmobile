@@ -59,3 +59,16 @@ final class ProfileError extends ProfileState {
   @override
   List<Object?> get props => [message];
 }
+
+final class AccountDeleting extends ProfileState {
+  final UserEntity user;
+
+  const AccountDeleting(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}
+
+final class AccountDeleted extends ProfileState {
+  const AccountDeleted();
+}

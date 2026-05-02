@@ -34,6 +34,8 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/change_password_usecase.dart'
     as _i788;
+import '../../features/auth/domain/usecases/delete_account_usecase.dart'
+    as _i914;
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart'
     as _i560;
 import '../../features/auth/domain/usecases/get_profile_usecase.dart' as _i568;
@@ -235,9 +237,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.dio(gh<_i388.AuthInterceptor>()),
     );
-    gh.factory<_i130.DictationPlayBloc>(
-      () => _i130.DictationPlayBloc(gh<_i900.GetRandomDictationUseCase>()),
-    );
     gh.lazySingleton<_i161.AuthRemoteDatasource>(
       () => authRemoteModule.authRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -282,6 +281,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i788.ChangePasswordUseCase>(
       () => _i788.ChangePasswordUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.factory<_i914.DeleteAccountUseCase>(
+      () => _i914.DeleteAccountUseCase(gh<_i787.AuthRepository>()),
     );
     gh.factory<_i560.ForgotPasswordUseCase>(
       () => _i560.ForgotPasswordUseCase(gh<_i787.AuthRepository>()),
@@ -428,14 +430,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i765.UploadImageUseCase>(
       () => _i765.UploadImageUseCase(gh<_i640.SubjectsRepository>()),
     );
-    gh.factory<_i124.ProfileBloc>(
-      () => _i124.ProfileBloc(
-        gh<_i568.GetProfileUseCase>(),
-        gh<_i798.UpdateProfileUseCase>(),
-        gh<_i788.ChangePasswordUseCase>(),
-        gh<_i797.AuthBloc>(),
-      ),
-    );
     gh.lazySingleton<_i376.GetAllSubjectsUseCase>(
       () => _i376.GetAllSubjectsUseCase(gh<_i0.HomeRepository>()),
     );
@@ -483,11 +477,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i518.QuizletDetailBloc>(
       () => _i518.QuizletDetailBloc(gh<_i595.GetQuizletDetailUseCase>()),
     );
+    gh.factory<_i124.ProfileBloc>(
+      () => _i124.ProfileBloc(
+        gh<_i568.GetProfileUseCase>(),
+        gh<_i798.UpdateProfileUseCase>(),
+        gh<_i788.ChangePasswordUseCase>(),
+        gh<_i914.DeleteAccountUseCase>(),
+        gh<_i797.AuthBloc>(),
+      ),
+    );
     gh.factory<_i252.QuizletBloc>(
       () => _i252.QuizletBloc(
         gh<_i1064.GetQuizletsUseCase>(),
         gh<_i231.DeleteQuizletUseCase>(),
       ),
+    );
+    gh.factory<_i130.DictationPlayBloc>(
+      () => _i130.DictationPlayBloc(gh<_i900.GetRandomDictationUseCase>()),
     );
     gh.factory<_i496.QuizletCreateBloc>(
       () => _i496.QuizletCreateBloc(

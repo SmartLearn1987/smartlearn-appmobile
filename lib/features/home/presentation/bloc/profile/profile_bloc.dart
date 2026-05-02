@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:smart_learn/core/usecase/usecase.dart';
 import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/domain/usecases/change_password_usecase.dart';
+import 'package:smart_learn/features/auth/domain/usecases/delete_account_usecase.dart';
 import 'package:smart_learn/features/auth/domain/usecases/get_profile_usecase.dart';
 import 'package:smart_learn/features/auth/domain/usecases/update_profile_usecase.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
@@ -16,17 +17,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetProfileUseCase _getProfileUseCase;
   final UpdateProfileUseCase _updateProfileUseCase;
   final ChangePasswordUseCase _changePasswordUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
   final AuthBloc _authBloc;
 
   ProfileBloc(
     this._getProfileUseCase,
     this._updateProfileUseCase,
     this._changePasswordUseCase,
+    this._deleteAccountUseCase,
     this._authBloc,
   ) : super(const ProfileInitial()) {
     on<LoadProfile>(_onLoadProfile);
     on<UpdateProfile>(_onUpdateProfile);
     on<ChangePassword>(_onChangePassword);
+    on<AccountDeleteRequested>(_onAccountDeleteRequested);
   }
 
   UserEntity? _getCurrentUser() {
@@ -99,6 +103,32 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(failure.message)),
       (_) => emit(ProfilePasswordChanged(currentUser)),
+    );
+  }
+
+  Future<void> _onAccountDeleteRequested(
+    AccountDeleteRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    final currentUser = _getCurrentUser();
+    if (currentUser == null) {
+      emit(const ProfileError('Không tìm thấy thông tin người dùng'));
+      return;
+    }
+
+    emit(AccountDeleting(currentUser));
+    final result = await _deleteAccountUseCase(
+      DeleteAccountParams(
+        userId: currentUser.id,
+        reason: event.reason,
+      ),
+    );
+    result.fold(
+      (failure) => emit(ProfileError(failure.message)),
+      (_) {
+        emit(const AccountDeleted());
+        _authBloc.add(AuthLogoutRequested());
+      },
     );
   }
 }
