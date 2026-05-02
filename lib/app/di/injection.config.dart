@@ -236,7 +236,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => dioModule.dio(gh<_i388.AuthInterceptor>()),
     );
     gh.factory<_i130.DictationPlayBloc>(
-      () => _i130.DictationPlayBloc(gh<_i643.TtsService>()),
+      () => _i130.DictationPlayBloc(gh<_i900.GetRandomDictationUseCase>()),
     );
     gh.lazySingleton<_i161.AuthRemoteDatasource>(
       () => authRemoteModule.authRemoteDatasource(gh<_i361.Dio>()),

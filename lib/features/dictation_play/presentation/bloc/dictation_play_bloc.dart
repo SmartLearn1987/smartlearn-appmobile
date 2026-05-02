@@ -4,8 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/services/tts_service.dart';
 import '../../../home/domain/entities/dictation_entity.dart';
+import '../../../home/domain/usecases/get_random_dictation.dart';
 import '../../domain/utils/compare_words.dart';
 import '../../domain/value_objects/dictation_result.dart';
 import '../../domain/value_objects/word_comparison.dart';
@@ -15,74 +15,36 @@ part 'dictation_play_state.dart';
 
 @injectable
 class DictationPlayBloc extends Bloc<DictationPlayEvent, DictationPlayState> {
-  final TtsService _ttsService;
-  StreamSubscription<TtsState>? _ttsSubscription;
-
-  DictationPlayBloc(this._ttsService) : super(const DictationPlayInitial()) {
+  DictationPlayBloc(this._getRandomDictation)
+    : super(const DictationPlayInitial()) {
     on<StartDictation>(_onStartDictation);
-    on<PlayAudio>(_onPlayAudio);
-    on<ReplayAudio>(_onReplayAudio);
     on<UpdateUserInput>(_onUpdateUserInput);
     on<SubmitAnswer>(_onSubmitAnswer);
     on<PlayAgain>(_onPlayAgain);
-    on<_TtsStateChanged>(_onTtsStateChanged);
-
-    _ttsSubscription = _ttsService.stateStream.listen((ttsState) {
-      add(_TtsStateChanged(ttsState: ttsState));
-    });
+    on<TimerTick>(_onTimerTick);
+    on<LoadNewDictation>(_onLoadNewDictation);
   }
+
+  final GetRandomDictationUseCase _getRandomDictation;
+  Timer? _timer;
 
   void _onStartDictation(
     StartDictation event,
     Emitter<DictationPlayState> emit,
   ) {
     emit(DictationPlayInProgress(entity: event.entity));
-    _ttsService.speak(event.entity.content, event.entity.language);
-  }
-
-  void _onPlayAudio(
-    PlayAudio event,
-    Emitter<DictationPlayState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is! DictationPlayInProgress) return;
-
-    emit(DictationPlayInProgress(
-      entity: currentState.entity,
-      userInput: currentState.userInput,
-      isPlaying: true,
-      wordCount: currentState.wordCount,
-    ));
-    _ttsService.speak(currentState.entity.content, currentState.entity.language);
-  }
-
-  void _onReplayAudio(
-    ReplayAudio event,
-    Emitter<DictationPlayState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is! DictationPlayInProgress) return;
-
-    emit(DictationPlayInProgress(
-      entity: currentState.entity,
-      userInput: currentState.userInput,
-      isPlaying: true,
-      wordCount: currentState.wordCount,
-    ));
-    _ttsService.speak(currentState.entity.content, currentState.entity.language);
+    _restartTimer();
   }
 
   void _onUpdateUserInput(
     UpdateUserInput event,
     Emitter<DictationPlayState> emit,
   ) {
-    final currentState = state;
-    if (currentState is! DictationPlayInProgress) return;
+    final s = state;
+    if (s is! DictationPlayInProgress) return;
 
-    emit(DictationPlayInProgress(
-      entity: currentState.entity,
+    emit(s.copyWith(
       userInput: event.text,
-      isPlaying: currentState.isPlaying,
       wordCount: countWords(event.text),
     ));
   }
@@ -91,19 +53,23 @@ class DictationPlayBloc extends Bloc<DictationPlayEvent, DictationPlayState> {
     SubmitAnswer event,
     Emitter<DictationPlayState> emit,
   ) {
-    final currentState = state;
-    if (currentState is! DictationPlayInProgress) return;
+    final s = state;
+    if (s is! DictationPlayInProgress) return;
+
+    _timer?.cancel();
+    _timer = null;
 
     final (wordComparisons, result) = compareWords(
-      currentState.entity.content,
-      currentState.userInput,
+      s.entity.content,
+      s.userInput,
     );
 
     emit(DictationPlayFinished(
-      entity: currentState.entity,
-      userInput: currentState.userInput,
+      entity: s.entity,
+      userInput: s.userInput,
       result: result,
       wordComparisons: wordComparisons,
+      elapsedSeconds: s.elapsedSeconds,
     ));
   }
 
@@ -111,33 +77,83 @@ class DictationPlayBloc extends Bloc<DictationPlayEvent, DictationPlayState> {
     PlayAgain event,
     Emitter<DictationPlayState> emit,
   ) {
-    // PlayAgain is handled by the UI (navigation), emit initial state.
-    emit(const DictationPlayInitial());
+    final s = state;
+    if (s is! DictationPlayFinished) return;
+    emit(DictationPlayInProgress(entity: s.entity));
+    _restartTimer();
   }
 
-  void _onTtsStateChanged(
-    _TtsStateChanged event,
+  void _onTimerTick(TimerTick event, Emitter<DictationPlayState> emit) {
+    final s = state;
+    if (s is! DictationPlayInProgress) return;
+    emit(s.copyWith(elapsedSeconds: s.elapsedSeconds + 1));
+  }
+
+  Future<void> _onLoadNewDictation(
+    LoadNewDictation event,
     Emitter<DictationPlayState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is! DictationPlayInProgress) return;
+  ) async {
+    final s = state;
 
-    final isPlaying = event.ttsState == TtsState.playing;
-
-    if (currentState.isPlaying != isPlaying) {
-      emit(DictationPlayInProgress(
-        entity: currentState.entity,
-        userInput: currentState.userInput,
-        isPlaying: isPlaying,
-        wordCount: currentState.wordCount,
-      ));
+    final DictationEntity sourceEntity;
+    if (s is DictationPlayInProgress) {
+      if (s.isLoadingNew) return;
+      sourceEntity = s.entity;
+      emit(s.copyWith(isLoadingNew: true, clearErrorMessage: true));
+    } else if (s is DictationPlayFinished) {
+      if (s.isLoadingNew) return;
+      sourceEntity = s.entity;
+      emit(s.copyWith(isLoadingNew: true, clearErrorMessage: true));
+    } else {
+      return;
     }
+
+    final result = await _getRandomDictation(
+      DictationParams(
+        level: sourceEntity.level,
+        language: sourceEntity.language,
+      ),
+    );
+
+    result.fold(
+      (failure) {
+        final current = state;
+        if (current is DictationPlayInProgress) {
+          emit(current.copyWith(
+            isLoadingNew: false,
+            errorMessage: failure.message,
+          ));
+        } else if (current is DictationPlayFinished) {
+          emit(current.copyWith(
+            isLoadingNew: false,
+            errorMessage: failure.message,
+          ));
+        }
+      },
+      (newEntity) {
+        emit(DictationPlayInProgress(entity: newEntity));
+        _restartTimer();
+      },
+    );
+  }
+
+  void _restartTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      add(const TimerTick());
+    });
   }
 
   @override
   Future<void> close() {
-    _ttsSubscription?.cancel();
-    _ttsService.stop();
+    _timer?.cancel();
     return super.close();
   }
+}
+
+/// Format giây thành chuỗi MM:SS.
+String formatElapsed(int seconds) {
+  final minutes = seconds ~/ 60;
+  final secs = seconds % 60;
+  return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
 }

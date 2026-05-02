@@ -17,16 +17,6 @@ final class StartDictation extends DictationPlayEvent {
   List<Object?> get props => [entity];
 }
 
-/// Phát âm thanh lần đầu.
-final class PlayAudio extends DictationPlayEvent {
-  const PlayAudio();
-}
-
-/// Phát lại âm thanh.
-final class ReplayAudio extends DictationPlayEvent {
-  const ReplayAudio();
-}
-
 /// Cập nhật nội dung người dùng gõ.
 final class UpdateUserInput extends DictationPlayEvent {
   final String text;
@@ -42,17 +32,17 @@ final class SubmitAnswer extends DictationPlayEvent {
   const SubmitAnswer();
 }
 
-/// Chơi lại (quay về trang chủ).
+/// Chơi lại — quay về trạng thái nhập liệu với cùng đề bài.
 final class PlayAgain extends DictationPlayEvent {
   const PlayAgain();
 }
 
-/// Internal event — TTS playback state changed.
-final class _TtsStateChanged extends DictationPlayEvent {
-  final TtsState ttsState;
+/// Tick mỗi giây để tăng thời gian đã trôi qua.
+final class TimerTick extends DictationPlayEvent {
+  const TimerTick();
+}
 
-  const _TtsStateChanged({required this.ttsState});
-
-  @override
-  List<Object?> get props => [ttsState];
+/// Lấy ngẫu nhiên một bài chép chính tả khác (cùng level + language).
+final class LoadNewDictation extends DictationPlayEvent {
+  const LoadNewDictation();
 }

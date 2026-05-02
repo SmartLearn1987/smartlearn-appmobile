@@ -1,196 +1,186 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/theme.dart';
+import '../../../home/domain/entities/dictation_entity.dart';
 import '../../domain/value_objects/dictation_result.dart';
 import '../../domain/value_objects/word_comparison.dart';
+import 'dictation_card.dart';
 
-/// Displays the dictation game result after the user submits their answer.
+/// Hiển thị màn hình kết quả sau khi người dùng nộp bài chép chính tả.
 ///
-/// Shows:
-/// - Accuracy percentage prominently (e.g., "85%") with correctWords/totalWords
-/// - Original content with color-coded words: green (correct) / red (incorrect)
-/// - User's typed content for comparison
-/// - "Chơi lại" (Play Again) and "Về trang chủ" (Go Home) buttons
+/// Bố cục (cuộn dọc):
+///   1. TIÊU ĐỀ      — card hiển thị tên bài
+///   2. NỘI DUNG     — card hiển thị đoạn gốc, từ đúng (xanh) / sai (đỏ)
+///   3. Chép chính tả * — card hiển thị phần user đã gõ (read-only, mờ)
+///   4. Banner điểm   — trophy + % chính xác + nhận xét (đổi màu theo điểm)
+///   5. Card chi tiết — tổng số từ / từ đúng / từ sai / thời gian + progress
+///   6. Hành động     — "Thử lại" (outlined) + "Bài mới" (filled)
 class DictationResultView extends StatelessWidget {
   const DictationResultView({
+    required this.entity,
     required this.result,
     required this.wordComparisons,
     required this.userInput,
-    required this.onPlayAgain,
-    required this.onGoHome,
+    required this.elapsedSeconds,
+    required this.isLoadingNew,
+    required this.onTryAgain,
+    required this.onLoadNew,
     super.key,
   });
 
-  /// The dictation result containing accuracy and word counts.
+  final DictationEntity entity;
   final DictationResult result;
-
-  /// Per-word comparison data for color-coding original content.
   final List<WordComparison> wordComparisons;
-
-  /// The user's typed content.
   final String userInput;
-
-  /// Callback when the user taps "Chơi lại".
-  final VoidCallback onPlayAgain;
-
-  /// Callback when the user taps "Về trang chủ".
-  final VoidCallback onGoHome;
+  final int elapsedSeconds;
+  final bool isLoadingNew;
+  final VoidCallback onTryAgain;
+  final VoidCallback onLoadNew;
 
   @override
   Widget build(BuildContext context) {
-    final accuracyPercent = (result.accuracy * 100).round();
+    final accuracy = result.accuracy;
+    final accuracyPercent = (accuracy * 100).round();
+    final tier = _ResultTier.from(accuracy);
+    final wrongWords = result.totalWords - result.correctWords;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Trophy icon
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: AppBorders.borderRadiusFull,
-              ),
-              child: const Icon(
-                Icons.emoji_events_rounded,
-                size: 48,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Title
-            Text(
-              'Kết quả',
-              style: AppTypography.h2.copyWith(color: AppColors.foreground),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Accuracy percentage card
-            _AccuracyCard(
-              accuracyPercent: accuracyPercent,
-              correctWords: result.correctWords,
-              totalWords: result.totalWords,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Original content with color-coded words
-            _ContentSection(
-              title: 'Nội dung gốc',
-              child: _ColorCodedOriginalContent(
-                wordComparisons: wordComparisons,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // User's typed content
-            _ContentSection(
-              title: 'Nội dung bạn đã gõ',
-              child: Text(
-                userInput.isEmpty ? '(Trống)' : userInput,
-                style: AppTypography.bodyLarge.copyWith(
-                  color: userInput.isEmpty
-                      ? AppColors.mutedForeground
-                      : AppColors.foreground,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Play Again button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onPlayAgain,
-                style: AppButtonStyles.primary,
-                child: Text(
-                  'Chơi lại',
-                  style: AppTypography.buttonLarge,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.smMd),
-
-            // Go Home button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: onGoHome,
-                style: AppButtonStyles.outline,
-                child: Text(
-                  'Về trang chủ',
-                  style: AppTypography.buttonLarge,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Displays accuracy percentage and correct/total word counts.
-class _AccuracyCard extends StatelessWidget {
-  const _AccuracyCard({
-    required this.accuracyPercent,
-    required this.correctWords,
-    required this.totalWords,
-  });
-
-  final int accuracyPercent;
-  final int correctWords;
-  final int totalWords;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(
-          color: AppColors.border,
-          width: AppBorders.widthThin,
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.mdLg,
+        AppSpacing.md,
+        AppSpacing.mdLg,
+        AppSpacing.lg,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Tỷ lệ chính xác',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.mutedForeground,
+          // ─── TIÊU ĐỀ ───
+          const DictationSectionLabel(label: 'TIÊU ĐỀ'),
+          const SizedBox(height: AppSpacing.sm),
+          DictationCard(
+            child: Text(
+              entity.title,
+              style: AppTypography.bodyLarge.copyWith(
+                color: AppColors.foreground,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // ─── NỘI DUNG (color-coded) ───
+          const DictationSectionLabel(label: 'NỘI DUNG'),
+          const SizedBox(height: AppSpacing.sm),
+          DictationCard(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 320),
+              child: Scrollbar(
+                child: SingleChildScrollView(
+                  child: _ColorCodedContent(comparisons: wordComparisons),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // ─── Chép chính tả * ───
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Chép chính tả ',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.foreground,
+                  ),
+                ),
+                TextSpan(
+                  text: '*',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.destructive,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            '$accuracyPercent%',
-            style: AppTypography.h1.copyWith(
-              color: AppColors.primary,
+          DictationCard(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Text(
+              userInput.isEmpty ? '(Chưa nhập nội dung)' : userInput,
+              style: AppTypography.bodyMedium.copyWith(
+                color: userInput.isEmpty
+                    ? AppColors.mutedForeground
+                    : AppColors.mutedForeground,
+                height: 1.6,
+                fontStyle: userInput.isEmpty ? FontStyle.italic : null,
+              ),
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // ─── Banner điểm ───
+          _ScoreBanner(percent: accuracyPercent, tier: tier),
           const SizedBox(height: AppSpacing.md),
-          Divider(
-            color: AppColors.border,
-            height: AppBorders.widthThin,
+
+          // ─── Card chi tiết ───
+          _DetailCard(
+            totalWords: result.totalWords,
+            correctWords: result.correctWords,
+            wrongWords: wrongWords,
+            elapsedSeconds: elapsedSeconds,
+            accuracy: accuracy,
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Số từ đúng',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.mutedForeground,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            '$correctWords/$totalWords',
-            style: AppTypography.h3.copyWith(
-              color: AppColors.foreground,
-            ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // ─── Hành động ───
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onTryAgain,
+                icon: const Icon(LucideIcons.refreshCcw, size: 18),
+                label: const Text('Thử lại'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.foreground,
+                  side: const BorderSide(color: AppColors.border),
+                  shape: AppBorders.shapeFull,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.smMd,
+                  ),
+                  textStyle: AppTypography.buttonMedium,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              ElevatedButton.icon(
+                onPressed: isLoadingNew ? null : onLoadNew,
+                icon: isLoadingNew
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                label: const Text('Bài mới'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.primaryForeground,
+                  disabledBackgroundColor: AppColors.muted,
+                  disabledForegroundColor: AppColors.mutedForeground,
+                  elevation: 0,
+                  shape: AppBorders.shapeFull,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.smMd,
+                  ),
+                  textStyle: AppTypography.buttonMedium,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -198,15 +188,141 @@ class _AccuracyCard extends StatelessWidget {
   }
 }
 
-/// A labeled section container for content display.
-class _ContentSection extends StatelessWidget {
-  const _ContentSection({
-    required this.title,
-    required this.child,
+// ─────────────────────────────────────────────────────────────────────────────
+// Color-coded content
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ColorCodedContent extends StatelessWidget {
+  const _ColorCodedContent({required this.comparisons});
+
+  final List<WordComparison> comparisons;
+
+  @override
+  Widget build(BuildContext context) {
+    if (comparisons.isEmpty) {
+      return Text(
+        '(Không có nội dung)',
+        style: AppTypography.bodyMedium.copyWith(
+          color: AppColors.mutedForeground,
+        ),
+      );
+    }
+
+    final baseStyle = AppTypography.bodyMedium.copyWith(height: 1.9);
+
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: comparisons.map((c) {
+        final color = c.isCorrect ? AppColors.success : AppColors.destructive;
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 2,
+          ),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: AppBorders.borderRadiusSm,
+          ),
+          child: Text(
+            c.originalWord,
+            style: baseStyle.copyWith(
+              color: color,
+              fontWeight: c.isCorrect ? FontWeight.w500 : FontWeight.w700,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Score banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum _ResultTier {
+  excellent('Tuyệt vời 🎉'),
+  good('Khá tốt 👍'),
+  needPractice('Cần luyện thêm 📚');
+
+  const _ResultTier(this.message);
+
+  final String message;
+
+  factory _ResultTier.from(double accuracy) {
+    if (accuracy >= 0.8) return _ResultTier.excellent;
+    if (accuracy >= 0.5) return _ResultTier.good;
+    return _ResultTier.needPractice;
+  }
+
+  Color get color => switch (this) {
+    _ResultTier.excellent => AppColors.success,
+    _ResultTier.good => AppColors.warning,
+    _ResultTier.needPractice => AppColors.destructive,
+  };
+}
+
+class _ScoreBanner extends StatelessWidget {
+  const _ScoreBanner({required this.percent, required this.tier});
+
+  final int percent;
+  final _ResultTier tier;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = tier.color;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.lg,
+        horizontal: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: AppBorders.borderRadiusLg,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(LucideIcons.trophy, size: 32, color: color),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '$percent%',
+            style: AppTypography.h1.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            tier.message,
+            style: AppTypography.labelLarge.copyWith(color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Detail card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DetailCard extends StatelessWidget {
+  const _DetailCard({
+    required this.totalWords,
+    required this.correctWords,
+    required this.wrongWords,
+    required this.elapsedSeconds,
+    required this.accuracy,
   });
 
-  final String title;
-  final Widget child;
+  final int totalWords;
+  final int correctWords;
+  final int wrongWords;
+  final int elapsedSeconds;
+  final double accuracy;
 
   @override
   Widget build(BuildContext context) {
@@ -215,74 +331,103 @@ class _ContentSection extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(
-          color: AppColors.border,
-          width: AppBorders.widthThin,
-        ),
+        borderRadius: AppBorders.borderRadiusLg,
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.mutedForeground,
+            'Chi tiết kết quả',
+            style: AppTypography.labelLarge.copyWith(
+              color: AppColors.foreground,
+              fontWeight: FontWeight.w700,
             ),
           ),
+          const SizedBox(height: AppSpacing.smMd),
+          _StatRow(label: 'Tổng số từ', value: '$totalWords từ'),
           const SizedBox(height: AppSpacing.sm),
-          child,
+          _StatRow(
+            label: 'Từ đúng',
+            value: '$correctWords từ',
+            valueColor: AppColors.success,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _StatRow(
+            label: 'Từ sai',
+            value: '$wrongWords từ',
+            valueColor: AppColors.destructive,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: AppSpacing.sm),
+          _StatRow(
+            icon: LucideIcons.clock,
+            label: 'Thời gian',
+            value: _formatDuration(elapsedSeconds),
+            valueColor: AppColors.success,
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          ClipRRect(
+            borderRadius: AppBorders.borderRadiusFull,
+            child: LinearProgressIndicator(
+              value: accuracy.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: AppColors.muted,
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.success),
+            ),
+          ),
         ],
       ),
     );
   }
+
+  static String _formatDuration(int seconds) {
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    final s = seconds % 60;
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(h)}:${two(m)}:${two(s)}';
+  }
 }
 
-/// Renders original content with color-coded words using [RichText].
-///
-/// Correct words are displayed in [AppColors.success] (green),
-/// incorrect words in [AppColors.destructive] (red).
-class _ColorCodedOriginalContent extends StatelessWidget {
-  const _ColorCodedOriginalContent({
-    required this.wordComparisons,
+class _StatRow extends StatelessWidget {
+  const _StatRow({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.valueColor,
   });
 
-  final List<WordComparison> wordComparisons;
+  final String label;
+  final String value;
+  final IconData? icon;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    if (wordComparisons.isEmpty) {
-      return Text(
-        '(Không có nội dung)',
-        style: AppTypography.bodyLarge.copyWith(
-          color: AppColors.mutedForeground,
-        ),
-      );
-    }
-
-    final spans = <InlineSpan>[];
-    for (var i = 0; i < wordComparisons.length; i++) {
-      final comparison = wordComparisons[i];
-      if (i > 0) {
-        spans.add(const TextSpan(text: ' '));
-      }
-      spans.add(
-        TextSpan(
-          text: comparison.originalWord,
-          style: AppTypography.bodyLarge.copyWith(
-            color: comparison.isCorrect
-                ? AppColors.success
-                : AppColors.destructive,
-            fontWeight: comparison.isCorrect
-                ? FontWeight.w400
-                : FontWeight.w700,
+    return Row(
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 16, color: AppColors.mutedForeground),
+          const SizedBox(width: AppSpacing.xs),
+        ],
+        Text(
+          label,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.mutedForeground,
           ),
         ),
-      );
-    }
-
-    return RichText(
-      text: TextSpan(children: spans),
+        const Spacer(),
+        Text(
+          value,
+          style: AppTypography.labelMedium.copyWith(
+            color: valueColor ?? AppColors.foreground,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

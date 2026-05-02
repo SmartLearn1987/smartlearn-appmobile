@@ -160,11 +160,12 @@ class AppTextField extends StatelessWidget {
   }
 
   Widget? _buildPrefix() {
-    if (prefix != null)
+    if (prefix != null) {
       return Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
         child: prefix,
       );
+    }
     if (prefixIcon != null) {
       return Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
@@ -175,11 +176,12 @@ class AppTextField extends StatelessWidget {
   }
 
   Widget? _buildSuffix() {
-    if (suffix != null)
+    if (suffix != null) {
       return Padding(
         padding: const EdgeInsets.only(right: AppSpacing.md),
         child: suffix,
       );
+    }
     if (suffixIcon != null) {
       return Padding(
         padding: const EdgeInsets.only(right: AppSpacing.md),
