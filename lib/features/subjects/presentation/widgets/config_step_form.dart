@@ -13,6 +13,7 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/photo_gallery/show_photo_gallery.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
@@ -300,22 +301,36 @@ class _ConfigStepFormState extends State<ConfigStepForm> {
   Widget _buildImagePreview(BuildContext context, CurriculumFormState state) {
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: AppBorders.borderRadiusSm,
-          child: state.imageFile != null
-              ? Image.file(
-                  state.imageFile!,
-                  width: 96,
-                  height: 96,
-                  fit: BoxFit.cover,
-                )
-              : AppCachedImage(
-                  imageUrl: state.existingImageUrl!,
-                  width: 96,
-                  height: 96,
-                  borderRadius: AppBorders.borderRadiusSm,
-                  errorWidget: _buildFallbackIcon(),
-                ),
+        GestureDetector(
+          onTap: () {
+            final items = <PhotoGalleryItem>[];
+            if (state.imageFile != null) {
+              items.add(PhotoGalleryLocalFile(state.imageFile!));
+            } else if (state.existingImageUrl != null &&
+                state.existingImageUrl!.trim().isNotEmpty) {
+              items.add(PhotoGalleryNetworkUrl(state.existingImageUrl!));
+            }
+            if (items.isNotEmpty && context.mounted) {
+              showPhotoGallery(context, items: items);
+            }
+          },
+          child: ClipRRect(
+            borderRadius: AppBorders.borderRadiusSm,
+            child: state.imageFile != null
+                ? Image.file(
+                    state.imageFile!,
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.cover,
+                  )
+                : AppCachedImage(
+                    imageUrl: state.existingImageUrl!,
+                    width: 96,
+                    height: 96,
+                    borderRadius: AppBorders.borderRadiusSm,
+                    errorWidget: _buildFallbackIcon(),
+                  ),
+          ),
         ),
         Positioned(
           top: 0,

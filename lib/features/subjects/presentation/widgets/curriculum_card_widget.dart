@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/photo_gallery/show_photo_gallery.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../../domain/entities/curriculum_entity.dart';
 
@@ -41,7 +42,7 @@ class CurriculumCardWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTopRow(),
+          _buildTopRow(context),
           const Divider(height: AppSpacing.mdLg),
           _buildActionButtons(),
         ],
@@ -49,18 +50,18 @@ class CurriculumCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTopRow() {
+  Widget _buildTopRow(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildCoverImage(),
+        _buildCoverImage(context),
         const SizedBox(width: AppSpacing.smMd),
         Expanded(child: _buildInfo()),
       ],
     );
   }
 
-  Widget _buildCoverImage() {
+  Widget _buildCoverImage(BuildContext context) {
     return SizedBox(
       width: 64,
       height: 64,
@@ -70,12 +71,21 @@ class CurriculumCardWidget extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: curriculum.imageUrl != null
-                ? AppCachedImage(
-                    imageUrl: curriculum.imageUrl!,
-                    width: 64,
-                    height: 64,
-                    borderRadius: BorderRadius.circular(12),
-                    errorWidget: _buildFallbackIcon(),
+                ? GestureDetector(
+                    onTap: () => showPhotoGallery(
+                      context,
+                      items: [
+                        PhotoGalleryNetworkUrl(curriculum.imageUrl!),
+                      ],
+                    ),
+                    behavior: HitTestBehavior.opaque,
+                    child: AppCachedImage(
+                      imageUrl: curriculum.imageUrl!,
+                      width: 64,
+                      height: 64,
+                      borderRadius: BorderRadius.circular(12),
+                      errorWidget: _buildFallbackIcon(),
+                    ),
                   )
                 : _buildFallbackIcon(),
           ),

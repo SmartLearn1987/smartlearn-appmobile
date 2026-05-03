@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/constants/education_level.dart';
 import 'package:smart_learn/core/theme/theme.dart';
 
+import '../../../../core/photo_gallery/show_photo_gallery.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../bloc/curriculum_form/curriculum_form_bloc.dart';
 
@@ -50,32 +51,54 @@ class PreviewStepContent extends StatelessWidget {
                         ClipRRect(
                           borderRadius: AppBorders.borderRadiusLg,
                           clipBehavior: Clip.hardEdge,
-                          child: Container(
-                            width: 96,
-                            height: 96,
-                            decoration: BoxDecoration(
-                              borderRadius: AppBorders.borderRadiusLg,
-                              border: Border.all(
-                                color: AppColors.border,
-                                width: AppBorders.widthThin,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (state.imageFile != null) {
+                                showPhotoGallery(
+                                  context,
+                                  items: [
+                                    PhotoGalleryLocalFile(state.imageFile!),
+                                  ],
+                                );
+                              } else if (state.existingImageUrl != null &&
+                                  state.existingImageUrl!.trim().isNotEmpty) {
+                                showPhotoGallery(
+                                  context,
+                                  items: [
+                                    PhotoGalleryNetworkUrl(
+                                      state.existingImageUrl!,
+                                    ),
+                                  ],
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 96,
+                              height: 96,
+                              decoration: BoxDecoration(
+                                borderRadius: AppBorders.borderRadiusLg,
+                                border: Border.all(
+                                  color: AppColors.border,
+                                  width: AppBorders.widthThin,
+                                ),
                               ),
+                              child: state.imageFile != null
+                                  ? Image.file(
+                                      state.imageFile!,
+                                      width: 96,
+                                      height: 96,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : state.existingImageUrl != null
+                                  ? AppCachedImage(
+                                      imageUrl: state.existingImageUrl!,
+                                      width: 96,
+                                      height: 96,
+                                      borderRadius: AppBorders.borderRadiusLg,
+                                      errorWidget: _buildFallbackIcon(),
+                                    )
+                                  : _buildFallbackIcon(),
                             ),
-                            child: state.imageFile != null
-                                ? Image.file(
-                                    state.imageFile!,
-                                    width: 96,
-                                    height: 96,
-                                    fit: BoxFit.cover,
-                                  )
-                                : state.existingImageUrl != null
-                                ? AppCachedImage(
-                                    imageUrl: state.existingImageUrl!,
-                                    width: 96,
-                                    height: 96,
-                                    borderRadius: AppBorders.borderRadiusLg,
-                                    errorWidget: _buildFallbackIcon(),
-                                  )
-                                : _buildFallbackIcon(),
                           ),
                         ),
                         Expanded(

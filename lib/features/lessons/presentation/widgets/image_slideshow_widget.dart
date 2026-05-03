@@ -5,16 +5,14 @@ import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/photo_gallery/show_photo_gallery.dart';
 import '../../../../core/widgets/app_cached_image.dart';
 import '../../domain/entities/lesson_image.dart';
 
 /// Widget hiển thị slideshow ảnh bài học với nút điều hướng trái/phải
 /// và bộ đếm slide (ví dụ: "1/5").
 class ImageSlideshowWidget extends StatefulWidget {
-  const ImageSlideshowWidget({
-    super.key,
-    required this.images,
-  });
+  const ImageSlideshowWidget({super.key, required this.images});
 
   final List<LessonImage> images;
 
@@ -50,7 +48,10 @@ class _ImageSlideshowWidgetState extends State<ImageSlideshowWidget> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(color: AppColors.border, width: AppBorders.widthThin),
+        border: Border.all(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
       ),
       child: Column(
         children: [
@@ -61,21 +62,31 @@ class _ImageSlideshowWidgetState extends State<ImageSlideshowWidget> {
               topRight: Radius.circular(AppBorders.radiusMd),
             ),
             child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: AppCachedImage(
-                imageUrl: image.fileUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              aspectRatio: 16 / 10,
+              child: Material(
+                color: AppColors.card,
+                child: InkWell(
+                  onTap: () {
+                    showNetworkPhotoGallery(
+                      context,
+                      imageUrls: widget.images.map((i) => i.fileUrl).toList(),
+                      initialIndex: _currentIndex,
+                      captions: widget.images.map((i) => i.caption).toList(),
+                    );
+                  },
+                  child: AppCachedImage(
+                    imageUrl: image.fileUrl,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
           ),
 
           // Navigation bar
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

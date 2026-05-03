@@ -1,7 +1,7 @@
 name: smart_learn
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.10
+version: 0.1.11
 
 environment:
   sdk: ^3.11.4
@@ -58,6 +58,7 @@ dependencies:
   cached_network_image: ^3.4.1
   toastification: ^2.3.0
   intl: ^0.20.2
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
