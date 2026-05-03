@@ -17,6 +17,11 @@ abstract final class RoutePaths {
   static const quizzes = '/quizzes';
   static const examCreate = '/quizzes/create';
   static const examEditTemplate = '/quizzes/edit/:id';
+
+  /// Đặt trong nhánh Home ([RoutePaths.home]).
+  static const homeProfileSegment = 'profile';
+
+  /// Đường dẫn đầy đủ tới profile (nested dưới `/`).
   static const profile = '/profile';
   static const pictogramGame = '/pictogram-game';
   static const pictogramPlay = '/games/pictogram/play';
@@ -33,13 +38,19 @@ abstract final class RoutePaths {
   static const examDetailTemplate = '/exams/:id';
   static const examPlayTemplate = '/exams/:id/play';
   static const examResultTemplate = '/exams/:id/result';
-  // Relative segments (nested routes)
-  static const subjectIdSegment = ':subjectId';
-  static const createCurriculumSegment = 'create-curriculum';
-  static const editCurriculumSegment = 'edit-curriculum/:curriculumId';
-  static const lessonsSegment = 'curricula/:curriculumId/lessons';
-  static const lessonFormSegment = 'form';
-  static const lessonReviewSegment = 'review/:lessonId';
+
+  /// Các router dưới đây dùng [parentNavigatorKey] gốc (không nested trong shell).
+  static const subjectDetailTemplate = '/subjects/:subjectId';
+  static const subjectCreateCurriculumTemplate =
+      '/subjects/:subjectId/create-curriculum';
+  static const subjectEditCurriculumTemplate =
+      '/subjects/:subjectId/edit-curriculum/:curriculumId';
+  static const subjectLessonsTemplate =
+      '/subjects/:subjectId/curricula/:curriculumId/lessons';
+  static const subjectLessonFormTemplate =
+      '/subjects/:subjectId/curricula/:curriculumId/lessons/form';
+  static const subjectLessonReviewTemplate =
+      '/subjects/:subjectId/curricula/:curriculumId/lessons/review/:lessonId';
 
   // ─── Path builders (for navigation calls) ───
   static String subjectDetail(String subjectId) => '/subjects/$subjectId';
@@ -73,7 +84,8 @@ abstract final class RoutePaths {
     String? subjectName,
     String? curriculumName,
     int lessonCount,
-  ) => '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId?subjectName=$subjectName&curriculumName=$curriculumName';
+  ) =>
+      '/subjects/$subjectId/curricula/$curriculumId/lessons/review/$lessonId?subjectName=$subjectName&curriculumName=$curriculumName';
 }
 
 abstract final class RouteNames {

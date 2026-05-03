@@ -49,7 +49,8 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     final result = await _getSubjects(const NoParams());
     result.fold(
       (failure) => emit(state.copyWith(errorMessage: failure.message)),
-      (subjects) => emit(state.copyWith(subjects: subjects, errorMessage: null)),
+      (subjects) =>
+          emit(state.copyWith(subjects: subjects, errorMessage: null)),
     );
   }
 
@@ -61,18 +62,13 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     final result = await _getQuizletDetail(event.quizletId);
     result.fold(
       (failure) => emit(
-        state.copyWith(
-          isLoadingDetail: false,
-          errorMessage: failure.message,
-        ),
+        state.copyWith(isLoadingDetail: false, errorMessage: failure.message),
       ),
       (detail) {
         final cards = detail.terms
             .map(
-              (term) => CardFormData(
-                term: term.term,
-                definition: term.definition,
-              ),
+              (term) =>
+                  CardFormData(term: term.term, definition: term.definition),
             )
             .toList();
         emit(
@@ -97,7 +93,9 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
   }
 
   void _onUpdateTitle(UpdateTitle event, Emitter<QuizletCreateState> emit) {
-    emit(state.copyWith(title: event.title, isSuccess: false, errorMessage: null));
+    emit(
+      state.copyWith(title: event.title, isSuccess: false, errorMessage: null),
+    );
   }
 
   void _onUpdateDescription(
@@ -126,10 +124,7 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     );
   }
 
-  void _onSelectSubject(
-    SelectSubject event,
-    Emitter<QuizletCreateState> emit,
-  ) {
+  void _onSelectSubject(SelectSubject event, Emitter<QuizletCreateState> emit) {
     emit(
       state.copyWith(
         selectedSubjectId: event.subjectId,
@@ -153,7 +148,9 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
   }
 
   void _onUpdateGrade(UpdateGrade event, Emitter<QuizletCreateState> emit) {
-    emit(state.copyWith(grade: event.grade, isSuccess: false, errorMessage: null));
+    emit(
+      state.copyWith(grade: event.grade, isSuccess: false, errorMessage: null),
+    );
   }
 
   void _onAddCard(AddCard event, Emitter<QuizletCreateState> emit) {
@@ -167,17 +164,13 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
   }
 
   void _onRemoveCard(RemoveCard event, Emitter<QuizletCreateState> emit) {
-    if (state.cards.length <= 2) {
+    if (state.cards.length <= 1) {
       return;
     }
 
     final updatedCards = [...state.cards]..removeAt(event.index);
     emit(
-      state.copyWith(
-        cards: updatedCards,
-        isSuccess: false,
-        errorMessage: null,
-      ),
+      state.copyWith(cards: updatedCards, isSuccess: false, errorMessage: null),
     );
   }
 
@@ -192,25 +185,27 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
       definition: event.definition,
     );
     emit(
-      state.copyWith(
-        cards: updatedCards,
-        isSuccess: false,
-        errorMessage: null,
-      ),
+      state.copyWith(cards: updatedCards, isSuccess: false, errorMessage: null),
     );
   }
 
   void _onImportCards(ImportCards event, Emitter<QuizletCreateState> emit) {
     final importedCards = parseCsvToCards(event.csvContent);
     if (importedCards.isEmpty) {
-      emit(state.copyWith(errorMessage: 'Không tìm thấy dữ liệu hợp lệ để nhập'));
+      emit(
+        state.copyWith(errorMessage: 'Không tìm thấy dữ liệu hợp lệ để nhập'),
+      );
       return;
     }
 
     final updatedCards = [...state.cards];
     var importIndex = 0;
 
-    for (var i = 0; i < updatedCards.length && importIndex < importedCards.length; i++) {
+    for (
+      var i = 0;
+      i < updatedCards.length && importIndex < importedCards.length;
+      i++
+    ) {
       if (!updatedCards[i].hasContent) {
         updatedCards[i] = importedCards[importIndex];
         importIndex++;
@@ -222,11 +217,7 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     }
 
     emit(
-      state.copyWith(
-        cards: updatedCards,
-        isSuccess: false,
-        errorMessage: null,
-      ),
+      state.copyWith(cards: updatedCards, isSuccess: false, errorMessage: null),
     );
   }
 
@@ -245,7 +236,9 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
       return;
     }
 
-    emit(state.copyWith(isSubmitting: true, isSuccess: false, errorMessage: null));
+    emit(
+      state.copyWith(isSubmitting: true, isSuccess: false, errorMessage: null),
+    );
 
     final terms = validCards
         .map(
@@ -261,7 +254,9 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
         UpdateQuizletParams(
           id: state.quizletId!,
           title: state.title.trim(),
-          description: state.description.trim().isEmpty ? null : state.description.trim(),
+          description: state.description.trim().isEmpty
+              ? null
+              : state.description.trim(),
           subjectId: state.selectedSubjectId,
           grade: state.grade.trim().isEmpty ? null : state.grade.trim(),
           educationLevel: state.educationLevel,
@@ -271,10 +266,18 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
       );
       result.fold(
         (failure) => emit(
-          state.copyWith(isSubmitting: false, isSuccess: false, errorMessage: failure.message),
+          state.copyWith(
+            isSubmitting: false,
+            isSuccess: false,
+            errorMessage: failure.message,
+          ),
         ),
         (_) => emit(
-          state.copyWith(isSubmitting: false, isSuccess: true, errorMessage: null),
+          state.copyWith(
+            isSubmitting: false,
+            isSuccess: true,
+            errorMessage: null,
+          ),
         ),
       );
       return;
@@ -283,7 +286,9 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     final result = await _createQuizlet(
       CreateQuizletParams(
         title: state.title.trim(),
-        description: state.description.trim().isEmpty ? null : state.description.trim(),
+        description: state.description.trim().isEmpty
+            ? null
+            : state.description.trim(),
         subjectId: state.selectedSubjectId,
         grade: state.grade.trim().isEmpty ? null : state.grade.trim(),
         educationLevel: state.educationLevel,
@@ -294,10 +299,18 @@ class QuizletCreateBloc extends Bloc<QuizletCreateEvent, QuizletCreateState> {
     );
     result.fold(
       (failure) => emit(
-        state.copyWith(isSubmitting: false, isSuccess: false, errorMessage: failure.message),
+        state.copyWith(
+          isSubmitting: false,
+          isSuccess: false,
+          errorMessage: failure.message,
+        ),
       ),
       (_) => emit(
-        state.copyWith(isSubmitting: false, isSuccess: true, errorMessage: null),
+        state.copyWith(
+          isSubmitting: false,
+          isSuccess: true,
+          errorMessage: null,
+        ),
       ),
     );
   }

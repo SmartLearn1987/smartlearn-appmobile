@@ -380,57 +380,81 @@ class _LoadedContentState extends State<_LoadedContent> {
                       ],
                       const SizedBox(height: AppSpacing.md),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
-                              IconButton(
-                                onPressed: _toggleAutoPlay,
-                                icon: Icon(
-                                  _isAutoPlaying
-                                      ? LucideIcons.pause
-                                      : LucideIcons.play,
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: IconButton(
+                                  iconSize: 20,
+                                  padding: EdgeInsets.zero,
+                                  onPressed: _toggleAutoPlay,
+                                  icon: Icon(
+                                    _isAutoPlaying
+                                        ? LucideIcons.pause
+                                        : LucideIcons.play,
+                                  ),
                                 ),
                               ),
-                              IconButton(
-                                onPressed: _toggleShuffle,
-                                icon: Icon(
-                                  LucideIcons.shuffle,
-                                  color: _isShuffled ? AppColors.primary : null,
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: IconButton(
+                                  iconSize: 20,
+                                  padding: EdgeInsets.zero,
+                                  onPressed: _toggleShuffle,
+                                  icon: Icon(
+                                    LucideIcons.shuffle,
+                                    color: _isShuffled
+                                        ? AppColors.primary
+                                        : null,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: isFirst ? null : _goPrevious,
-                                icon: const Icon(LucideIcons.chevronLeft),
-                              ),
-                              Text(
-                                '${currentIndex + 1} / ${terms.length}',
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.foreground,
-                                  fontWeight: FontWeight.w700,
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  onPressed: isFirst ? null : _goPrevious,
+                                  icon: const Icon(LucideIcons.chevronLeft),
                                 ),
-                              ),
-                              IconButton(
-                                onPressed: isLast ? null : _goNext,
-                                icon: const Icon(LucideIcons.chevronRight),
-                              ),
-                            ],
+                                Text(
+                                  '${currentIndex + 1} / ${terms.length}',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: AppColors.foreground,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: isLast ? null : _goNext,
+                                  icon: const Icon(LucideIcons.chevronRight),
+                                ),
+                              ],
+                            ),
                           ),
                           Row(
                             children: [
-                              const SizedBox(width: 48),
-                              IconButton(
-                                onPressed: () => _pushFullscreen(
-                                  context,
-                                  currentTerm,
-                                  terms,
+                              const SizedBox(width: 32),
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: IconButton(
+                                  iconSize: 20,
+                                  onPressed: () => _pushFullscreen(
+                                    context,
+                                    currentTerm,
+                                    terms,
+                                  ),
+                                  style: IconButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  icon: const Icon(LucideIcons.maximize2),
+                                  tooltip: 'Toàn màn hình',
                                 ),
-                                icon: const Icon(LucideIcons.maximize2),
-                                tooltip: 'Toàn màn hình',
                               ),
                             ],
                           ),

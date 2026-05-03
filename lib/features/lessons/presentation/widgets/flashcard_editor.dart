@@ -291,10 +291,6 @@ class FlashcardEditorState extends State<FlashcardEditor> {
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               textStyle: AppTypography.buttonMedium,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
               side: BorderSide(
                 color: AppColors.primary.withValues(alpha: 0.3),
                 width: AppBorders.widthThin,
@@ -311,10 +307,6 @@ class FlashcardEditorState extends State<FlashcardEditor> {
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               textStyle: AppTypography.buttonMedium,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
               side: BorderSide(
                 color: AppColors.primary.withValues(alpha: 0.3),
                 width: AppBorders.widthThin,

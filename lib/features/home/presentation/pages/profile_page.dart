@@ -110,22 +110,17 @@ class _ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
+      listenWhen: (previous, current) => current is AccountDeleted,
       listener: (context, state) {
-        if (state is ProfileUpdateSuccess) {
-          AppToast.success(context, 'Cập nhật thành công');
-        } else if (state is ProfilePasswordChanged) {
-          AppToast.success(context, 'Đổi mật khẩu thành công');
-        } else if (state is AccountDeleted) {
+        if (state is AccountDeleted) {
           AppToast.success(context, 'Tài khoản của bạn đã được xóa thành công');
-        } else if (state is ProfileError) {
-          AppToast.error(context, state.message);
         }
       },
       builder: (context, state) {
         if (state is ProfileLoading || state is ProfileInitial) {
           return Scaffold(
             backgroundColor: AppColors.background,
-            appBar: _profileAppBar(),
+            appBar: AppBar(title: Text('Hồ sơ')),
             body: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -133,7 +128,7 @@ class _ProfileView extends StatelessWidget {
         if (state is ProfileError) {
           return Scaffold(
             backgroundColor: AppColors.background,
-            appBar: _profileAppBar(),
+            appBar: AppBar(title: Text('Hồ sơ')),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.mdLg),
@@ -184,7 +179,7 @@ class _ProfileView extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.background,
-          appBar: _profileAppBar(),
+          appBar: AppBar(title: Text('Hồ sơ')),
           body: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.mdLg,
@@ -222,20 +217,6 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _profileAppBar() {
-    return AppBar(
-      centerTitle: true,
-      backgroundColor: AppColors.background,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      title: Text(
-        'Hồ sơ',
-        style: AppTypography.h4.copyWith(color: AppColors.foreground),
-      ),
-    );
-  }
-
   Widget _buildHero(UserEntity user) {
     return Column(
       children: [
@@ -245,6 +226,14 @@ class _ProfileView extends StatelessWidget {
           user.displayName,
           textAlign: TextAlign.center,
           style: AppTypography.h3.copyWith(color: AppColors.foreground),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Tên đăng nhập: ${user.username}',
+          textAlign: TextAlign.center,
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.mutedForeground,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -481,19 +470,26 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(UserEntity user) {
-    Widget inner;
-    if (user.avatarUrl != null && user.avatarUrl!.isNotEmpty) {
-      inner = AppCachedImage(
-        imageUrl: user.avatarUrl!,
-        width: 88,
-        height: 88,
-        shape: BoxShape.circle,
-        errorWidget: _buildInitialAvatar(user),
-      );
-    } else {
-      inner = _buildInitialAvatar(user);
+  static String _avatarLetter(UserEntity user) {
+    for (final raw in [user.displayName, user.username]) {
+      final t = raw.trim();
+      if (t.isNotEmpty) return t[0].toUpperCase();
     }
+    return 'U';
+  }
+
+  Widget _buildAvatar(UserEntity user) {
+    final url = user.avatarUrl?.trim();
+    final hasUrl = url != null && url.isNotEmpty;
+    final inner = hasUrl
+        ? AppCachedImage(
+            imageUrl: url,
+            width: 88,
+            height: 88,
+            shape: BoxShape.circle,
+            errorWidget: _buildInitialAvatar(user),
+          )
+        : _buildInitialAvatar(user);
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -519,7 +515,7 @@ class _ProfileView extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : 'U',
+        _avatarLetter(user),
         style: AppTypography.h2.copyWith(color: AppColors.primaryForeground),
       ),
     );

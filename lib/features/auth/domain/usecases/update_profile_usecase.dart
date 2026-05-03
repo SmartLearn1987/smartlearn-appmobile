@@ -15,18 +15,55 @@ class UpdateProfileUseCase extends UseCase<UserEntity, UpdateProfileParams> {
   @override
   Future<Either<Failure, UserEntity>> call(UpdateProfileParams params) =>
       _repository.updateProfile(
-        username: params.username,
+        userId: params.userId,
+        displayName: params.displayName,
+        email: params.email,
         avatarUrl: params.avatarUrl,
+        role: params.role,
+        isActive: params.isActive,
+        educationLevel: params.educationLevel,
+        plan: params.plan,
+        planStartDate: params.planStartDate,
+        planEndDate: params.planEndDate,
       );
 }
 
 class UpdateProfileParams extends Equatable {
-  final String? name;
-  final String? username;
+  final String userId;
+  final String? displayName;
+  final String? email;
   final String? avatarUrl;
+  final String role;
+  final bool isActive;
+  final String? educationLevel;
+  final String? plan;
+  final DateTime? planStartDate;
+  final DateTime? planEndDate;
 
-  const UpdateProfileParams({this.name, this.username, this.avatarUrl});
+  const UpdateProfileParams({
+    required this.userId,
+    this.displayName,
+    this.email,
+    this.avatarUrl,
+    required this.role,
+    required this.isActive,
+    this.educationLevel,
+    this.plan,
+    this.planStartDate,
+    this.planEndDate,
+  });
 
   @override
-  List<Object?> get props => [name, username, avatarUrl];
+  List<Object?> get props => [
+        userId,
+        displayName,
+        email,
+        avatarUrl,
+        role,
+        isActive,
+        educationLevel,
+        plan,
+        planStartDate,
+        planEndDate,
+      ];
 }

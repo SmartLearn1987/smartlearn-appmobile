@@ -41,9 +41,9 @@ class _NoteAddFormState extends State<NoteAddForm> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<NotesCubit>().addNote(
-          title: _titleController.text.trim(),
-          content: _contentController.text.trim(),
-        );
+      title: _titleController.text.trim(),
+      content: _contentController.text.trim(),
+    );
     Navigator.of(context).pop();
     AppToast.success(context, 'Đã thêm ghi chú');
   }
@@ -96,6 +96,8 @@ class _NoteAddFormState extends State<NoteAddForm> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.destructive,
+                        side: const BorderSide(color: AppColors.destructive),
                         shape: AppBorders.shapeSm,
                       ),
                       child: const Text('Hủy'),

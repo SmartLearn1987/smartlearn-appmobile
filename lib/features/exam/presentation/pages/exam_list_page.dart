@@ -83,6 +83,7 @@ class _ExamListViewState extends State<_ExamListView> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Xóa'),
           ),
         ],
@@ -93,13 +94,10 @@ class _ExamListViewState extends State<_ExamListView> {
     }
     final result = await getIt<ExamRepository>().deleteExam(examId);
     if (!mounted) return;
-    result.fold(
-      (failure) => AppToast.error(context, failure.message),
-      (_) {
-        AppToast.success(context, 'Đã xóa bài thi');
-        _fetchExams(isRefresh: true);
-      },
-    );
+    result.fold((failure) => AppToast.error(context, failure.message), (_) {
+      AppToast.success(context, 'Đã xóa bài thi');
+      _fetchExams(isRefresh: true);
+    });
   }
 
   @override

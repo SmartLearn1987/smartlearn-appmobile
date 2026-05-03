@@ -7,7 +7,6 @@ import 'package:smart_learn/core/theme/theme.dart';
 import '../../../../app/di/injection.dart';
 import '../../../../core/widgets/app_segmented_tabs.dart';
 import '../../../../core/widgets/app_toast.dart';
-import '../../../../router/route_names.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/lesson_entity.dart';
 import '../bloc/lesson_detail/lesson_detail_bloc.dart';
@@ -107,16 +106,7 @@ class _LessonReviewViewState extends State<_LessonReviewView> {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: BackButton(
-              onPressed: () => context.go(
-                RoutePaths.lessons(widget.subjectId, widget.curriculumId),
-                extra: {
-                  'curriculumName': widget.curriculumName,
-                  'publisher': widget.publisher,
-                  'subjectName': widget.subjectName,
-                },
-              ),
-            ),
+            leading: BackButton(onPressed: () => context.pop()),
             title: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

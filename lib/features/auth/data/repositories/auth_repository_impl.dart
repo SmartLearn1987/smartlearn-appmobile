@@ -57,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'username': username,
         'email': email,
         'password': password,
-        if (educationLevel != null) 'education_level': educationLevel,
+        'education_level': ?educationLevel,
       });
 
       return const Right(null);
@@ -92,18 +92,34 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> updateProfile({
-    String? name,
-    String? username,
+    required String userId,
+    String? displayName,
+    String? email,
     String? avatarUrl,
+    required String role,
+    required bool isActive,
+    String? educationLevel,
+    String? plan,
+    DateTime? planStartDate,
+    DateTime? planEndDate,
   }) async {
     try {
+      // Mirrors `smartlearn/src/lib/auth.ts` `updateUser` JSON body.
       final body = <String, dynamic>{
-        if (name != null) 'name': name,
-        if (username != null) 'username': username,
-        if (avatarUrl != null) 'avatar_url': avatarUrl,
+        'display_name': ?displayName,
+        'role': role,
+        'email': ?email,
+        'education_level': ?educationLevel,
+        'avatar_url': ?avatarUrl,
+        'is_active': isActive,
+        'plan': ?plan,
+        if (planStartDate != null)
+          'plan_start_date': planStartDate.toUtc().toIso8601String(),
+        if (planEndDate != null)
+          'plan_end_date': planEndDate.toUtc().toIso8601String(),
       };
 
-      final userModel = await _remoteDatasource.updateProfile(body);
+      final userModel = await _remoteDatasource.updateUser(userId, body);
       return Right(userModel);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
@@ -130,9 +146,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String newPassword,
   ) async {
     try {
-      await _remoteDatasource.changePassword(userId, {
-        'new_password': newPassword,
-      });
+      await _remoteDatasource.changePassword(userId, {'password': newPassword});
       return const Right(null);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
@@ -160,13 +174,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, String>> uploadFile(File file) async {
     try {
-      final url = await _remoteDatasource.uploadFile(file);
-      return Right(url);
+      final res = await _remoteDatasource.uploadFile(file);
+      return Right(res.url);
     } on DioException catch (e) {
       return Left(ServerFailure(message: extractDioErrorMessage(e)));
     } catch (e) {
       return Left(ServerFailure(message: 'Đã xảy ra lỗi không xác định'));
     }
   }
-
 }

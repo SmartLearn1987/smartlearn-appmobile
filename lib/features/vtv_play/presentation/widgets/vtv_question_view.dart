@@ -173,8 +173,6 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
   }) {
     final total = state.questions.length;
     final percent = (progress * 100).toInt();
-    const columns = 5;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.mdLg),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -238,116 +236,104 @@ class _VTVQuestionViewState extends State<VTVQuestionView> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          // ─── Circle grid ───
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const spacing = AppSpacing.md;
-              final itemSize =
-                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
-              return Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
-                children: List.generate(total, (i) {
-                  final isCurrent = i == state.currentIndex;
-                  final status =
-                      state.answerStatuses[i] ?? AnswerStatus.unanswered;
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: List.generate(total, (i) {
+              final isCurrent = i == state.currentIndex;
+              final status = state.answerStatuses[i] ?? AnswerStatus.unanswered;
 
-                  Color bgColor;
-                  Color textColor;
-                  List<BoxShadow>? shadow;
+              Color bgColor;
+              Color textColor;
+              List<BoxShadow>? shadow;
 
-                  if (isCurrent) {
-                    bgColor = AppColors.primary;
-                    textColor = Colors.white;
-                    shadow = [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ];
-                  } else {
-                    switch (status) {
-                      case AnswerStatus.checkedCorrect:
-                        bgColor = AppColors.success.withValues(alpha: 0.15);
-                        textColor = AppColors.success;
-                      case AnswerStatus.checkedIncorrect:
-                        bgColor = AppColors.destructive.withValues(alpha: 0.15);
-                        textColor = AppColors.destructive;
-                      case AnswerStatus.answered:
-                        bgColor = AppColors.mutedForeground.withValues(
-                          alpha: 0.15,
-                        );
-                        textColor = AppColors.foreground;
-                      case AnswerStatus.unanswered:
-                        bgColor = AppColors.muted;
-                        textColor = AppColors.mutedForeground;
-                    }
-                  }
+              if (isCurrent) {
+                bgColor = AppColors.primary;
+                textColor = Colors.white;
+                shadow = [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ];
+              } else {
+                switch (status) {
+                  case AnswerStatus.checkedCorrect:
+                    bgColor = AppColors.success.withValues(alpha: 0.15);
+                    textColor = AppColors.success;
+                  case AnswerStatus.checkedIncorrect:
+                    bgColor = AppColors.destructive.withValues(alpha: 0.15);
+                    textColor = AppColors.destructive;
+                  case AnswerStatus.answered:
+                    bgColor = AppColors.mutedForeground.withValues(alpha: 0.15);
+                    textColor = AppColors.foreground;
+                  case AnswerStatus.unanswered:
+                    bgColor = AppColors.muted;
+                    textColor = AppColors.mutedForeground;
+                }
+              }
 
-                  final isChecked =
-                      status == AnswerStatus.checkedCorrect ||
-                      status == AnswerStatus.checkedIncorrect;
-                  final isCorrect = status == AnswerStatus.checkedCorrect;
+              final isChecked =
+                  status == AnswerStatus.checkedCorrect ||
+                  status == AnswerStatus.checkedIncorrect;
+              final isCorrect = status == AnswerStatus.checkedCorrect;
 
-                  return SizedBox(
-                    width: itemSize,
-                    height: itemSize,
-                    child: GestureDetector(
-                      onTap: () => context.read<VTVPlayBloc>().add(
-                        GoToQuestion(index: i),
-                      ),
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Positioned.fill(
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: bgColor,
-                                shape: BoxShape.circle,
-                                boxShadow: shadow,
-                              ),
-                              child: Text(
-                                '${i + 1}',
-                                style: AppTypography.labelLarge.copyWith(
-                                  color: textColor,
-                                ),
-                              ),
+              return SizedBox(
+                width: 40,
+                height: 36,
+                child: GestureDetector(
+                  onTap: () =>
+                      context.read<VTVPlayBloc>().add(GoToQuestion(index: i)),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            borderRadius: AppBorders.borderRadiusSm,
+                            boxShadow: shadow,
+                          ),
+                          child: Text(
+                            '${i + 1}',
+                            style: AppTypography.labelLarge.copyWith(
+                              color: textColor,
                             ),
                           ),
-                          if (isChecked)
-                            Positioned(
-                              top: -2,
-                              right: -2,
-                              child: Container(
-                                width: 18,
-                                height: 18,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isCorrect
-                                      ? AppColors.success
-                                      : AppColors.destructive,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColors.card,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Icon(
-                                  isCorrect ? LucideIcons.check : LucideIcons.x,
-                                  size: 10,
-                                  color: Colors.white,
-                                ),
+                        ),
+                      ),
+                      if (isChecked)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isCorrect
+                                  ? AppColors.success
+                                  : AppColors.destructive,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.card,
+                                width: 2,
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                            child: Icon(
+                              isCorrect ? LucideIcons.check : LucideIcons.x,
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               );
-            },
+            }),
           ),
         ],
       ),

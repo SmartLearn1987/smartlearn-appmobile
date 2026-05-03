@@ -92,10 +92,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: BackButton(
-              onPressed: () =>
-                  context.go(RoutePaths.subjectDetail(widget.subjectId)),
-            ),
+            leading: BackButton(onPressed: () => context.pop()),
             title: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -205,22 +202,16 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
   }
 
   Widget _buildCreateButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _navigateToForm(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.primaryForeground,
-          textStyle: AppTypography.buttonMedium,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorders.borderRadiusSm,
-          ),
-          elevation: 2,
-        ),
-        child: const Text('+ Tạo ghi chú mới'),
+    return ElevatedButton(
+      onPressed: () => _navigateToForm(),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.primaryForeground,
+        textStyle: AppTypography.buttonMedium,
+        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
+        elevation: 2,
       ),
+      child: const Text('+ Tạo ghi chú mới'),
     );
   }
 
@@ -351,7 +342,7 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
             index: index,
             isReviewMode: true,
             isCompleted: isCompleted,
-            onTap: () => context.go(
+            onTap: () => context.push(
               RoutePaths.lessonReview(
                 widget.subjectId,
                 widget.curriculumId,

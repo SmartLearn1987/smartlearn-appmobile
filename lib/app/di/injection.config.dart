@@ -393,18 +393,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i591.ExamDetailBloc>(
       () => _i591.ExamDetailBloc(gh<_i1072.GetExamDetailUseCase>()),
     );
+    gh.factory<_i104.ForgotPasswordCubit>(
+      () => _i104.ForgotPasswordCubit(gh<_i560.ForgotPasswordUseCase>()),
+    );
     gh.lazySingleton<_i797.AuthBloc>(
       () => _i797.AuthBloc(
         gh<_i188.LoginUseCase>(),
         gh<_i941.RegisterUseCase>(),
         gh<_i48.LogoutUseCase>(),
         gh<_i568.GetProfileUseCase>(),
-        gh<_i798.UpdateProfileUseCase>(),
         gh<_i992.AuthLocalDatasource>(),
       ),
-    );
-    gh.factory<_i104.ForgotPasswordCubit>(
-      () => _i104.ForgotPasswordCubit(gh<_i560.ForgotPasswordUseCase>()),
     );
     gh.factory<_i729.ExamBloc>(
       () => _i729.ExamBloc(gh<_i347.GetExamsUseCase>()),

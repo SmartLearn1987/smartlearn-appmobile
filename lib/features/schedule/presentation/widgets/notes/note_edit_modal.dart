@@ -125,6 +125,8 @@ class _NoteEditModalState extends State<NoteEditModal> {
                         Navigator.of(context).pop();
                       },
                       style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.destructive,
+                        side: const BorderSide(color: AppColors.destructive),
                         shape: AppBorders.shapeSm,
                       ),
                       child: const Text('Hủy'),

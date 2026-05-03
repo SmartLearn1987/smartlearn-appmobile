@@ -278,6 +278,7 @@ class _ExamFormPageState extends State<ExamFormPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: const Text('Xóa'),
           ),
         ],

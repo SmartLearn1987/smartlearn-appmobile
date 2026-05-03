@@ -232,12 +232,6 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: RoutePaths.profile,
-          name: RouteNames.profile,
-          parentNavigatorKey: _rootNavigatorKey,
-          builder: (context, state) => const ProfilePage(),
-        ),
-        GoRoute(
           path: RoutePaths.webView,
           name: RouteNames.webView,
           parentNavigatorKey: _rootNavigatorKey,
@@ -352,6 +346,94 @@ class AppRouter {
           },
         ),
 
+        GoRoute(
+          path: RoutePaths.subjectLessonReviewTemplate,
+          name: RouteNames.lessonReview,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return LessonReviewPage(
+              subjectName: extra?['subjectName'] as String?,
+              subjectId: state.pathParameters['subjectId']!,
+              curriculumId: state.pathParameters['curriculumId']!,
+              lessonId: state.pathParameters['lessonId']!,
+              curriculumName: extra?['curriculumName'] as String?,
+              publisher: extra?['publisher'] as String?,
+              lessonCount: extra?['lessonCount'] as int? ?? 0,
+            );
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.subjectLessonFormTemplate,
+          name: RouteNames.lessonForm,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return LessonFormPage(
+              subjectId: state.pathParameters['subjectId']!,
+              subjectName: extra?['subjectName'] as String?,
+              curriculumId: state.pathParameters['curriculumId']!,
+              curriculumName: extra?['curriculumName'] as String?,
+              publisher: extra?['publisher'] as String?,
+              lessonId: extra?['lessonId'] as String?,
+            );
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.subjectLessonsTemplate,
+          name: RouteNames.lessons,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return LessonManagementPage(
+              subjectName: extra?['subjectName'] as String?,
+              subjectId: state.pathParameters['subjectId']!,
+              curriculumId: state.pathParameters['curriculumId']!,
+              curriculumName: extra?['curriculumName'] as String?,
+              publisher: extra?['publisher'] as String?,
+            );
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.subjectEditCurriculumTemplate,
+          name: RouteNames.editCurriculum,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final subjectName = extra?['subjectName'] as String?;
+            return EditCurriculumPage(
+              subjectId: state.pathParameters['subjectId']!,
+              curriculumId: state.pathParameters['curriculumId']!,
+              subjectName: subjectName,
+            );
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.subjectCreateCurriculumTemplate,
+          name: RouteNames.createCurriculum,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final subjectName = extra?['subjectName'] as String?;
+            return CreateCurriculumPage(
+              subjectId: state.pathParameters['subjectId']!,
+              subjectName: subjectName,
+            );
+          },
+        ),
+        GoRoute(
+          path: RoutePaths.subjectDetailTemplate,
+          name: RouteNames.subjectDetailFromSubjects,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final subjectId = state.pathParameters['subjectId']!;
+            return SubjectDetailPage(
+              key: ValueKey(subjectId),
+              subjectId: subjectId,
+            );
+          },
+        ),
+
         // ─── Main shell with bottom nav ───
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
@@ -377,104 +459,6 @@ class AppRouter {
                   path: RoutePaths.subjects,
                   name: RouteNames.subjects,
                   builder: (context, state) => const SubjectsListPage(),
-                  routes: [
-                    GoRoute(
-                      path: RoutePaths.subjectIdSegment,
-                      name: RouteNames.subjectDetailFromSubjects,
-                      builder: (context, state) {
-                        final subjectId = state.pathParameters['subjectId']!;
-                        return SubjectDetailPage(
-                          key: ValueKey(subjectId),
-                          subjectId: subjectId,
-                        );
-                      },
-                      routes: [
-                        GoRoute(
-                          path: RoutePaths.createCurriculumSegment,
-                          name: RouteNames.createCurriculum,
-                          builder: (context, state) {
-                            final extra = state.extra as Map<String, dynamic>?;
-                            final subjectName =
-                                extra?['subjectName'] as String?;
-                            return CreateCurriculumPage(
-                              subjectId: state.pathParameters['subjectId']!,
-                              subjectName: subjectName,
-                            );
-                          },
-                        ),
-                        GoRoute(
-                          path: RoutePaths.editCurriculumSegment,
-                          name: RouteNames.editCurriculum,
-                          builder: (context, state) {
-                            final extra = state.extra as Map<String, dynamic>?;
-                            final subjectName =
-                                extra?['subjectName'] as String?;
-                            return EditCurriculumPage(
-                              subjectId: state.pathParameters['subjectId']!,
-                              curriculumId:
-                                  state.pathParameters['curriculumId']!,
-                              subjectName: subjectName,
-                            );
-                          },
-                        ),
-                        GoRoute(
-                          path: RoutePaths.lessonsSegment,
-                          name: RouteNames.lessons,
-                          builder: (context, state) {
-                            final extra = state.extra as Map<String, dynamic>?;
-                            return LessonManagementPage(
-                              subjectName: extra?['subjectName'] as String?,
-                              subjectId: state.pathParameters['subjectId']!,
-                              curriculumId:
-                                  state.pathParameters['curriculumId']!,
-                              curriculumName:
-                                  extra?['curriculumName'] as String?,
-                              publisher: extra?['publisher'] as String?,
-                            );
-                          },
-                          routes: [
-                            GoRoute(
-                              path: RoutePaths.lessonFormSegment,
-                              name: RouteNames.lessonForm,
-                              builder: (context, state) {
-                                final extra =
-                                    state.extra as Map<String, dynamic>?;
-                                return LessonFormPage(
-                                  subjectId: state.pathParameters['subjectId']!,
-                                  subjectName: extra?['subjectName'] as String?,
-                                  curriculumId:
-                                      state.pathParameters['curriculumId']!,
-                                  curriculumName:
-                                      extra?['curriculumName'] as String?,
-                                  publisher: extra?['publisher'] as String?,
-                                  lessonId: extra?['lessonId'] as String?,
-                                );
-                              },
-                            ),
-                            GoRoute(
-                              path: RoutePaths.lessonReviewSegment,
-                              name: RouteNames.lessonReview,
-                              builder: (context, state) {
-                                final extra =
-                                    state.extra as Map<String, dynamic>?;
-                                return LessonReviewPage(
-                                  subjectName: extra?['subjectName'] as String?,
-                                  subjectId: state.pathParameters['subjectId']!,
-                                  curriculumId:
-                                      state.pathParameters['curriculumId']!,
-                                  lessonId: state.pathParameters['lessonId']!,
-                                  curriculumName:
-                                      extra?['curriculumName'] as String?,
-                                  publisher: extra?['publisher'] as String?,
-                                  lessonCount: extra?['lessonCount'] as int? ?? 0,
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -493,6 +477,13 @@ class AppRouter {
                   path: RoutePaths.home,
                   name: RouteNames.home,
                   builder: (context, state) => const HomePage(),
+                  routes: [
+                    GoRoute(
+                      path: RoutePaths.homeProfileSegment,
+                      name: RouteNames.profile,
+                      builder: (context, state) => const ProfilePage(),
+                    ),
+                  ],
                 ),
               ],
             ),

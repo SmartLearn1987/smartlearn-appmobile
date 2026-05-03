@@ -97,95 +97,99 @@ class QuizletCardWidget extends StatelessWidget {
                   children: [
                     if (showVisibilityIcon)
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: quizlet.isPublic
-                                ? AppColors.blue600
-                                : AppColors.secondary,
+                                ? AppColors.primary
+                                : AppColors.gray200,
                             width: AppBorders.widthThin,
                           ),
                           color: quizlet.isPublic
-                              ? AppColors.blue600Light
-                              : AppColors.secondaryLight,
+                              ? AppColors.primaryLight
+                              : AppColors.gray50,
                         ),
                         child: Icon(
                           quizlet.isPublic
-                              ? LucideIcons.eye
-                              : LucideIcons.eyeOff,
+                              ? LucideIcons.globe
+                              : LucideIcons.lock,
                           size: AppSpacing.mdLg,
                           color: quizlet.isPublic
-                              ? AppColors.blue600
-                              : AppColors.secondary,
+                              ? AppColors.primary
+                              : AppColors.gray400,
                         ),
                       ),
                     if (showMenu)
-                      PopupMenuButton<String>(
-                        padding: EdgeInsets.zero,
-                        iconSize: 15,
-                        icon: const Icon(
-                          LucideIcons.moreVertical,
-                          color: AppColors.mutedForeground,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        onSelected: (value) {
-                          if (value == 'edit') onEdit();
-                          if (value == 'delete') onDelete();
-                        },
-                        itemBuilder: (_) => [
-                          PopupMenuItem<String>(
-                            value: 'edit',
-                            height: 36,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.smMd,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  LucideIcons.pencil,
-                                  size: 14,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  'Chỉnh sửa',
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.foreground,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          iconSize: 20,
+                          icon: const Icon(
+                            LucideIcons.moreVertical,
+                            color: AppColors.mutedForeground,
                           ),
-                          PopupMenuItem<String>(
-                            value: 'delete',
-                            height: 36,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.smMd,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          onSelected: (value) {
+                            if (value == 'edit') onEdit();
+                            if (value == 'delete') onDelete();
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem<String>(
+                              value: 'edit',
+                              height: 36,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.smMd,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.pencil,
+                                    size: 14,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Text(
+                                    'Chỉnh sửa',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.foreground,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  LucideIcons.trash2,
-                                  size: 14,
-                                  color: AppColors.destructive,
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  'Xóa học phần',
-                                  style: AppTypography.bodySmall.copyWith(
+                            PopupMenuItem<String>(
+                              value: 'delete',
+                              height: 36,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.smMd,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.trash2,
+                                    size: 14,
                                     color: AppColors.destructive,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Text(
+                                    'Xóa học phần',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.destructive,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                   ],
                 ),

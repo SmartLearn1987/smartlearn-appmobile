@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/features/quizlet/presentation/helpers/csv_import_helper.dart';
 
@@ -65,12 +66,10 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
           child: const Text('Hủy'),
         ),
-        ElevatedButton(
-          onPressed: _onImportNow,
-          child: const Text('Nhập ngay'),
-        ),
+        ElevatedButton(onPressed: _onImportNow, child: const Text('Nhập ngay')),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_learn/core/widgets/app_cached_image.dart';
+import 'package:smart_learn/features/auth/domain/entities/user_entity.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/home/presentation/bloc/home_bloc.dart';
 import 'package:smart_learn/features/home/presentation/widgets/focus_tab.dart';
@@ -81,41 +82,32 @@ class _HomePageState extends State<HomePage> {
                     child: user?.avatarUrl != null
                         ? AppCachedImage(
                             imageUrl: user!.avatarUrl!,
+                            errorWidget: _buildInitialAvatar(user),
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
                           )
-                        : Container(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            child: Center(
-                              child: Text(
-                                _initials(user?.displayName ?? user?.username),
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
+                        : _buildInitialAvatar(user),
                   ),
                 ),
               ],
             ),
-        
+
             // ── Hero section ─────────────────────────────────────────────────
             const SliverToBoxAdapter(child: HomeHeroSection()),
-        
+
             // ── Category tabs (sticky) ────────────────────────────────────────
             SliverPersistentHeader(
               pinned: true,
               delegate: _StickyTabsDelegate(
                 child: HomeCategoryTabs(
                   selectedIndex: _selectedTabIndex,
-                  onChanged: (index) => setState(() => _selectedTabIndex = index),
+                  onChanged: (index) =>
+                      setState(() => _selectedTabIndex = index),
                 ),
               ),
             ),
-        
+
             // ── Tab content ───────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
@@ -130,6 +122,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Container _buildInitialAvatar(UserEntity? user) {
+    return Container(
+      color: AppColors.primary.withValues(alpha: 0.1),
+      child: Center(
+        child: Text(
+          _initials(user?.displayName ?? user?.username),
+          style: AppTypography.labelSmall.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

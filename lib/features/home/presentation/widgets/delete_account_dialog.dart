@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/theme.dart';
+import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/home/presentation/bloc/profile/profile_bloc.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
@@ -72,6 +73,8 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
       listener: (dialogContext, state) {
         if (state is AccountDeleted) {
           Navigator.of(dialogContext).pop(true);
+        } else if (state is ProfileError) {
+          AppToast.error(dialogContext, state.message);
         }
       },
       builder: (context, state) {

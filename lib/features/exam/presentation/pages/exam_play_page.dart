@@ -477,6 +477,7 @@ void _showExitDialog(BuildContext context) {
             Navigator.of(ctx).pop();
             context.go(RoutePaths.quizzes);
           },
+          style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
           child: const Text('Thoát'),
         ),
       ],
@@ -534,11 +535,13 @@ class _QuestionBadge extends StatelessWidget {
             Icon(icon, size: AppSpacing.smMd, color: textColor),
             const SizedBox(width: AppSpacing.xs),
           ],
-          Text(
-            label,
-            style: AppTypography.caption.bold
-                .withColor(textColor)
-                .copyWith(letterSpacing: 0.6),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.caption.bold
+                  .withColor(textColor)
+                  .copyWith(letterSpacing: 0.6),
+            ),
           ),
         ],
       ),

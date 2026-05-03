@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/constants/education_level.dart';
 import 'package:smart_learn/core/constants/visibility.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
@@ -13,6 +12,8 @@ import 'package:smart_learn/core/widgets/app_toast.dart';
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/csv_import_dialog.dart';
+
+import '../../../../core/theme/theme.dart';
 
 class QuizletCreatePage extends StatelessWidget {
   const QuizletCreatePage({super.key});
@@ -146,7 +147,7 @@ class _QuizletCreateViewState extends State<_QuizletCreateView> {
                       (entry) => CardFormWidget(
                         index: entry.key,
                         data: entry.value,
-                        canDelete: state.cards.length > 2,
+                        canDelete: state.cards.length > 1,
                         onTermChanged: (value) => bloc.add(
                           UpdateCard(entry.key, value, entry.value.definition),
                         ),
@@ -162,7 +163,15 @@ class _QuizletCreateViewState extends State<_QuizletCreateView> {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () => bloc.add(const AddCard()),
-                            icon: const Icon(LucideIcons.plus),
+                            icon: const Icon(LucideIcons.plus, size: 16),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: AppTypography.buttonMedium,
+                              side: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                width: AppBorders.widthThin,
+                              ),
+                            ),
                             label: const Text('Thêm thẻ'),
                           ),
                         ),
@@ -180,7 +189,15 @@ class _QuizletCreateViewState extends State<_QuizletCreateView> {
                                 );
                               }
                             },
-                            icon: const Icon(LucideIcons.upload),
+                            icon: const Icon(LucideIcons.upload, size: 16),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: AppTypography.buttonMedium,
+                              side: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                width: AppBorders.widthThin,
+                              ),
+                            ),
                             label: const Text('Nhập danh sách'),
                           ),
                         ),

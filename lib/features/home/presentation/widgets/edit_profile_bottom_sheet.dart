@@ -33,40 +33,58 @@ class EditProfileBottomSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => EditProfileBottomSheet(
-        user: user,
-        profileBloc: profileBloc,
-      ),
+      builder: (_) =>
+          EditProfileBottomSheet(user: user, profileBloc: profileBloc),
     );
   }
 
   @override
-  State<EditProfileBottomSheet> createState() =>
-      _EditProfileBottomSheetState();
+  State<EditProfileBottomSheet> createState() => _EditProfileBottomSheetState();
 }
 
 class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _displayNameController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _emailController;
   String? _newAvatarUrl;
   bool _isUploading = false;
+
+  /// Lightweight format check; value is trimmed before save/send.
+  static final _emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
   @override
   void initState() {
     super.initState();
-    _displayNameController =
-        TextEditingController(text: widget.user.displayName);
+    _displayNameController = TextEditingController(
+      text: widget.user.displayName,
+    );
+    _usernameController = TextEditingController(text: widget.user.username);
+    _emailController = TextEditingController(text: widget.user.email);
   }
 
   @override
   void dispose() {
     _displayNameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   String? _validateDisplayName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Tên hiển thị không được để trống';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return 'Email không được để trống';
+    }
+    if (!_emailPattern.hasMatch(trimmed)) {
+      return 'Email không hợp lệ';
     }
     return null;
   }
@@ -101,10 +119,94 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final displayName = _displayNameController.text.trim();
+    final email = _emailController.text.trim();
     widget.profileBloc.add(
       UpdateProfile(
         displayName: displayName,
         avatarUrl: _newAvatarUrl ?? widget.user.avatarUrl,
+        email: email,
+      ),
+    );
+  }
+
+  InputDecoration _profileInputDecoration({required String hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: AppTypography.bodyMedium.copyWith(
+        color: AppColors.mutedForeground,
+      ),
+      filled: true,
+      fillColor: AppColors.card,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.smMd,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.input,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.input,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.primary,
+          width: AppBorders.widthMedium,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.destructive,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.destructive,
+          width: AppBorders.widthMedium,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _usernameDisabledDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: AppColors.muted,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.smMd,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: AppBorders.borderRadiusSm,
+        borderSide: const BorderSide(
+          color: AppColors.border,
+          width: AppBorders.widthThin,
+        ),
       ),
     );
   }
@@ -116,6 +218,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       child: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileUpdateSuccess) {
+            AppToast.success(context, 'Cập nhật thành công');
             Navigator.of(context).pop();
           } else if (state is ProfileError) {
             AppToast.error(context, state.message);
@@ -125,134 +228,133 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.mdLg,
-              AppSpacing.sm,
-              AppSpacing.mdLg,
-              AppSpacing.xl,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ─── Drag handle ───
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        borderRadius: AppBorders.borderRadiusFull,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Thông tin cá nhân',
-                    style: AppTypography.h4.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  // ─── Avatar section ───
-                  Center(child: _buildAvatarSection()),
-                  const SizedBox(height: AppSpacing.lg),
-                  // ─── Display name field ───
-                  Text(
-                    'Tên hiển thị',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextFormField(
-                    controller: _displayNameController,
-                    validator: _validateDisplayName,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.foreground,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Nhập tên hiển thị',
-                      hintStyle: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.mutedForeground,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.card,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.smMd,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: AppBorders.borderRadiusSm,
-                        borderSide: const BorderSide(
-                          color: AppColors.input,
-                          width: AppBorders.widthThin,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: AppBorders.borderRadiusSm,
-                        borderSide: const BorderSide(
-                          color: AppColors.input,
-                          width: AppBorders.widthThin,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: AppBorders.borderRadiusSm,
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: AppBorders.widthMedium,
-                        ),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: AppBorders.borderRadiusSm,
-                        borderSide: const BorderSide(
-                          color: AppColors.destructive,
-                          width: AppBorders.widthThin,
-                        ),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: AppBorders.borderRadiusSm,
-                        borderSide: const BorderSide(
-                          color: AppColors.destructive,
-                          width: AppBorders.widthMedium,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  // ─── Save button ───
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: BlocBuilder<ProfileBloc, ProfileState>(
-                      builder: (context, state) {
-                        final isUpdating = state is ProfileUpdating;
-                        return ElevatedButton(
-                          onPressed: isUpdating ? null : _onSave,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.primaryForeground,
-                            shape: AppBorders.shapeSm,
-                            textStyle: AppTypography.buttonLarge,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.mdLg,
+                  AppSpacing.sm,
+                  AppSpacing.mdLg,
+                  AppSpacing.xl,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ─── Drag handle ───
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.border,
+                            borderRadius: AppBorders.borderRadiusFull,
                           ),
-                          child: isUpdating
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Lưu'),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                      Text(
+                        'Thông tin cá nhân',
+                        style: AppTypography.h4.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      // ─── Avatar section ───
+                      Center(child: _buildAvatarSection()),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Tên đăng nhập',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _usernameController,
+                        enabled: false,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.mutedForeground,
+                        ),
+                        decoration: _usernameDisabledDecoration(),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      // ─── Display name field ───
+                      Text(
+                        'Tên hiển thị',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _displayNameController,
+                        validator: _validateDisplayName,
+                        textCapitalization: TextCapitalization.words,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                        decoration: _profileInputDecoration(
+                          hintText: 'Nhập tên hiển thị',
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Địa chỉ email',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _emailController,
+                        validator: _validateEmail,
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.foreground,
+                        ),
+                        decoration: _profileInputDecoration(
+                          hintText: 'Nhập email',
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      // ─── Save button ───
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: BlocBuilder<ProfileBloc, ProfileState>(
+                          builder: (context, state) {
+                            final isUpdating = state is ProfileUpdating;
+                            return ElevatedButton(
+                              onPressed: isUpdating ? null : _onSave,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.primaryForeground,
+                                shape: AppBorders.shapeSm,
+                                textStyle: AppTypography.buttonLarge,
+                              ),
+                              child: isUpdating
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text('Lưu'),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -293,9 +395,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
           onTap: _isUploading ? null : _pickAndUploadImage,
           child: Text(
             'Thay đổi',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.primary,
-            ),
+            style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
           ),
         ),
       ],
@@ -303,7 +403,8 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   }
 
   Widget _buildAvatarImage() {
-    final avatarUrl = _newAvatarUrl ?? widget.user.avatarUrl;
+    final rawUrl = _newAvatarUrl ?? widget.user.avatarUrl;
+    final avatarUrl = rawUrl?.trim();
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       return AppCachedImage(
         imageUrl: avatarUrl,
@@ -316,6 +417,14 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     return _buildInitialAvatar();
   }
 
+  String _avatarLetter() {
+    for (final raw in [widget.user.displayName, widget.user.username]) {
+      final t = raw.trim();
+      if (t.isNotEmpty) return t[0].toUpperCase();
+    }
+    return 'U';
+  }
+
   Widget _buildInitialAvatar() {
     return Container(
       width: 80,
@@ -326,12 +435,8 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       ),
       alignment: Alignment.center,
       child: Text(
-        widget.user.displayName.isNotEmpty
-            ? widget.user.displayName[0].toUpperCase()
-            : 'U',
-        style: AppTypography.h2.copyWith(
-          color: AppColors.primaryForeground,
-        ),
+        _avatarLetter(),
+        style: AppTypography.h2.copyWith(color: AppColors.primaryForeground),
       ),
     );
   }

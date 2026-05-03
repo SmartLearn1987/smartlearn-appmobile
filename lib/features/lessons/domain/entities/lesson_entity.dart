@@ -17,6 +17,7 @@ class LessonEntity extends Equatable {
   final List<QuizQuestion>? quiz;
   final List<Flashcard>? flashcards;
   final int sortOrder;
+  final DateTime? createdAt;
 
   const LessonEntity({
     required this.id,
@@ -30,6 +31,7 @@ class LessonEntity extends Equatable {
     this.quiz,
     this.flashcards,
     required this.sortOrder,
+    this.createdAt,
   });
 
   @override
@@ -45,5 +47,6 @@ class LessonEntity extends Equatable {
         quiz,
         flashcards,
         sortOrder,
+        createdAt,
       ];
 }

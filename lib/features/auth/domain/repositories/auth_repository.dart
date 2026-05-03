@@ -22,9 +22,16 @@ abstract class AuthRepository {
   Future<Either<Failure, UserEntity>> getProfile();
 
   Future<Either<Failure, UserEntity>> updateProfile({
-    String? name,
-    String? username,
+    required String userId,
+    String? displayName,
+    String? email,
     String? avatarUrl,
+    required String role,
+    required bool isActive,
+    String? educationLevel,
+    String? plan,
+    DateTime? planStartDate,
+    DateTime? planEndDate,
   });
 
   Future<Either<Failure, void>> forgotPassword(String email);

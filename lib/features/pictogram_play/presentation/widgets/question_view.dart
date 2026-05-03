@@ -211,53 +211,52 @@ class _QuestionViewState extends State<QuestionView> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(widget.totalQuestions, (i) {
-                final isCurrent = i == widget.currentIndex;
-                final result = widget.answeredQuestions[i];
-                Color bgColor;
-                Color textColor;
-                if (isCurrent) {
-                  bgColor = AppColors.primary;
-                  textColor = Colors.white;
-                } else if (result != null) {
-                  bgColor = result == AnswerResult.correct
-                      ? AppColors.success.withValues(alpha: 0.15)
-                      : AppColors.destructive.withValues(alpha: 0.15);
-                  textColor = result == AnswerResult.correct
-                      ? AppColors.success
-                      : AppColors.destructive;
-                } else {
-                  bgColor = AppColors.muted;
-                  textColor = AppColors.foreground;
-                }
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: i < widget.totalQuestions - 1 ? AppSpacing.xs : 0,
-                  ),
-                  child: GestureDetector(
-                    onTap: () => widget.onGoTo(i),
-                    child: Container(
-                      width: 40,
-                      height: 36,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        borderRadius: AppBorders.borderRadiusSm,
-                      ),
-                      child: Text(
-                        '${i + 1}',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: textColor,
-                        ),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: List.generate(widget.totalQuestions, (i) {
+              final isCurrent = i == widget.currentIndex;
+              final result = widget.answeredQuestions[i];
+              Color bgColor;
+              Color textColor;
+              if (isCurrent) {
+                bgColor = AppColors.primary;
+                textColor = Colors.white;
+              } else if (result != null) {
+                bgColor = result == AnswerResult.correct
+                    ? AppColors.success.withValues(alpha: 0.15)
+                    : AppColors.destructive.withValues(alpha: 0.15);
+                textColor = result == AnswerResult.correct
+                    ? AppColors.success
+                    : AppColors.destructive;
+              } else {
+                bgColor = AppColors.muted;
+                textColor = AppColors.foreground;
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: i < widget.totalQuestions - 1 ? AppSpacing.xs : 0,
+                ),
+                child: GestureDetector(
+                  onTap: () => widget.onGoTo(i),
+                  child: Container(
+                    width: 40,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: AppBorders.borderRadiusSm,
+                    ),
+                    child: Text(
+                      '${i + 1}',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: textColor,
                       ),
                     ),
                   ),
-                );
-              }),
-            ),
+                ),
+              );
+            }),
           ),
         ],
       ),

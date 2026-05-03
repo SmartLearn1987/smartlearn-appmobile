@@ -9,7 +9,6 @@ import 'package:smart_learn/features/auth/domain/usecases/get_profile_usecase.da
 import 'package:smart_learn/features/auth/domain/usecases/login_usecase.dart';
 import 'package:smart_learn/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:smart_learn/features/auth/domain/usecases/register_usecase.dart';
-import 'package:smart_learn/features/auth/domain/usecases/update_profile_usecase.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -20,7 +19,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetProfileUseCase _getProfileUseCase;
-  final UpdateProfileUseCase _updateProfileUseCase;
   final AuthLocalDatasource _localDatasource;
 
   AuthBloc(
@@ -28,7 +26,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this._registerUseCase,
     this._logoutUseCase,
     this._getProfileUseCase,
-    this._updateProfileUseCase,
     this._localDatasource,
   ) : super(const AuthInitial()) {
     on<AuthLoginRequested>(_onLoginRequested);
@@ -36,7 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthCheckStatusRequested>(_onCheckStatusRequested);
     on<AuthProfileRequested>(_onProfileRequested);
-    on<AuthProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<AuthUserSynced>(_onUserSynced);
     on<AuthForceLogout>(_onForceLogout);
   }
 
@@ -117,22 +114,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onProfileUpdateRequested(
-    AuthProfileUpdateRequested event,
+  void _onUserSynced(
+    AuthUserSynced event,
     Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
-    final result = await _updateProfileUseCase(
-      UpdateProfileParams(
-        name: event.name,
-        username: event.username,
-        avatarUrl: event.avatarUrl,
-      ),
-    );
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
-    );
+  ) {
+    emit(AuthAuthenticated(event.user));
   }
 
   void _onForceLogout(

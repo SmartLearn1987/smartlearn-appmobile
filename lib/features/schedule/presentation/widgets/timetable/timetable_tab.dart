@@ -156,14 +156,14 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Chưa có môn học nào',
+            'Chưa có lịch học nào',
             style: AppTypography.labelLarge.copyWith(
               color: AppColors.foreground,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Nhấn Thêm môn học để bắt đầu',
+            'Nhấn Thêm lịch học để bắt đầu',
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.mutedForeground,
             ),

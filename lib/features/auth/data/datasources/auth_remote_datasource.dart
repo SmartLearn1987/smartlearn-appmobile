@@ -5,6 +5,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../models/login_response_model.dart';
 import '../models/refresh_token_response_model.dart';
+import '../models/upload_response_model.dart';
 import '../models/user_model.dart';
 
 part 'auth_remote_datasource.g.dart';
@@ -28,8 +29,13 @@ abstract class AuthRemoteDatasource {
   @GET('/me')
   Future<UserModel> getProfile();
 
-  @PUT('/profile')
-  Future<UserModel> updateProfile(@Body() Map<String, dynamic> body);
+  /// Same contract as web `updateUser` in `smartlearn/src/lib/auth.ts`
+  /// (`PUT /users/:id`).
+  @PUT('/users/{id}')
+  Future<UserModel> updateUser(
+    @Path('id') String userId,
+    @Body() Map<String, dynamic> body,
+  );
 
   @POST('/forgot-password')
   Future<void> forgotPassword(@Body() Map<String, dynamic> body);
@@ -48,7 +54,7 @@ abstract class AuthRemoteDatasource {
 
   @POST('/upload')
   @MultiPart()
-  Future<String> uploadFile(
+  Future<UploadResponseModel> uploadFile(
     @Part(name: 'file') File file,
   );
 }

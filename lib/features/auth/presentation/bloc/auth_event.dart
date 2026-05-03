@@ -46,15 +46,13 @@ final class AuthProfileRequested extends AuthEvent {
   const AuthProfileRequested();
 }
 
-final class AuthProfileUpdateRequested extends AuthEvent {
-  final String? name;
-  final String? username;
-  final String? avatarUrl;
+final class AuthUserSynced extends AuthEvent {
+  final UserEntity user;
 
-  const AuthProfileUpdateRequested({this.name, this.username, this.avatarUrl});
+  const AuthUserSynced(this.user);
 
   @override
-  List<Object?> get props => [name, username, avatarUrl];
+  List<Object?> get props => [user];
 }
 
 final class AuthForceLogout extends AuthEvent {

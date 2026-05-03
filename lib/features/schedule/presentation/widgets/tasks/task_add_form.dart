@@ -133,6 +133,8 @@ class _TaskAddFormState extends State<TaskAddForm> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.destructive,
+                        side: const BorderSide(color: AppColors.destructive),
                         shape: AppBorders.shapeSm,
                       ),
                       child: const Text('Hủy'),

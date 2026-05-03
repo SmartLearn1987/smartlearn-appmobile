@@ -14,11 +14,12 @@ final class LoadProfile extends ProfileEvent {
 final class UpdateProfile extends ProfileEvent {
   final String? displayName;
   final String? avatarUrl;
+  final String? email;
 
-  const UpdateProfile({this.displayName, this.avatarUrl});
+  const UpdateProfile({this.displayName, this.avatarUrl, this.email});
 
   @override
-  List<Object?> get props => [displayName, avatarUrl];
+  List<Object?> get props => [displayName, avatarUrl, email];
 }
 
 final class ChangePassword extends ProfileEvent {

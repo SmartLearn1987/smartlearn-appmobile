@@ -33,6 +33,7 @@ class LessonModel extends LessonEntity {
     this.quiz,
     this.flashcards,
     required super.sortOrder,
+    super.createdAt,
   }) : super(
          content: content,
          vocabulary: vocabulary,

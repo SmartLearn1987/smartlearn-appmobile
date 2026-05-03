@@ -23,7 +23,7 @@ class SubjectCardWidget extends StatelessWidget {
           Opacity(opacity: opacity, child: child),
       child: GestureDetector(
         onTap: () =>
-            context.go(RoutePaths.subjectDetail(subjectWithCount.subject.id)),
+            context.push(RoutePaths.subjectDetail(subjectWithCount.subject.id)),
         child: ClipRRect(
           borderRadius: AppBorders.borderRadiusLg,
           child: Stack(

@@ -64,11 +64,18 @@ class _SubjectDetailView extends StatelessWidget {
           curr is SubjectDetailLoaded ||
           curr is SubjectDetailError,
       builder: (context, state) => switch (state) {
-        SubjectDetailLoading() => const Center(
-          child: CircularProgressIndicator(),
+        SubjectDetailLoading() => Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
+          body: const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
         ),
         SubjectDetailLoaded() => _buildContent(context, state),
-        SubjectDetailError(:final message) => _buildError(context, message),
+        SubjectDetailError(:final message) => _buildErrorScaffold(
+          context,
+          message,
+        ),
         _ => const SizedBox.shrink(),
       },
     );
@@ -89,7 +96,7 @@ class _SubjectDetailView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        leading: BackButton(onPressed: () => context.go(RoutePaths.subjects)),
+        leading: BackButton(onPressed: () => context.pop()),
         title: Text(subject.name, overflow: TextOverflow.ellipsis),
       ),
       body: SingleChildScrollView(
@@ -143,7 +150,7 @@ class _SubjectDetailView extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => context.go(
+        onPressed: () => context.push(
           RoutePaths.createCurriculum(subjectId),
           extra: {'subjectName': subjectName},
         ),
@@ -206,7 +213,7 @@ class _SubjectDetailView extends StatelessWidget {
             child: CurriculumCardWidget(
               curriculum: curriculum,
               index: i,
-              onManageLessons: () => context.go(
+              onManageLessons: () => context.push(
                 RoutePaths.lessons(subjectId, curriculum.id),
                 extra: {
                   'curriculumName': curriculum.name,
@@ -214,7 +221,7 @@ class _SubjectDetailView extends StatelessWidget {
                   'subjectName': subjectName,
                 },
               ),
-              onEdit: () => context.go(
+              onEdit: () => context.push(
                 RoutePaths.editCurriculum(subjectId, curriculum.id),
                 extra: {'subjectName': subjectName},
               ),
@@ -244,28 +251,32 @@ class _SubjectDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildError(BuildContext context, String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.xxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.mutedForeground,
+  Widget _buildErrorScaffold(BuildContext context, String message) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(leading: BackButton(onPressed: () => context.pop())),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.mdLg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                message,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.mutedForeground,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ElevatedButton(
-              onPressed: () => context.read<SubjectDetailBloc>().add(
-                SubjectDetailLoadRequested(subjectId: subjectId),
+              const SizedBox(height: AppSpacing.md),
+              ElevatedButton(
+                onPressed: () => context.read<SubjectDetailBloc>().add(
+                  SubjectDetailLoadRequested(subjectId: subjectId),
+                ),
+                child: const Text('Thử lại'),
               ),
-              child: const Text('Thử lại'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

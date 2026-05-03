@@ -166,6 +166,8 @@ class _TaskEditModalState extends State<TaskEditModal> {
                         Navigator.of(context).pop();
                       },
                       style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.destructive,
+                        side: const BorderSide(color: AppColors.destructive),
                         shape: AppBorders.shapeSm,
                       ),
                       child: const Text('Hủy'),

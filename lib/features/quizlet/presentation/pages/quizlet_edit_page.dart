@@ -5,8 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/app/di/injection.dart';
 import 'package:smart_learn/core/constants/education_level.dart';
 import 'package:smart_learn/core/constants/visibility.dart';
-import 'package:smart_learn/core/theme/app_colors.dart';
-import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/validators/form_validators.dart';
 import 'package:smart_learn/core/widgets/app_dropdown_field.dart';
 import 'package:smart_learn/core/widgets/app_text_field.dart';
@@ -15,6 +13,8 @@ import 'package:smart_learn/features/quizlet/domain/usecases/delete_quizlet_use_
 import 'package:smart_learn/features/quizlet/presentation/bloc/quizlet_create/quizlet_create_bloc.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/card_form_widget.dart';
 import 'package:smart_learn/features/quizlet/presentation/widgets/csv_import_dialog.dart';
+
+import '../../../../core/theme/theme.dart';
 
 class QuizletEditPage extends StatelessWidget {
   final String quizletId;
@@ -151,7 +151,7 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                       (entry) => CardFormWidget(
                         index: entry.key,
                         data: entry.value,
-                        canDelete: state.cards.length > 2,
+                        canDelete: state.cards.length > 1,
                         onTermChanged: (value) => bloc.add(
                           UpdateCard(entry.key, value, entry.value.definition),
                         ),
@@ -167,8 +167,19 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () => bloc.add(const AddCard()),
-                            icon: const Icon(LucideIcons.plus),
-                            label: const Text('Thêm thẻ'),
+                            icon: const Icon(LucideIcons.plus, size: 16),
+                            label: Text(
+                              'Thêm thẻ',
+                              style: AppTypography.buttonMedium,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: AppTypography.buttonMedium,
+                              side: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                width: AppBorders.widthThin,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -185,8 +196,19 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                                 );
                               }
                             },
-                            icon: const Icon(LucideIcons.upload),
-                            label: const Text('Nhập danh sách'),
+                            icon: const Icon(LucideIcons.upload, size: 16),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: AppTypography.buttonMedium,
+                              side: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                width: AppBorders.widthThin,
+                              ),
+                            ),
+                            label: Text(
+                              'Nhập danh sách',
+                              style: AppTypography.buttonMedium,
+                            ),
                           ),
                         ),
                       ],
@@ -214,8 +236,9 @@ class _QuizletEditViewState extends State<_QuizletEditView> {
                     ElevatedButton.icon(
                       key: const Key('delete_quizlet_button'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.destructive,
-                        foregroundColor: AppColors.destructiveForeground,
+                        backgroundColor: AppColors.destructiveForeground,
+                        foregroundColor: AppColors.destructive,
+                        side: const BorderSide(color: AppColors.destructive),
                       ),
                       onPressed: () async {
                         final confirmDelete = await showDialog<bool>(

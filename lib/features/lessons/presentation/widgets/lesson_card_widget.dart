@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:smart_learn/core/theme/theme.dart';
 
@@ -7,8 +8,8 @@ import '../../domain/entities/lesson_entity.dart';
 /// Displays a lesson card with index, title, and description.
 ///
 /// Supports two modes:
-/// - **Manage mode** (`isReviewMode: false`): Shows "Sửa" and "Xóa" action
-///   buttons for editing and deleting.
+/// - **Manage mode** (`isReviewMode: false`): Menu (⋯) beside the title; footer
+///   shows creation date chip.
 /// - **Review mode** (`isReviewMode: true`): Shows a "Đã học" completion badge
 ///   when [isCompleted] is `true`, and the entire card is tappable.
 class LessonCardWidget extends StatelessWidget {
@@ -54,7 +55,7 @@ class LessonCardWidget extends StatelessWidget {
           _buildInfo(),
           if (!isReviewMode) ...[
             const Divider(height: AppSpacing.mdLg),
-            _buildManageActions(),
+            _buildManageFooter(),
           ],
           if (isReviewMode) ...[
             const SizedBox(height: AppSpacing.md),
@@ -64,7 +65,7 @@ class LessonCardWidget extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(
                   0,
                   AppSpacing.xs,
-                  AppSpacing.xs,  
+                  AppSpacing.xs,
                   AppSpacing.xs,
                 ),
                 child: Row(
@@ -98,6 +99,8 @@ class LessonCardWidget extends StatelessWidget {
   }
 
   Widget _buildInfo() {
+    final titleStyle = AppTypography.h4.copyWith(fontWeight: FontWeight.w700);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -128,12 +131,28 @@ class LessonCardWidget extends StatelessWidget {
             ],
           ),
         const SizedBox(height: AppSpacing.sm),
-        Text(
-          isReviewMode ? lesson.title : "${index + 1}. ${lesson.title}",
-          style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
+        if (isReviewMode)
+          Text(
+            lesson.title,
+            style: titleStyle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          )
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '${index + 1}. ${lesson.title}',
+                  style: titleStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _buildManageMenuButton(),
+            ],
+          ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           lesson.description ?? "Không có mô tả nội dung bài học",
@@ -177,55 +196,97 @@ class LessonCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildManageActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onEdit,
-            icon: const Icon(LucideIcons.pencil, size: 14),
-            label: const Text('Sửa'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.foreground,
-              textStyle: AppTypography.buttonSmall,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
-              side: const BorderSide(
-                color: AppColors.border,
-                width: AppBorders.widthThin,
-              ),
+  Widget _buildManageFooter() {
+    final dateText = lesson.createdAt != null
+        ? DateFormat('d/M/yyyy').format(lesson.createdAt!.toLocal())
+        : '—';
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.gray100,
+          borderRadius: BorderRadius.circular(AppSpacing.lg),
+        ),
+        child: Text(
+          'Ngày tạo: $dateText',
+          style: AppTypography.textXs.semiBold.copyWith(
+            color: AppColors.mutedForeground,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManageMenuButton() {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        iconSize: 20,
+        icon: const Icon(
+          LucideIcons.moreVertical,
+          color: AppColors.mutedForeground,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        onSelected: (value) {
+          if (value == 'edit') onEdit?.call();
+          if (value == 'delete') onDelete?.call();
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem<String>(
+            value: 'edit',
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  LucideIcons.pencil,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Chỉnh sửa',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.foreground,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onDelete,
-            icon: const Icon(LucideIcons.trash2, size: 14),
-            label: const Text('Xóa'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.destructive,
-              textStyle: AppTypography.buttonSmall,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
-              side: const BorderSide(
-                color: AppColors.destructive,
-                width: AppBorders.widthThin,
-              ),
+          PopupMenuItem<String>(
+            value: 'delete',
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  LucideIcons.trash2,
+                  size: 14,
+                  color: AppColors.destructive,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Xóa bài học',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.destructive,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

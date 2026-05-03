@@ -67,18 +67,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileUpdating(currentUser));
     final result = await _updateProfileUseCase(
       UpdateProfileParams(
-        name: event.displayName,
+        userId: currentUser.id,
+        displayName: event.displayName,
         avatarUrl: event.avatarUrl,
+        email: event.email,
+        role: currentUser.role,
+        isActive: currentUser.isActive,
+        educationLevel: currentUser.educationLevel,
+        plan: currentUser.plan,
+        planStartDate: currentUser.planStartDate,
+        planEndDate: currentUser.planEndDate,
       ),
     );
     result.fold(
       (failure) => emit(ProfileError(failure.message)),
       (updatedUser) {
         emit(ProfileUpdateSuccess(updatedUser));
-        _authBloc.add(AuthProfileUpdateRequested(
-          name: event.displayName,
-          avatarUrl: event.avatarUrl,
-        ));
+        _authBloc.add(AuthUserSynced(updatedUser));
       },
     );
   }
