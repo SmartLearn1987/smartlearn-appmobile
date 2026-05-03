@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -149,22 +148,13 @@ class _SubjectDetailView extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: () => context.push(
           RoutePaths.createCurriculum(subjectId),
           extra: {'subjectName': subjectName},
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.primaryForeground,
-          textStyle: AppTypography.buttonMedium,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.smMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorders.borderRadiusSm,
-          ),
-          elevation: 2,
-        ),
-        child: const Text('+ Tạo giáo trình mới'),
+        icon: const Icon(LucideIcons.plus, size: 18),
+        label: const Text('Tạo giáo trình mới'),
       ),
     );
   }

@@ -202,16 +202,10 @@ class _LessonManagementViewState extends State<_LessonManagementView> {
   }
 
   Widget _buildCreateButton() {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: () => _navigateToForm(),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.primaryForeground,
-        textStyle: AppTypography.buttonMedium,
-        shape: RoundedRectangleBorder(borderRadius: AppBorders.borderRadiusSm),
-        elevation: 2,
-      ),
-      child: const Text('+ Tạo ghi chú mới'),
+      icon: const Icon(LucideIcons.plus, size: 18),
+      label: const Text('Tạo bài học mới'),
     );
   }
 

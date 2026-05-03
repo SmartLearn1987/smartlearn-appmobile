@@ -7,49 +7,22 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/content_block.dart';
 
-// ─── Internal rich block model (editor-only, not persisted) ──────────────────
+// ─── Internal editor block (type + controller) ───────────────────────────────
 
 class _RichBlock {
-  _RichBlock({
-    required this.type,
-    required this.controller,
-    this.fontSize = 16,
-    this.fontFamily = 'default',
-    this.color = const Color(0xFF222D3F),
-    this.bold = false,
-    this.italic = false,
-  });
+  _RichBlock({required this.type, required this.controller});
 
   String type;
   final TextEditingController controller;
-  double fontSize;
-  String fontFamily;
-  Color color;
-  bool bold;
-  bool italic;
 
   factory _RichBlock.fromContentBlock(ContentBlock block) => _RichBlock(
     type: block.type,
     controller: TextEditingController(text: block.content),
-    fontSize: block.fontSize ?? 16,
-    fontFamily: block.fontFamily ?? 'default',
-    color: block.color != null ? _hexToColor(block.color!) : const Color(0xFF222D3F),
-    bold: block.bold ?? false,
-    italic: block.italic ?? false,
   );
+
+  ContentBlock toContentBlock() =>
+      ContentBlock(type: type, content: controller.text);
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-Color _hexToColor(String hex) {
-  final h = hex.replaceFirst('#', '');
-  return Color(int.parse('FF$h', radix: 16));
-}
-
-String _colorToHex(Color color) =>
-    '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
-
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const _blockTypes = <String, String>{
   'paragraph': 'Đoạn văn',
@@ -65,34 +38,9 @@ const _blockIcons = <String, IconData>{
   'numbered_item': LucideIcons.listOrdered,
 };
 
-const _fontSizes = <double>[12, 14, 16, 18, 20, 24, 28, 32];
+// ──────────────────────────────────────────────────────────────────────────────
 
-const _fontFamilies = <String, String>{
-  'default': 'Mặc định',
-  'serif': 'Serif',
-  'mono': 'Mono',
-  'sans': 'Sans',
-};
-
-const _colors = <Color>[
-  Color(0xFF222D3F),
-  Color(0xFF6A7181),
-  Color(0xFFB91C1C),
-  Color(0xFF1D4ED8),
-  Color(0xFF15803D),
-  Color(0xFF9333EA),
-  Color(0xFFC2410C),
-  Color(0xFF0E7490),
-];
-
-// ─── Widget ──────────────────────────────────────────────────────────────────
-
-/// Block-based rich content editor matching the React RichTextEditor.
-///
-/// Features: block type selector, font size, font family, color swatches,
-/// bold/italic toggles. Toolbar state syncs to the focused block.
-///
-/// Serializes to [ContentBlock] (type + content only) for API compatibility.
+/// Soạn khối nội dung — chỉ lưu [ContentBlock.type] và [ContentBlock.content].
 class RichContentEditor extends StatefulWidget {
   const RichContentEditor({
     super.key,
@@ -111,13 +59,8 @@ class RichContentEditorState extends State<RichContentEditor> {
   late final List<_RichBlock> _blocks;
   int _focusedIdx = -1;
 
-  // Toolbar state — mirrors focused block
-  double _fontSize = 16;
-  String _fontFamily = 'default';
-  Color _color = const Color(0xFF222D3F);
+  /// Loại khối hiển thị khi có dòng đang focus — dùng khi "Thêm đoạn".
   String _blockType = 'paragraph';
-  bool _bold = false;
-  bool _italic = false;
 
   @override
   void initState() {
@@ -135,63 +78,19 @@ class RichContentEditorState extends State<RichContentEditor> {
     super.dispose();
   }
 
-  /// Public getter — returns [ContentBlock] list for saving.
-  List<ContentBlock> get blocks => _blocks
-      .map((b) => ContentBlock(
-            type: b.type,
-            content: b.controller.text,
-            fontSize: b.fontSize != 16 ? b.fontSize : null,
-            fontFamily: b.fontFamily != 'default' ? b.fontFamily : null,
-            color: _colorToHex(b.color) != '#222D3F' ? _colorToHex(b.color) : null,
-            bold: b.bold ? true : null,
-            italic: b.italic ? true : null,
-          ))
-      .toList();
+  List<ContentBlock> get blocks =>
+      _blocks.map((b) => b.toContentBlock()).toList();
 
   void _notify() => widget.onChanged?.call(blocks);
-
-  // ── Focus sync ──
 
   void _onFocus(int idx) {
     setState(() {
       _focusedIdx = idx;
-      final b = _blocks[idx];
-      _fontSize = b.fontSize;
-      _fontFamily = b.fontFamily;
-      _color = b.color;
-      _blockType = b.type;
-      _bold = b.bold;
-      _italic = b.italic;
+      _blockType = _blocks[idx].type;
     });
   }
 
   void _onBlur() => setState(() => _focusedIdx = -1);
-
-  // ── Toolbar actions ──
-
-  void _applyFontSize(double v) {
-    if (_focusedIdx == -1) return;
-    setState(() {
-      _fontSize = v;
-      _blocks[_focusedIdx].fontSize = v;
-    });
-  }
-
-  void _applyFontFamily(String v) {
-    if (_focusedIdx == -1) return;
-    setState(() {
-      _fontFamily = v;
-      _blocks[_focusedIdx].fontFamily = v;
-    });
-  }
-
-  void _applyColor(Color v) {
-    if (_focusedIdx == -1) return;
-    setState(() {
-      _color = v;
-      _blocks[_focusedIdx].color = v;
-    });
-  }
 
   void _applyBlockType(String v) {
     if (_focusedIdx == -1) return;
@@ -202,36 +101,10 @@ class RichContentEditorState extends State<RichContentEditor> {
     _notify();
   }
 
-  void _toggleBold() {
-    if (_focusedIdx == -1) return;
-    setState(() {
-      _bold = !_bold;
-      _blocks[_focusedIdx].bold = _bold;
-    });
-  }
-
-  void _toggleItalic() {
-    if (_focusedIdx == -1) return;
-    setState(() {
-      _italic = !_italic;
-      _blocks[_focusedIdx].italic = _italic;
-    });
-  }
-
-  // ── Block management ──
-
   void _addBlock() {
     setState(() {
       _blocks.add(
-        _RichBlock(
-          type: _blockType,
-          controller: TextEditingController(),
-          fontSize: _fontSize,
-          fontFamily: _fontFamily,
-          color: _color,
-          bold: _bold,
-          italic: _italic,
-        ),
+        _RichBlock(type: _blockType, controller: TextEditingController()),
       );
       _focusedIdx = _blocks.length - 1;
     });
@@ -242,49 +115,28 @@ class RichContentEditorState extends State<RichContentEditor> {
     setState(() {
       _blocks[idx].controller.dispose();
       _blocks.removeAt(idx);
-      if (_focusedIdx >= _blocks.length) _focusedIdx = _blocks.length - 1;
+      if (_focusedIdx >= _blocks.length) {
+        _focusedIdx = _blocks.isEmpty ? -1 : _blocks.length - 1;
+      }
     });
     _notify();
   }
 
-  void _moveUp(int idx) {
-    if (idx <= 0) return;
-    setState(() {
-      final b = _blocks.removeAt(idx);
-      _blocks.insert(idx - 1, b);
-      _focusedIdx = idx - 1;
-    });
-    _notify();
+  TextStyle _textStyleFor(String type) {
+    return switch (type) {
+      'heading' => AppTypography.labelLarge.copyWith(
+        color: AppColors.foreground,
+        fontWeight: FontWeight.w700,
+      ),
+      _ => AppTypography.bodyMedium.copyWith(color: AppColors.foreground),
+    };
   }
 
-  void _moveDown(int idx) {
-    if (idx >= _blocks.length - 1) return;
-    setState(() {
-      final b = _blocks.removeAt(idx);
-      _blocks.insert(idx + 1, b);
-      _focusedIdx = idx + 1;
-    });
-    _notify();
-  }
-
-  // ── Helpers ──
-
-  TextStyle _textStyleFor(_RichBlock b) {
-    final base = b.type == 'heading'
-        ? AppTypography.labelLarge
-        : AppTypography.bodyMedium;
-    return base.copyWith(
-      fontSize: b.fontSize,
-      color: b.color,
-      fontWeight: b.bold ? FontWeight.w700 : FontWeight.w400,
-      fontStyle: b.italic ? FontStyle.italic : FontStyle.normal,
-      fontFamily: b.fontFamily == 'default' ? null : b.fontFamily,
-    );
-  }
-
-  String _prefixFor(_RichBlock b, int idx) {
-    if (b.type == 'list_item') return '•';
-    if (b.type == 'numbered_item') return '${idx + 1}.';
+  String _prefixFor(String type, int numberedOrdinal) {
+    if (type == 'list_item') return '•';
+    if (type == 'numbered_item' && numberedOrdinal > 0) {
+      return '$numberedOrdinal.';
+    }
     return '';
   }
 
@@ -294,10 +146,6 @@ class RichContentEditorState extends State<RichContentEditor> {
     'numbered_item' => 'Nhập mục đánh số...',
     _ => 'Nhập nội dung...',
   };
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Build
-  // ─────────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -310,16 +158,10 @@ class RichContentEditorState extends State<RichContentEditor> {
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildToolbar(),
-          _buildBlockList(),
-          if (_focusedIdx >= 0) _buildStatusBar(),
-        ],
+        children: [_buildToolbar(), _buildBlockList()],
       ),
     );
   }
-
-  // ── Toolbar ──
 
   Widget _buildToolbar() {
     return Container(
@@ -333,85 +175,18 @@ class RichContentEditorState extends State<RichContentEditor> {
         runSpacing: AppSpacing.sm,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          // Font size
-          _ToolbarDropdown<double>(
-            value: _fontSize,
-            items: _fontSizes
-                .map(
-                  (s) =>
-                      DropdownMenuItem(value: s, child: Text('${s.toInt()}px')),
-                )
-                .toList(),
-            onChanged: _applyFontSize,
-            prefix: const Icon(
-              LucideIcons.type,
-              size: 13,
+          Text(
+            'Loại:',
+            style: AppTypography.bodySmall.copyWith(
               color: AppColors.mutedForeground,
             ),
           ),
-
-          _divider(),
-
-          // Font family
-          _ToolbarDropdown<String>(
-            value: _fontFamily,
-            items: _fontFamilies.entries
-                .map(
-                  (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
-                )
-                .toList(),
-            onChanged: _applyFontFamily,
-          ),
-
-          _divider(),
-
-          // Color swatches
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                LucideIcons.palette,
-                size: 13,
-                color: AppColors.mutedForeground,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              ..._colors.map(
-                (c) => _ColorSwatch(
-                  color: c,
-                  isSelected: _color == c,
-                  onTap: () => _applyColor(c),
-                ),
-              ),
-            ],
-          ),
-
-          _divider(),
-
-          // Bold
-          _ToolbarToggle(
-            label: 'B',
-            active: _bold,
-            bold: true,
-            onTap: _toggleBold,
-          ),
-          // Italic
-          _ToolbarToggle(
-            label: 'I',
-            active: _italic,
-            italic: true,
-            onTap: _toggleItalic,
-          ),
-
-          _divider(),
-
-          // Block type buttons
           ..._blockTypes.entries.map(
             (e) => _BlockTypeButton(
-              type: e.key,
               icon: _blockIcons[e.key]!,
               label: e.value,
-              isSelected: _blockType == e.key,
-              onTap: () => _applyBlockType(e.key),
+              isSelected: _focusedIdx >= 0 && _blockType == e.key,
+              onTap: _focusedIdx >= 0 ? () => _applyBlockType(e.key) : null,
             ),
           ),
         ],
@@ -419,16 +194,8 @@ class RichContentEditorState extends State<RichContentEditor> {
     );
   }
 
-  Widget _divider() => Container(
-    width: 1,
-    height: 16,
-    color: AppColors.border,
-    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-  );
-
-  // ── Block list ──
-
   Widget _buildBlockList() {
+    var numberedOrdinal = 0;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.smMd),
       child: Column(
@@ -437,9 +204,15 @@ class RichContentEditorState extends State<RichContentEditor> {
           if (_blocks.isEmpty)
             _buildEmptyState()
           else
-            ..._blocks.asMap().entries.map(
-              (e) => _buildBlockRow(e.key, e.value),
-            ),
+            ..._blocks.asMap().entries.map((e) {
+              final block = e.value;
+              if (block.type == 'numbered_item') {
+                numberedOrdinal++;
+              } else {
+                numberedOrdinal = 0;
+              }
+              return _buildBlockRow(e.key, block, numberedOrdinal);
+            }),
           const SizedBox(height: AppSpacing.smMd),
           _buildAddButton(),
         ],
@@ -470,9 +243,9 @@ class RichContentEditorState extends State<RichContentEditor> {
     );
   }
 
-  Widget _buildBlockRow(int idx, _RichBlock block) {
+  Widget _buildBlockRow(int idx, _RichBlock block, int numberedOrdinal) {
     final isFocused = _focusedIdx == idx;
-    final prefix = _prefixFor(block, idx);
+    final prefix = _prefixFor(block.type, numberedOrdinal);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
@@ -487,7 +260,6 @@ class RichContentEditorState extends State<RichContentEditor> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text field
             Expanded(
               child: Focus(
                 onFocusChange: (hasFocus) {
@@ -498,28 +270,16 @@ class RichContentEditorState extends State<RichContentEditor> {
                   }
                 },
                 child: TextFormField(
-                  key: ValueKey(
-                    '${idx}_${block.fontSize}_${block.color.value}_${block.bold}_${block.italic}_${block.fontFamily}_${block.type}',
-                  ),
+                  key: ValueKey('${idx}_${block.type}_${block.controller}'),
                   controller: block.controller,
                   maxLines: block.type == 'heading' ? 1 : null,
                   minLines: 1,
                   onChanged: (_) => _notify(),
-                  style: _textStyleFor(block),
+                  style: _textStyleFor(block.type),
                   decoration: InputDecoration(
                     suffix: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // _iconBtn(
-                        //   LucideIcons.chevronUp,
-                        //   idx > 0 ? () => _moveUp(idx) : null,
-                        // ),
-                        // _iconBtn(
-                        //   LucideIcons.chevronDown,
-                        //   idx < _blocks.length - 1
-                        //       ? () => _moveDown(idx)
-                        //       : null,
-                        // ),
                         _iconBtn(
                           LucideIcons.x,
                           () => _removeBlock(idx),
@@ -556,30 +316,6 @@ class RichContentEditorState extends State<RichContentEditor> {
                 ),
               ),
             ),
-
-            // // Actions (visible on focus/hover via AnimatedOpacity)
-            // AnimatedOpacity(
-            //   opacity: isFocused ? 1.0 : 0.0,
-            //   duration: const Duration(milliseconds: 150),
-            //   child: Row(
-            //     mainAxisSize: MainAxisSize.min,
-            //     children: [
-            //       _iconBtn(
-            //         LucideIcons.chevronUp,
-            //         idx > 0 ? () => _moveUp(idx) : null,
-            //       ),
-            //       _iconBtn(
-            //         LucideIcons.chevronDown,
-            //         idx < _blocks.length - 1 ? () => _moveDown(idx) : null,
-            //       ),
-            //       _iconBtn(
-            //         LucideIcons.x,
-            //         () => _removeBlock(idx),
-            //         color: AppColors.destructive,
-            //       ),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -614,174 +350,25 @@ class RichContentEditorState extends State<RichContentEditor> {
       ),
     );
   }
-
-  // ── Status bar ──
-
-  Widget _buildStatusBar() {
-    return Container(
-      color: AppColors.muted.withValues(alpha: 0.3),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.smMd,
-        vertical: AppSpacing.xs,
-      ),
-      child: Text(
-        'Dòng ${_focusedIdx + 1} đang được chọn — Thay đổi toolbar sẽ áp dụng ngay cho dòng này',
-        style: AppTypography.bodySmall.copyWith(
-          fontSize: 10,
-          color: AppColors.mutedForeground,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Toolbar sub-widgets ──────────────────────────────────────────────────────
-
-class _ToolbarDropdown<T> extends StatelessWidget {
-  const _ToolbarDropdown({
-    required this.value,
-    required this.items,
-    required this.onChanged,
-    this.prefix,
-  });
-
-  final T value;
-  final List<DropdownMenuItem<T>> items;
-  final ValueChanged<T> onChanged;
-  final Widget? prefix;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppBorders.borderRadiusSm,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (prefix != null) ...[
-            prefix!,
-            const SizedBox(width: AppSpacing.xs),
-          ],
-          DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              isDense: true,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.foreground,
-              ),
-              dropdownColor: AppColors.card,
-              borderRadius: AppBorders.borderRadiusSm,
-              items: items,
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ColorSwatch extends StatelessWidget {
-  const _ColorSwatch({
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: 16,
-        height: 16,
-        margin: const EdgeInsets.only(left: AppSpacing.xxs),
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? Colors.white : Colors.transparent,
-            width: 2,
-          ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: color, blurRadius: 0, spreadRadius: 1.5)]
-              : null,
-        ),
-      ),
-    );
-  }
-}
-
-class _ToolbarToggle extends StatelessWidget {
-  const _ToolbarToggle({
-    required this.label,
-    required this.active,
-    required this.onTap,
-    this.bold = false,
-    this.italic = false,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  final bool bold;
-  final bool italic;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xxs,
-        ),
-        decoration: BoxDecoration(
-          color: active ? AppColors.primary : Colors.transparent,
-          borderRadius: AppBorders.borderRadiusSm,
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: active ? AppColors.primaryForeground : AppColors.foreground,
-            fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-            fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _BlockTypeButton extends StatelessWidget {
   const _BlockTypeButton({
-    required this.type,
     required this.icon,
     required this.label,
     required this.isSelected,
-    required this.onTap,
+    this.onTap,
   });
 
-  final String type;
   final IconData icon;
   final String label;
   final bool isSelected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onTap != null;
+
     return Tooltip(
       message: label,
       child: GestureDetector(
@@ -792,11 +379,18 @@ class _BlockTypeButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : Colors.transparent,
             borderRadius: AppBorders.borderRadiusSm,
+            border: Border.all(
+              color: enabled
+                  ? AppColors.border
+                  : AppColors.border.withValues(alpha: 0.35),
+            ),
           ),
           child: Icon(
             icon,
             size: 14,
-            color: isSelected
+            color: !enabled
+                ? AppColors.mutedForeground.withValues(alpha: 0.35)
+                : isSelected
                 ? AppColors.primaryForeground
                 : AppColors.mutedForeground,
           ),

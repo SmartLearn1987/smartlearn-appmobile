@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/subscription/subscription_plan_access.dart';
+import 'package:smart_learn/core/widgets/subscription_expired_dialog.dart';
 import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/features/exam/domain/entities/exam_entity.dart';
 import 'package:smart_learn/router/route_names.dart';
@@ -28,8 +30,19 @@ class ExamCardWidget extends StatelessWidget {
     final isMe = authState is AuthAuthenticated
         ? authState.user.id == exam.userId
         : false;
+
+    void openExamDetail() {
+      final s = context.read<AuthBloc>().state;
+      if (s is AuthAuthenticated &&
+          isBlockedByExpiredSubscriptionPlan(s.user)) {
+        showSubscriptionExpiredDialog(context);
+        return;
+      }
+      context.push(RoutePaths.examDetail(exam.id));
+    }
+
     return GestureDetector(
-      onTap: () => context.push(RoutePaths.examDetail(exam.id)),
+      onTap: openExamDetail,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,
@@ -253,7 +266,7 @@ class ExamCardWidget extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => context.push(RoutePaths.examDetail(exam.id)),
+                onPressed: openExamDetail,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   shape: AppBorders.shapeSm,

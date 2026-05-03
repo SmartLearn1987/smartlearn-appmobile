@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/flashcard.dart';
+import '../pages/lesson_flashcards_fullscreen_page.dart';
+import 'flashcard_flip_view.dart';
 
 class FlashcardViewerWidget extends StatefulWidget {
   const FlashcardViewerWidget({super.key, required this.flashcards});
@@ -24,6 +25,7 @@ class _FlashcardViewerWidgetState extends State<FlashcardViewerWidget> {
   bool _isFlipped = false;
   bool _isPlaying = false;
   bool _isShuffled = false;
+  final GlobalKey _cardKey = GlobalKey();
 
   @override
   void initState() {
@@ -95,227 +97,149 @@ class _FlashcardViewerWidgetState extends State<FlashcardViewerWidget> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _FlashcardItem(
-          key: ValueKey(_currentIndex),
-          front: _currentCard.front,
-          back: _currentCard.back,
-          isFlipped: _isFlipped,
-          onFlip: _flip,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  iconSize: 20,
-                  onPressed: _togglePlay,
-                  icon: Icon(_isPlaying ? LucideIcons.pause : LucideIcons.play),
-                ),
-                IconButton(
-                  onPressed: _shuffle,
-                  iconSize: 20,
-                  icon: Icon(
-                    LucideIcons.shuffle,
-                    color: _isShuffled ? AppColors.primary : null,
-                  ),
-                ),
-              ],
+  void _pushFullscreen(BuildContext context) {
+    final ctx = _cardKey.currentContext;
+    final ro = ctx?.findRenderObject();
+    final renderBox = ro is RenderBox ? ro : null;
+    final cardRect = renderBox != null
+        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+        : Rect.zero;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder<void>(
+        opaque: true,
+        transitionDuration: const Duration(milliseconds: 420),
+        reverseTransitionDuration: const Duration(milliseconds: 350),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            LessonFlashcardsFullscreenPage(
+              initialDeck: List.of(_deck),
+              initialIndex: _currentIndex,
+              initialFlipped: _isFlipped,
+              initialShuffled: _isShuffled,
+              sourceFlashcards: List.of(widget.flashcards),
             ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: _hasPrevious ? _goToPrevious : null,
-                  icon: const Icon(LucideIcons.chevronLeft),
-                ),
-                Text(
-                  '${_currentIndex + 1} / ${_deck.length}',
-                  style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.foreground,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                IconButton(
-                  onPressed: _hasNext ? _goToNext : null,
-                  icon: const Icon(LucideIcons.chevronRight),
-                ),
-              ],
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          final scaleX = Tween<double>(
+            begin: cardRect.width / screenSize.width,
+            end: 1.0,
+          ).animate(curved);
+          final scaleY = Tween<double>(
+            begin: cardRect.height / screenSize.height,
+            end: 1.0,
+          ).animate(curved);
+          final dx = Tween<double>(
+            begin:
+                (cardRect.left + cardRect.width / 2 - screenSize.width / 2) /
+                screenSize.width,
+            end: 0.0,
+          ).animate(curved);
+          final dy = Tween<double>(
+            begin:
+                (cardRect.top + cardRect.height / 2 - screenSize.height / 2) /
+                screenSize.height,
+            end: 0.0,
+          ).animate(curved);
+          final radius = Tween<double>(begin: 16.0, end: 0.0).animate(curved);
+
+          return AnimatedBuilder(
+            animation: curved,
+            builder: (context, animChild) => Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..translate(
+                  dx.value * screenSize.width,
+                  dy.value * screenSize.height,
+                )
+                ..scale(scaleX.value, scaleY.value),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius.value),
+                child: animChild,
+              ),
             ),
-            const SizedBox(width: 96),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _FlashcardItem extends StatefulWidget {
-  const _FlashcardItem({
-    super.key,
-    required this.front,
-    required this.back,
-    required this.isFlipped,
-    required this.onFlip,
-  });
-
-  final String front;
-  final String back;
-  final bool isFlipped;
-  final VoidCallback onFlip;
-
-  @override
-  State<_FlashcardItem> createState() => _FlashcardItemState();
-}
-
-class _FlashcardItemState extends State<_FlashcardItem>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    if (widget.isFlipped) _controller.value = 1.0;
-  }
-
-  @override
-  void didUpdateWidget(covariant _FlashcardItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isFlipped != oldWidget.isFlipped) {
-      widget.isFlipped ? _controller.forward() : _controller.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onFlip,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, _) {
-          final angle = _animation.value * pi;
-          final showBack = _animation.value > 0.5;
-
-          return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(angle),
-            child: showBack
-                ? _CardBack(text: widget.back)
-                : _CardFront(text: widget.front),
+            child: child,
           );
         },
       ),
     );
   }
-}
-
-class _CardFront extends StatelessWidget {
-  const _CardFront({required this.text});
-  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return _CardShell(
-      color: AppColors.card,
-      child: Center(
-        child: Text(
-          text,
-          style: AppTypography.h3.copyWith(
-            color: AppColors.destructive,
-            fontSize: _adaptiveFontSize(text, context),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          key: _cardKey,
+          width: double.infinity,
+          child: FlashcardFlipView(
+            key: ValueKey(_currentIndex),
+            front: _currentCard.front,
+            back: _currentCard.back,
+            isFlipped: _isFlipped,
+            onFlip: _flip,
           ),
-          textAlign: TextAlign.center,
         ),
-      ),
-    );
-  }
-}
-
-class _CardBack extends StatelessWidget {
-  const _CardBack({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform(
-      alignment: Alignment.center,
-      transform: Matrix4.identity()..rotateY(pi),
-      child: _CardShell(
-        color: AppColors.card,
-        child: Center(
-          child: Text(
-            text,
-            style: AppTypography.h3.copyWith(
-              color: Colors.blue.shade700,
-              fontSize: _adaptiveFontSize(text, context),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FlashcardDeckControlIconButton(
+                  onPressed: _togglePlay,
+                  icon: _isPlaying ? LucideIcons.pause : LucideIcons.play,
+                ),
+                FlashcardDeckControlIconButton(
+                  onPressed: _shuffle,
+                  icon: LucideIcons.shuffle,
+                  iconColor: _isShuffled ? AppColors.primary : null,
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
-          ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FlashcardDeckControlIconButton(
+                    onPressed: _hasPrevious ? _goToPrevious : null,
+                    icon: LucideIcons.chevronLeft,
+                  ),
+                  Text(
+                    '${_currentIndex + 1} / ${_deck.length}',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.foreground,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  FlashcardDeckControlIconButton(
+                    onPressed: _hasNext ? _goToNext : null,
+                    icon: LucideIcons.chevronRight,
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 32),
+                FlashcardDeckControlIconButton(
+                  onPressed: widget.flashcards.isEmpty
+                      ? null
+                      : () => _pushFullscreen(context),
+                  icon: LucideIcons.maximize2,
+                  tooltip: 'Toàn màn hình',
+                ),
+              ],
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
-}
-
-class _CardShell extends StatelessWidget {
-  const _CardShell({required this.color, required this.child});
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 200),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: AppBorders.borderRadiusMd,
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
-double _adaptiveFontSize(String text, BuildContext context) {
-  final width = MediaQuery.sizeOf(context).width;
-  var size = width < 380 ? 26.0 : 32.0;
-  final length = text.trim().length;
-
-  if (length > 120) {
-    size = width < 380 ? 16 : 18;
-  } else if (length > 70) {
-    size = width < 380 ? 18 : 22;
-  } else if (length > 40) {
-    size = width < 380 ? 20 : 26;
-  }
-
-  return size;
 }

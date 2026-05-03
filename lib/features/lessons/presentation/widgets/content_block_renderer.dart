@@ -5,18 +5,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/content_block.dart';
 
-/// Widget hiển thị danh sách các content block theo loại:
-/// - paragraph → văn bản thường
-/// - heading → tiêu đề in đậm, cỡ lớn
-/// - list_item → văn bản với dấu đầu dòng (•)
-/// - numbered_item → văn bản với số thứ tự (1., 2., ...)
-///
-/// Hỗ trợ styling: fontSize, fontFamily, color, bold, italic.
+/// Hiển thị các khối nội dung theo [ContentBlock.type] (paragraph, heading,
+/// list_item, numbered_item).
 class ContentBlockRenderer extends StatelessWidget {
-  const ContentBlockRenderer({
-    super.key,
-    required this.blocks,
-  });
+  const ContentBlockRenderer({super.key, required this.blocks});
 
   final List<ContentBlock> blocks;
 
@@ -52,27 +44,11 @@ class ContentBlockRenderer extends StatelessWidget {
     };
   }
 
-  /// Merges block-level styling on top of a base [TextStyle].
-  TextStyle _applyStyle(TextStyle base, ContentBlock block) {
-    return base.copyWith(
-      fontSize: block.fontSize,
-      color: block.color != null ? _hexToColor(block.color!) : null,
-      fontWeight: block.bold == true ? FontWeight.w700 : null,
-      fontStyle: block.italic == true ? FontStyle.italic : null,
-      fontFamily: (block.fontFamily != null && block.fontFamily != 'default')
-          ? _resolveFontFamily(block.fontFamily!)
-          : null,
-    );
-  }
+  TextStyle _baseStyle() =>
+      AppTypography.bodyLarge.copyWith(color: AppColors.foreground);
 
   Widget _buildParagraph(ContentBlock block) {
-    return Text(
-      block.content,
-      style: _applyStyle(
-        AppTypography.bodyLarge.copyWith(color: AppColors.foreground),
-        block,
-      ),
-    );
+    return Text(block.content, style: _baseStyle());
   }
 
   Widget _buildHeading(ContentBlock block) {
@@ -80,22 +56,16 @@ class ContentBlockRenderer extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Text(
         block.content,
-        style: _applyStyle(
-          AppTypography.h4.copyWith(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.w700,
-          ),
-          block,
+        style: AppTypography.h4.copyWith(
+          color: AppColors.foreground,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 
   Widget _buildListItem(ContentBlock block) {
-    final style = _applyStyle(
-      AppTypography.bodyLarge.copyWith(color: AppColors.foreground),
-      block,
-    );
+    final style = _baseStyle();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,10 +76,7 @@ class ContentBlockRenderer extends StatelessWidget {
   }
 
   Widget _buildNumberedItem(ContentBlock block, int index) {
-    final style = _applyStyle(
-      AppTypography.bodyLarge.copyWith(color: AppColors.foreground),
-      block,
-    );
+    final style = _baseStyle();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,15 +86,3 @@ class ContentBlockRenderer extends StatelessWidget {
     );
   }
 }
-
-Color _hexToColor(String hex) {
-  final h = hex.replaceFirst('#', '');
-  return Color(int.parse('FF$h', radix: 16));
-}
-
-String _resolveFontFamily(String key) => switch (key) {
-      'serif' => 'Georgia',
-      'mono' => 'monospace',
-      'sans' => 'Arial',
-      _ => 'Arial',
-    };

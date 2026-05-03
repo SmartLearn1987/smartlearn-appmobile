@@ -8,11 +8,6 @@ class ContentBlockModel extends ContentBlock {
   const ContentBlockModel({
     required super.type,
     required super.content,
-    super.fontSize,
-    super.fontFamily,
-    super.color,
-    super.bold,
-    super.italic,
   });
 
   factory ContentBlockModel.fromJson(Map<String, dynamic> json) =>

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_learn/core/subscription/subscription_plan_access.dart';
 import 'package:smart_learn/core/theme/app_borders.dart';
 import 'package:smart_learn/core/theme/app_colors.dart';
 import 'package:smart_learn/core/theme/app_shadows.dart';
 import 'package:smart_learn/core/theme/app_spacing.dart';
 import 'package:smart_learn/core/theme/app_typography.dart';
+import 'package:smart_learn/core/widgets/subscription_expired_dialog.dart';
+import 'package:smart_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:smart_learn/router/route_names.dart';
 
 import '../models/subject_with_count.dart';
@@ -22,8 +26,17 @@ class SubjectCardWidget extends StatelessWidget {
       builder: (context, opacity, child) =>
           Opacity(opacity: opacity, child: child),
       child: GestureDetector(
-        onTap: () =>
-            context.push(RoutePaths.subjectDetail(subjectWithCount.subject.id)),
+        onTap: () {
+          final authState = context.read<AuthBloc>().state;
+          if (authState is AuthAuthenticated &&
+              isBlockedByExpiredSubscriptionPlan(authState.user)) {
+            showSubscriptionExpiredDialog(context);
+            return;
+          }
+          context.push(
+            RoutePaths.subjectDetail(subjectWithCount.subject.id),
+          );
+        },
         child: ClipRRect(
           borderRadius: AppBorders.borderRadiusLg,
           child: Stack(

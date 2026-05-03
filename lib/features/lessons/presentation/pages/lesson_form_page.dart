@@ -540,18 +540,7 @@ class _LessonFormViewState extends State<_LessonFormView> {
       'title': _titleController.text.trim(),
       'description': _descriptionController.text.trim(),
       'content': contentBlocks
-          .map(
-            (b) => {
-              'type': b.type,
-              'content': b.content,
-              if (b.fontSize != null) 'fontSize': b.fontSize,
-              if (b.fontFamily != null) 'fontFamily': b.fontFamily,
-              if (b.color != null) 'color': b.color,
-              if (b.bold != null) 'bold': b.bold,
-              if (b.italic != null) 'italic': b.italic,
-            },
-          )
-          .toList(),
+          .map((b) => {'type': b.type, 'content': b.content}).toList(),
       'summary': _summaryController.text.trim(),
       'key_points': keyPoints,
     };

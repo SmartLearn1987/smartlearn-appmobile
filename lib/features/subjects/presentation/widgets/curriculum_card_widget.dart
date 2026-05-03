@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:smart_learn/core/theme/theme.dart';
 
 import '../../../../core/theme/app_borders.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -56,7 +57,7 @@ class CurriculumCardWidget extends StatelessWidget {
       children: [
         _buildCoverImage(context),
         const SizedBox(width: AppSpacing.smMd),
-        Expanded(child: _buildInfo()),
+        Expanded(child: _buildInfo(context)),
       ],
     );
   }
@@ -74,9 +75,7 @@ class CurriculumCardWidget extends StatelessWidget {
                 ? GestureDetector(
                     onTap: () => showPhotoGallery(
                       context,
-                      items: [
-                        PhotoGalleryNetworkUrl(curriculum.imageUrl!),
-                      ],
+                      items: [PhotoGalleryNetworkUrl(curriculum.imageUrl!)],
                     ),
                     behavior: HitTestBehavior.opaque,
                     child: AppCachedImage(
@@ -131,34 +130,100 @@ class CurriculumCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(BuildContext context) {
+    final hasMenu = onEdit != null || onDelete != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Text(
                 curriculum.name,
-                style: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: AppTypography.labelLarge.bold,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(
-              curriculum.isPublic ? LucideIcons.eye : LucideIcons.eyeOff,
-              size: 16,
-              color: curriculum.isPublic
-                  ? const Color(0xFF3b82f6)
-                  : const Color(0xFFf59e0b),
-            ),
+            if (hasMenu) ...[
+              const SizedBox(width: AppSpacing.xs),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  icon: const Icon(
+                    LucideIcons.moreVertical,
+                    color: AppColors.mutedForeground,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') onEdit?.call();
+                    if (value == 'delete') onDelete?.call();
+                  },
+                  itemBuilder: (ctx) => [
+                    if (onEdit != null)
+                      PopupMenuItem<String>(
+                        value: 'edit',
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.smMd,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              LucideIcons.pencil,
+                              size: 20,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              'Chỉnh sửa',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.foreground,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (onDelete != null)
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.smMd,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              LucideIcons.trash2,
+                              size: 20,
+                              color: AppColors.destructive,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              'Xóa giáo trình',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.destructive,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
         if (curriculum.grade != null) ...[
-          const SizedBox(height: AppSpacing.xxs),
           Text(
             'Lớp ${curriculum.grade}',
             style: AppTypography.bodySmall.copyWith(
@@ -167,7 +232,7 @@ class CurriculumCardWidget extends StatelessWidget {
           ),
         ],
         if (curriculum.publisher != null) ...[
-          const SizedBox(height: AppSpacing.xxs),
+          if (curriculum.grade != null) const SizedBox(height: AppSpacing.xxs),
           Text(
             'NXB: ${curriculum.publisher}',
             style: AppTypography.bodySmall.copyWith(
@@ -198,75 +263,23 @@ class CurriculumCardWidget extends StatelessWidget {
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: onManageLessons,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.foreground,
-              textStyle: AppTypography.buttonSmall,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppBorders.borderRadiusSm,
-              ),
-              side: const BorderSide(
-                color: AppColors.border,
-                width: AppBorders.widthThin,
-              ),
-            ),
-            child: const Text('Quản lý bài học'),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _IconActionButton(icon: LucideIcons.pencil, onPressed: onEdit),
-        const SizedBox(width: AppSpacing.xs),
-        _IconActionButton(
-          icon: LucideIcons.trash2,
-          onPressed: onDelete,
-          hoverColor: AppColors.destructive,
-          borderColor: AppColors.destructive,
-        ),
-      ],
-    );
-  }
-}
-
-class _IconActionButton extends StatelessWidget {
-  const _IconActionButton({
-    required this.icon,
-    this.onPressed,
-    this.hoverColor,
-    this.borderColor,
-  });
-
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final Color? hoverColor;
-  final Color? borderColor;
-
-  @override
-  Widget build(BuildContext context) {
     return SizedBox(
-      width: 36,
-      height: 36,
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 16),
-        style: IconButton.styleFrom(
-          foregroundColor: hoverColor ?? AppColors.mutedForeground,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppBorders.borderRadiusSm,
-            side: BorderSide(
-              color: borderColor ?? AppColors.border,
-              width: AppBorders.widthThin,
-            ),
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.5),
+            width: AppBorders.widthThin,
           ),
-          padding: EdgeInsets.zero,
+          textStyle: AppTypography.buttonMedium,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
         ),
+        onPressed: onManageLessons,
+        child: const Text('Quản lý bài học'),
       ),
     );
   }
