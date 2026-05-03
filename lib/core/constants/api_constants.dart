@@ -2,9 +2,9 @@ class ApiConstants {
   ApiConstants._();
 
   static const String baseUrl =
-      'https://hopeful-connection-production.up.railway.app/api';
+      'https://smart-learn-rlw-production.up.railway.app/api';
   static const String baseImageUrl =
-      'https://hopeful-connection-production.up.railway.app';
+      'https://smart-learn-rlw-production.up.railway.app';
   static const String baseApiKey =
       'smart-learn-secret-key-VYWgmEI3UTFUSeCaylYhtKQMHxjVooKQ';
   static const Duration connectTimeout = Duration(minutes: 5);

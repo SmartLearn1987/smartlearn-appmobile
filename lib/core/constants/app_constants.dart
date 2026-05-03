@@ -2,4 +2,4 @@
 /// trong WebView nhúng.
 ///
 /// Đổi sang URL production khi triển khai.
-const String kWebBaseUrl = 'https://hopeful-connection-production.up.railway.app';
+const String kWebBaseUrl = 'https://smart-learn-rlw-production.up.railway.app';
